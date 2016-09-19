@@ -1,0 +1,7 @@
+/.build
+/.release
+/.tarballs
+/firehose_exporter
+*.tar.gz
+*.test
+*-stamp
