@@ -98,7 +98,6 @@ func main() {
 		authTokenRefresher,
 		metricsStore,
 	)
-	go nozzle.Start()
 
 	internalMetricsCollector := collectors.NewInternalMetricsCollector(metricsStore)
 	prometheus.MustRegister(internalMetricsCollector)
@@ -124,5 +123,7 @@ func main() {
 	})
 
 	log.Infoln("Listening on", *listenAddress)
-	log.Fatal(http.ListenAndServe(*listenAddress, nil))
+	go http.ListenAndServe(*listenAddress, nil)
+
+	log.Fatal(nozzle.Start())
 }
