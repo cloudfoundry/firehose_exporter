@@ -11,12 +11,12 @@ Here are some ways *you* can contribute:
 * by writing specifications
 * by writing code (**no patch is too small**: fix typos, add comments, clean up inconsistent whitespace)
 * by refactoring code
-* by closing [issues](https://github.com/frodenas/firehose_exporter/issues)
+* by closing [issues](https://github.com/cloudfoundry-community/firehose_exporter/issues)
 * by reviewing patches
 
 ## Submitting an Issue
 
-We use the [GitHub issue tracker](https://github.com/frodenas/firehose_exporter/issues) to track bugs and features. Before submitting a bug report or feature request, check to make sure it hasn't already been submitted. You can indicate support for an existing issue by voting it up. When submitting a bug report, please include a [Gist](http://gist.github.com/) that includes a stack trace and any details that may be necessary to reproduce the bug,. Ideally, a bug report should include a pull request with failing specs.
+We use the [GitHub issue tracker](https://github.com/cloudfoundry-community/firehose_exporter/issues) to track bugs and features. Before submitting a bug report or feature request, check to make sure it hasn't already been submitted. You can indicate support for an existing issue by voting it up. When submitting a bug report, please include a [Gist](http://gist.github.com/) that includes a stack trace and any details that may be necessary to reproduce the bug,. Ideally, a bug report should include a pull request with failing specs.
 
 ## Submitting a Pull Request
 

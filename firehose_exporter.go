@@ -10,10 +10,10 @@ import (
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
 
-	"github.com/frodenas/firehose_exporter/collectors"
-	"github.com/frodenas/firehose_exporter/firehosenozzle"
-	"github.com/frodenas/firehose_exporter/metrics"
-	"github.com/frodenas/firehose_exporter/uaatokenrefresher"
+	"github.com/cloudfoundry-community/firehose_exporter/collectors"
+	"github.com/cloudfoundry-community/firehose_exporter/firehosenozzle"
+	"github.com/cloudfoundry-community/firehose_exporter/metrics"
+	"github.com/cloudfoundry-community/firehose_exporter/uaatokenrefresher"
 )
 
 var (
