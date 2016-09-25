@@ -13,7 +13,7 @@ make
 
 | Flag | Required | Default | Description
 | ---- | -------- | ------- | -----------
-| web.listen-address          | No  | :9114      | Address to listen on for web interface and telemetry
+| web.listen-address          | No  | :9186      | Address to listen on for web interface and telemetry
 | web.telemetry-path          | No  | /metrics   | Path under which to expose Prometheus metrics
 | uaa.url                     | Yes |            | Cloud Foundry UAA URL
 | uaa.client-id               | Yes |            | Cloud Foundry UAA Client ID
@@ -52,7 +52,7 @@ You can deploy this exporter using the [frodenas/firehose-exporter][hub] Docker 
 ```bash
 docker pull frodenas/firehose-exporter
 
-docker run -d -p 9114:9114 frodenas/firehose-exporter <flags>
+docker run -d -p 9186:9186 frodenas/firehose-exporter <flags>
 ```
 
 [firehose]: https://docs.cloudfoundry.org/loggregator/architecture.html#firehose
