@@ -22,6 +22,7 @@ make
 | doppler.url                 | Yes |                   | Cloud Foundry Doppler URL
 | doppler.subscription-id     | No  | prometheus        | Cloud Foundry Doppler Subscription ID
 | doppler.idle-timeout-seconds| No  | 5                 | Cloud Foundry Doppler Idle Timeout (in seconds)
+| doppler.metric-expiry       | No  | 1 minute          | How long a Cloud Foundry Doppler metric is valid
 | skip-ssl-verify             | No  | false             | Disable SSL Verify |
 
 ### UAA Client

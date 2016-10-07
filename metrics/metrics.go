@@ -1,13 +1,17 @@
 package metrics
 
 type InternalMetrics struct {
-	TotalEnvelopesReceived        float64
-	TotalMetricsReceived          float64
-	TotalContainerMetricsReceived float64
-	TotalCounterEventsReceived    float64
-	TotalValueMetricsReceived     float64
-	SlowConsumerAlert             bool
-	LastReceivedMetricTimestamp   int64
+	TotalEnvelopesReceived               float64
+	LastReceivedEnvelopTimestamp         int64
+	TotalMetricsReceived                 float64
+	LastReceivedMetricTimestamp          int64
+	TotalContainerMetricsReceived        float64
+	LastReceivedContainerMetricTimestamp int64
+	TotalCounterEventsReceived           float64
+	LastReceivedCounterEventTimestamp    int64
+	TotalValueMetricsReceived            float64
+	LastReceivedValueMetricTimestamp     int64
+	SlowConsumerAlert                    bool
 }
 
 type ContainerMetrics map[string]ContainerMetric

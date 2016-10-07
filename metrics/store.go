@@ -2,20 +2,27 @@ package metrics
 
 import (
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/cloudfoundry/sonde-go/events"
 )
 
 type Store struct {
-	internalMetrics  InternalMetrics
-	containerMetrics ContainerMetrics
-	counterMetrics   CounterMetrics
-	valueMetrics     ValueMetrics
+	metricExpiry          time.Duration
+	internalMetrics       InternalMetrics
+	internalMetricsMutex  sync.Mutex
+	containerMetrics      ContainerMetrics
+	containerMetricsMutex sync.Mutex
+	counterMetrics        CounterMetrics
+	counterMetricsMutex   sync.Mutex
+	valueMetrics          ValueMetrics
+	valueMetricsMutex     sync.Mutex
 }
 
-func NewStore() *Store {
+func NewStore(metricExpiry time.Duration) *Store {
 	return &Store{
+		metricExpiry: metricExpiry,
 		internalMetrics: InternalMetrics{
 			TotalEnvelopesReceived:        0,
 			TotalMetricsReceived:          0,
@@ -31,72 +38,17 @@ func NewStore() *Store {
 	}
 }
 
-func (s *Store) AddMetric(envelope *events.Envelope) {
-	s.internalMetrics.TotalEnvelopesReceived++
-	switch envelope.GetEventType() {
-	case events.Envelope_ContainerMetric:
-		s.internalMetrics.TotalMetricsReceived++
-		s.internalMetrics.TotalContainerMetricsReceived++
-		s.internalMetrics.LastReceivedMetricTimestamp = time.Now().Unix()
-		containerMetric := ContainerMetric{
-			Origin:           envelope.GetOrigin(),
-			Timestamp:        envelope.GetTimestamp(),
-			Deployment:       envelope.GetDeployment(),
-			Job:              envelope.GetJob(),
-			Index:            envelope.GetIndex(),
-			IP:               envelope.GetIp(),
-			Tags:             envelope.GetTags(),
-			ApplicationId:    envelope.GetContainerMetric().GetApplicationId(),
-			InstanceIndex:    envelope.GetContainerMetric().GetInstanceIndex(),
-			CpuPercentage:    envelope.GetContainerMetric().GetCpuPercentage(),
-			MemoryBytes:      envelope.GetContainerMetric().GetMemoryBytes(),
-			DiskBytes:        envelope.GetContainerMetric().GetDiskBytes(),
-			MemoryBytesQuota: envelope.GetContainerMetric().GetMemoryBytesQuota(),
-			DiskBytesQuota:   envelope.GetContainerMetric().GetDiskBytesQuota(),
+func (s *Store) Start() {
+	ticker := time.NewTicker(s.metricExpiry).C
+	for {
+		select {
+		case <-ticker:
+			s.expireInternalMetrics()
+			s.expireContainerMetrics()
+			s.expireCounterMetrics()
+			s.expireValueMetrics()
 		}
-		containerKey := envelope.GetContainerMetric().GetApplicationId() + strconv.Itoa(int(containerMetric.InstanceIndex))
-		s.containerMetrics[containerKey] = containerMetric
-	case events.Envelope_CounterEvent:
-		s.internalMetrics.TotalMetricsReceived++
-		s.internalMetrics.TotalCounterEventsReceived++
-		s.internalMetrics.LastReceivedMetricTimestamp = time.Now().Unix()
-		counterMetric := CounterMetric{
-			Origin:     envelope.GetOrigin(),
-			Timestamp:  envelope.GetTimestamp(),
-			Deployment: envelope.GetDeployment(),
-			Job:        envelope.GetJob(),
-			Index:      envelope.GetIndex(),
-			IP:         envelope.GetIp(),
-			Tags:       envelope.GetTags(),
-			Name:       envelope.GetCounterEvent().GetName(),
-			Delta:      envelope.GetCounterEvent().GetDelta(),
-			Total:      envelope.GetCounterEvent().GetTotal(),
-		}
-		counterKey := envelope.GetCounterEvent().GetName()
-		s.counterMetrics[counterKey] = counterMetric
-	case events.Envelope_ValueMetric:
-		s.internalMetrics.TotalMetricsReceived++
-		s.internalMetrics.TotalValueMetricsReceived++
-		s.internalMetrics.LastReceivedMetricTimestamp = time.Now().Unix()
-		valueMetric := ValueMetric{
-			Origin:     envelope.GetOrigin(),
-			Timestamp:  envelope.GetTimestamp(),
-			Deployment: envelope.GetDeployment(),
-			Job:        envelope.GetJob(),
-			Index:      envelope.GetIndex(),
-			IP:         envelope.GetIp(),
-			Tags:       envelope.GetTags(),
-			Name:       envelope.GetValueMetric().GetName(),
-			Value:      envelope.GetValueMetric().GetValue(),
-			Unit:       envelope.GetValueMetric().GetUnit(),
-		}
-		valueKey := envelope.GetValueMetric().GetName()
-		s.valueMetrics[valueKey] = valueMetric
 	}
-}
-
-func (s *Store) AlertSlowConsumerError() {
-	s.internalMetrics.SlowConsumerAlert = true
 }
 
 func (s *Store) GetInternalMetrics() InternalMetrics {
@@ -113,4 +65,150 @@ func (s *Store) GetCounterMetrics() CounterMetrics {
 
 func (s *Store) GetValueMetrics() ValueMetrics {
 	return s.valueMetrics
+}
+
+func (s *Store) AlertSlowConsumerError() {
+	s.internalMetricsMutex.Lock()
+	s.internalMetrics.SlowConsumerAlert = true
+	s.internalMetricsMutex.Unlock()
+}
+
+func (s *Store) expireInternalMetrics() {
+	s.internalMetricsMutex.Lock()
+	s.internalMetrics.SlowConsumerAlert = false
+	s.internalMetricsMutex.Unlock()
+}
+
+func (s *Store) AddMetric(envelope *events.Envelope) {
+	s.internalMetricsMutex.Lock()
+	s.internalMetrics.TotalEnvelopesReceived++
+	s.internalMetrics.LastReceivedEnvelopTimestamp = time.Now().Unix()
+	s.internalMetricsMutex.Unlock()
+
+	switch envelope.GetEventType() {
+	case events.Envelope_ContainerMetric:
+		s.addContainerMetric(envelope)
+	case events.Envelope_CounterEvent:
+		s.addCounterMetric(envelope)
+	case events.Envelope_ValueMetric:
+		s.addValueMetric(envelope)
+	}
+}
+
+func (s *Store) addContainerMetric(envelope *events.Envelope) {
+	s.internalMetricsMutex.Lock()
+	s.internalMetrics.TotalMetricsReceived++
+	s.internalMetrics.LastReceivedMetricTimestamp = time.Now().Unix()
+	s.internalMetrics.TotalContainerMetricsReceived++
+	s.internalMetrics.LastReceivedContainerMetricTimestamp = time.Now().Unix()
+	s.internalMetricsMutex.Unlock()
+
+	s.containerMetricsMutex.Lock()
+	containerMetric := ContainerMetric{
+		Origin:           envelope.GetOrigin(),
+		Timestamp:        envelope.GetTimestamp(),
+		Deployment:       envelope.GetDeployment(),
+		Job:              envelope.GetJob(),
+		Index:            envelope.GetIndex(),
+		IP:               envelope.GetIp(),
+		Tags:             envelope.GetTags(),
+		ApplicationId:    envelope.GetContainerMetric().GetApplicationId(),
+		InstanceIndex:    envelope.GetContainerMetric().GetInstanceIndex(),
+		CpuPercentage:    envelope.GetContainerMetric().GetCpuPercentage(),
+		MemoryBytes:      envelope.GetContainerMetric().GetMemoryBytes(),
+		DiskBytes:        envelope.GetContainerMetric().GetDiskBytes(),
+		MemoryBytesQuota: envelope.GetContainerMetric().GetMemoryBytesQuota(),
+		DiskBytesQuota:   envelope.GetContainerMetric().GetDiskBytesQuota(),
+	}
+	containerKey := envelope.GetContainerMetric().GetApplicationId() + strconv.Itoa(int(containerMetric.InstanceIndex))
+	s.containerMetrics[containerKey] = containerMetric
+	s.containerMetricsMutex.Unlock()
+}
+
+func (s *Store) expireContainerMetrics() {
+	s.containerMetricsMutex.Lock()
+	now := time.Now()
+	for k, containerMetric := range s.containerMetrics {
+		validUntil := time.Unix(containerMetric.Timestamp, 0).Add(s.metricExpiry)
+		if validUntil.Before(now) {
+			delete(s.containerMetrics, k)
+		}
+	}
+	s.containerMetricsMutex.Unlock()
+}
+
+func (s *Store) addCounterMetric(envelope *events.Envelope) {
+	s.internalMetricsMutex.Lock()
+	s.internalMetrics.TotalMetricsReceived++
+	s.internalMetrics.LastReceivedMetricTimestamp = time.Now().Unix()
+	s.internalMetrics.TotalCounterEventsReceived++
+	s.internalMetrics.LastReceivedCounterEventTimestamp = time.Now().Unix()
+	s.internalMetricsMutex.Unlock()
+
+	s.counterMetricsMutex.Lock()
+	counterMetric := CounterMetric{
+		Origin:     envelope.GetOrigin(),
+		Timestamp:  envelope.GetTimestamp(),
+		Deployment: envelope.GetDeployment(),
+		Job:        envelope.GetJob(),
+		Index:      envelope.GetIndex(),
+		IP:         envelope.GetIp(),
+		Tags:       envelope.GetTags(),
+		Name:       envelope.GetCounterEvent().GetName(),
+		Delta:      envelope.GetCounterEvent().GetDelta(),
+		Total:      envelope.GetCounterEvent().GetTotal(),
+	}
+	counterKey := envelope.GetCounterEvent().GetName()
+	s.counterMetrics[counterKey] = counterMetric
+	s.counterMetricsMutex.Unlock()
+}
+
+func (s *Store) expireCounterMetrics() {
+	s.counterMetricsMutex.Lock()
+	now := time.Now()
+	for k, counterMetric := range s.counterMetrics {
+		validUntil := time.Unix(counterMetric.Timestamp, 0).Add(s.metricExpiry)
+		if validUntil.Before(now) {
+			delete(s.counterMetrics, k)
+		}
+	}
+	s.counterMetricsMutex.Unlock()
+}
+
+func (s *Store) addValueMetric(envelope *events.Envelope) {
+	s.internalMetricsMutex.Lock()
+	s.internalMetrics.TotalMetricsReceived++
+	s.internalMetrics.LastReceivedMetricTimestamp = time.Now().Unix()
+	s.internalMetrics.TotalValueMetricsReceived++
+	s.internalMetrics.LastReceivedValueMetricTimestamp = time.Now().Unix()
+	s.internalMetricsMutex.Unlock()
+
+	s.valueMetricsMutex.Lock()
+	valueMetric := ValueMetric{
+		Origin:     envelope.GetOrigin(),
+		Timestamp:  envelope.GetTimestamp(),
+		Deployment: envelope.GetDeployment(),
+		Job:        envelope.GetJob(),
+		Index:      envelope.GetIndex(),
+		IP:         envelope.GetIp(),
+		Tags:       envelope.GetTags(),
+		Name:       envelope.GetValueMetric().GetName(),
+		Value:      envelope.GetValueMetric().GetValue(),
+		Unit:       envelope.GetValueMetric().GetUnit(),
+	}
+	valueKey := envelope.GetValueMetric().GetName()
+	s.valueMetrics[valueKey] = valueMetric
+	s.valueMetricsMutex.Unlock()
+}
+
+func (s *Store) expireValueMetrics() {
+	s.valueMetricsMutex.Lock()
+	now := time.Now()
+	for k, valueMetric := range s.valueMetrics {
+		validUntil := time.Unix(valueMetric.Timestamp, 0).Add(s.metricExpiry)
+		if validUntil.Before(now) {
+			delete(s.valueMetrics, k)
+		}
+	}
+	s.valueMetricsMutex.Unlock()
 }

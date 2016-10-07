@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/log"
@@ -59,6 +60,10 @@ var (
 		"doppler.idle-timeout-seconds", 5,
 		"Cloud Foundry Doppler Idle Timeout (in seconds).",
 	)
+	dopplerMetricExpiry = flag.Duration(
+		"doppler.metric-expiry", 1*time.Minute,
+		"How long a Cloud Foundry Doppler metric is valid.",
+	)
 
 	skipSSLValidation = flag.Bool(
 		"skip-ssl-verify", false,
@@ -92,7 +97,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	metricsStore := metrics.NewStore()
+	metricsStore := metrics.NewStore(*dopplerMetricExpiry)
+	go metricsStore.Start()
 
 	nozzle := firehosenozzle.New(
 		*dopplerUrl,
