@@ -7,15 +7,19 @@ import (
 )
 
 type internalMetricsCollector struct {
-	namespace                         string
-	metricsStore                      *metrics.Store
-	totalEnvelopesReceivedDesc        *prometheus.Desc
-	totalMetricsReceivedDesc          *prometheus.Desc
-	totalContainerMetricsReceivedDesc *prometheus.Desc
-	totalCounterEventsReceivedDesc    *prometheus.Desc
-	totalValueMetricsReceivedDesc     *prometheus.Desc
-	slowConsumerAlertDesc             *prometheus.Desc
-	lastReceivedMetricTimestampDesc   *prometheus.Desc
+	namespace                            string
+	metricsStore                         *metrics.Store
+	totalEnvelopesReceivedDesc           *prometheus.Desc
+	lastReceivedEnvelopeTimestampDesc    *prometheus.Desc
+	totalMetricsReceivedDesc             *prometheus.Desc
+	lastReceivedMetricTimestampDesc      *prometheus.Desc
+	totalContainerMetricsReceivedDesc    *prometheus.Desc
+	lastReceivedContainerMetricTimestamp *prometheus.Desc
+	totalCounterEventsReceivedDesc       *prometheus.Desc
+	lastReceivedCounterEventTimestamp    *prometheus.Desc
+	totalValueMetricsReceivedDesc        *prometheus.Desc
+	lastReceivedValueMetricTimestamp     *prometheus.Desc
+	slowConsumerAlertDesc                *prometheus.Desc
 }
 
 func NewInternalMetricsCollector(
@@ -24,35 +28,70 @@ func NewInternalMetricsCollector(
 ) *internalMetricsCollector {
 	totalEnvelopesReceivedDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "total_envelopes_received"),
-		"Total number of envelopes received from Cloud Foundry firehose.",
+		"Total number of envelopes received from Cloud Foundry Firehose.",
+		[]string{},
+		nil,
+	)
+
+	lastReceivedEnvelopeTimestampDesc := prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "last_received_envelope_timestamp"),
+		"Last received envelope timestamp from Cloud Foundry Firehose (milliseconds since epoch).",
 		[]string{},
 		nil,
 	)
 
 	totalMetricsReceivedDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "total_metrics_received"),
-		"Total number of metrics received from Cloud Foundry firehose.",
+		"Total number of metrics received from Cloud Foundry Firehose.",
+		[]string{},
+		nil,
+	)
+
+	lastReceivedMetricTimestampDesc := prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "last_received_metric_timestamp"),
+		"Last received metric timestamp from Cloud Foundry Firehose (milliseconds since epoch).",
 		[]string{},
 		nil,
 	)
 
 	totalContainerMetricsReceivedDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "total_container_metrics_received"),
-		"Total number of container metrics received from Cloud Foundry firehose.",
+		"Total number of container metrics received from Cloud Foundry Firehose.",
+		[]string{},
+		nil,
+	)
+
+	lastReceivedContainerMetricTimestamp := prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "last_received_container_metric_timestamp"),
+		"Last received container metric timestamp from Cloud Foundry Firehose (milliseconds since epoch).",
 		[]string{},
 		nil,
 	)
 
 	totalCounterEventsReceivedDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "total_counter_events_received"),
-		"Total number of counter events received from Cloud Foundry firehose.",
+		"Total number of counter events received from Cloud Foundry Firehose.",
+		[]string{},
+		nil,
+	)
+
+	lastReceivedCounterEventTimestamp := prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "last_received_counter_event_timestamp"),
+		"Last received counter event timestamp from Cloud Foundry Firehose (milliseconds since epoch).",
 		[]string{},
 		nil,
 	)
 
 	totalValueMetricsReceivedDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "total_value_metrics_received"),
-		"Total number of value metrics received from Cloud Foundry firehose.",
+		"Total number of value metrics received from Cloud Foundry Firehose.",
+		[]string{},
+		nil,
+	)
+
+	lastReceivedValueMetricTimestamp := prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "last_received_value_metric_timestamp"),
+		"Last received value metric timestamp from Cloud Foundry Firehose (milliseconds since epoch).",
 		[]string{},
 		nil,
 	)
@@ -64,55 +103,88 @@ func NewInternalMetricsCollector(
 		nil,
 	)
 
-	lastReceivedMetricTimestampDesc := prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, "", "last_received_metric_timestamp"),
-		"Last received metric timestamp (milliseconds since epoch).",
-		[]string{},
-		nil,
-	)
-
 	collector := &internalMetricsCollector{
-		namespace:                         namespace,
-		metricsStore:                      metricsStore,
-		totalEnvelopesReceivedDesc:        totalEnvelopesReceivedDesc,
-		totalMetricsReceivedDesc:          totalMetricsReceivedDesc,
-		totalContainerMetricsReceivedDesc: totalContainerMetricsReceivedDesc,
-		totalCounterEventsReceivedDesc:    totalCounterEventsReceivedDesc,
-		totalValueMetricsReceivedDesc:     totalValueMetricsReceivedDesc,
-		slowConsumerAlertDesc:             slowConsumerAlertDesc,
-		lastReceivedMetricTimestampDesc:   lastReceivedMetricTimestampDesc,
+		namespace:                            namespace,
+		metricsStore:                         metricsStore,
+		totalEnvelopesReceivedDesc:           totalEnvelopesReceivedDesc,
+		lastReceivedEnvelopeTimestampDesc:    lastReceivedEnvelopeTimestampDesc,
+		totalMetricsReceivedDesc:             totalMetricsReceivedDesc,
+		lastReceivedMetricTimestampDesc:      lastReceivedMetricTimestampDesc,
+		totalContainerMetricsReceivedDesc:    totalContainerMetricsReceivedDesc,
+		lastReceivedContainerMetricTimestamp: lastReceivedContainerMetricTimestamp,
+		totalCounterEventsReceivedDesc:       totalCounterEventsReceivedDesc,
+		lastReceivedCounterEventTimestamp:    lastReceivedCounterEventTimestamp,
+		totalValueMetricsReceivedDesc:        totalValueMetricsReceivedDesc,
+		lastReceivedValueMetricTimestamp:     lastReceivedValueMetricTimestamp,
+		slowConsumerAlertDesc:                slowConsumerAlertDesc,
 	}
 	return collector
 }
 
 func (c internalMetricsCollector) Collect(ch chan<- prometheus.Metric) {
+	internalMetrics := c.metricsStore.GetInternalMetrics()
+
 	ch <- prometheus.MustNewConstMetric(
 		c.totalEnvelopesReceivedDesc,
 		prometheus.CounterValue,
-		c.metricsStore.GetInternalMetrics().TotalEnvelopesReceived,
+		internalMetrics.TotalEnvelopesReceived,
 	)
+
+	ch <- prometheus.MustNewConstMetric(
+		c.lastReceivedEnvelopeTimestampDesc,
+		prometheus.CounterValue,
+		float64(internalMetrics.LastReceivedEnvelopTimestamp),
+	)
+
 	ch <- prometheus.MustNewConstMetric(
 		c.totalMetricsReceivedDesc,
 		prometheus.CounterValue,
-		c.metricsStore.GetInternalMetrics().TotalMetricsReceived,
+		internalMetrics.TotalMetricsReceived,
 	)
+
+	ch <- prometheus.MustNewConstMetric(
+		c.lastReceivedMetricTimestampDesc,
+		prometheus.CounterValue,
+		float64(internalMetrics.LastReceivedMetricTimestamp),
+	)
+
 	ch <- prometheus.MustNewConstMetric(
 		c.totalContainerMetricsReceivedDesc,
 		prometheus.CounterValue,
-		c.metricsStore.GetInternalMetrics().TotalContainerMetricsReceived,
+		internalMetrics.TotalContainerMetricsReceived,
 	)
+
+	ch <- prometheus.MustNewConstMetric(
+		c.lastReceivedContainerMetricTimestamp,
+		prometheus.CounterValue,
+		float64(internalMetrics.LastReceivedContainerMetricTimestamp),
+	)
+
 	ch <- prometheus.MustNewConstMetric(
 		c.totalCounterEventsReceivedDesc,
 		prometheus.CounterValue,
-		c.metricsStore.GetInternalMetrics().TotalCounterEventsReceived,
+		internalMetrics.TotalCounterEventsReceived,
 	)
+
+	ch <- prometheus.MustNewConstMetric(
+		c.lastReceivedCounterEventTimestamp,
+		prometheus.CounterValue,
+		float64(internalMetrics.LastReceivedCounterEventTimestamp),
+	)
+
 	ch <- prometheus.MustNewConstMetric(
 		c.totalValueMetricsReceivedDesc,
 		prometheus.CounterValue,
-		c.metricsStore.GetInternalMetrics().TotalValueMetricsReceived,
+		internalMetrics.TotalValueMetricsReceived,
 	)
 
-	if c.metricsStore.GetInternalMetrics().SlowConsumerAlert {
+	ch <- prometheus.MustNewConstMetric(
+		c.lastReceivedValueMetricTimestamp,
+		prometheus.CounterValue,
+		float64(internalMetrics.LastReceivedValueMetricTimestamp),
+	)
+
+	if internalMetrics.SlowConsumerAlert {
 		ch <- prometheus.MustNewConstMetric(
 			c.slowConsumerAlertDesc,
 			prometheus.UntypedValue,
@@ -123,10 +195,14 @@ func (c internalMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 
 func (c internalMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.totalEnvelopesReceivedDesc
+	ch <- c.lastReceivedEnvelopeTimestampDesc
 	ch <- c.totalMetricsReceivedDesc
-	ch <- c.totalContainerMetricsReceivedDesc
-	ch <- c.totalCounterEventsReceivedDesc
-	ch <- c.totalValueMetricsReceivedDesc
-	ch <- c.slowConsumerAlertDesc
 	ch <- c.lastReceivedMetricTimestampDesc
+	ch <- c.totalContainerMetricsReceivedDesc
+	ch <- c.lastReceivedContainerMetricTimestamp
+	ch <- c.totalCounterEventsReceivedDesc
+	ch <- c.lastReceivedCounterEventTimestamp
+	ch <- c.totalValueMetricsReceivedDesc
+	ch <- c.lastReceivedValueMetricTimestamp
+	ch <- c.slowConsumerAlertDesc
 }
