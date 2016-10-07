@@ -9,22 +9,27 @@ import (
 	"github.com/cloudfoundry-community/firehose_exporter/utils"
 )
 
-var (
-	valueMetricsCollectorDesc = prometheus.NewDesc(
+type valueMetricsCollector struct {
+	namespace                 string
+	metricsStore              *metrics.Store
+	valueMetricsCollectorDesc *prometheus.Desc
+}
+
+func NewValueMetricsCollector(
+	namespace string,
+	metricsStore *metrics.Store,
+) *valueMetricsCollector {
+	valueMetricsCollectorDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, value_metrics_subsystem, "collector"),
-		"Cloud Foundry firehose value metrics collector.",
+		"Cloud Foundry Firehose value metrics collector.",
 		nil,
 		nil,
 	)
-)
 
-type valueMetricsCollector struct {
-	metricsStore *metrics.Store
-}
-
-func NewValueMetricsCollector(metricsStore *metrics.Store) *valueMetricsCollector {
 	collector := &valueMetricsCollector{
-		metricsStore: metricsStore,
+		namespace:                 namespace,
+		metricsStore:              metricsStore,
+		valueMetricsCollectorDesc: valueMetricsCollectorDesc,
 	}
 	return collector
 }
@@ -33,7 +38,7 @@ func (c valueMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, valueMetric := range c.metricsStore.GetValueMetrics() {
 		ch <- prometheus.MustNewConstMetric(
 			prometheus.NewDesc(
-				prometheus.BuildFQName(namespace, value_metrics_subsystem, utils.NormalizeName(valueMetric.Name)),
+				prometheus.BuildFQName(c.namespace, value_metrics_subsystem, utils.NormalizeName(valueMetric.Name)),
 				fmt.Sprintf("Cloud Foundry firehose '%s' value metric.", valueMetric.Name),
 				[]string{"origin", "deployment", "job", "index", "ip", "unit"},
 				nil,
@@ -51,5 +56,5 @@ func (c valueMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 }
 
 func (c valueMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
-	ch <- valueMetricsCollectorDesc
+	ch <- c.valueMetricsCollectorDesc
 }

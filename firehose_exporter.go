@@ -25,6 +25,10 @@ var (
 		"web.telemetry-path", "/metrics",
 		"Path under which to expose Prometheus metrics.",
 	)
+	metricsNamespace = flag.String(
+		"metrics.namespace", "firehose_exporter",
+		"Metrics Namespace.",
+	)
 	showVersion = flag.Bool(
 		"version", false,
 		"Print version information.",
@@ -102,16 +106,16 @@ func main() {
 		log.Fatal(nozzle.Start())
 	}()
 
-	internalMetricsCollector := collectors.NewInternalMetricsCollector(metricsStore)
+	internalMetricsCollector := collectors.NewInternalMetricsCollector(*metricsNamespace, metricsStore)
 	prometheus.MustRegister(internalMetricsCollector)
 
-	containerMetricsCollector := collectors.NewContainerMetricsCollector(metricsStore)
+	containerMetricsCollector := collectors.NewContainerMetricsCollector(*metricsNamespace, metricsStore)
 	prometheus.MustRegister(containerMetricsCollector)
 
-	counterMetricsCollector := collectors.NewCounterMetricsCollector(metricsStore)
+	counterMetricsCollector := collectors.NewCounterMetricsCollector(*metricsNamespace, metricsStore)
 	prometheus.MustRegister(counterMetricsCollector)
 
-	valueMetricsCollector := collectors.NewValueMetricsCollector(metricsStore)
+	valueMetricsCollector := collectors.NewValueMetricsCollector(*metricsNamespace, metricsStore)
 	prometheus.MustRegister(valueMetricsCollector)
 
 	http.Handle(*metricsPath, prometheus.Handler())

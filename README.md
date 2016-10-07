@@ -13,15 +13,16 @@ make
 
 | Flag | Required | Default | Description
 | ---- | -------- | ------- | -----------
-| web.listen-address          | No  | :9186      | Address to listen on for web interface and telemetry
-| web.telemetry-path          | No  | /metrics   | Path under which to expose Prometheus metrics
-| uaa.url                     | Yes |            | Cloud Foundry UAA URL
-| uaa.client-id               | Yes |            | Cloud Foundry UAA Client ID
-| uaa.client-secret           | Yes |            | Cloud Foundry UAA Client Secret
-| doppler.url                 | Yes |            | Cloud Foundry Doppler URL
-| doppler.subscription-id     | No  | prometheus | Cloud Foundry Doppler Subscription ID
-| doppler.idle-timeout-seconds| No  | 5          | Cloud Foundry Doppler Idle Timeout (in seconds)
-| skip-ssl-verify             | No  | false      | Disable SSL Verify |
+| metrics.namespace           | No  | firehose_exporter | Metrics Namespace
+| web.listen-address          | No  | :9186             | Address to listen on for web interface and telemetry
+| web.telemetry-path          | No  | /metrics          | Path under which to expose Prometheus metrics
+| uaa.url                     | Yes |                   | Cloud Foundry UAA URL
+| uaa.client-id               | Yes |                   | Cloud Foundry UAA Client ID
+| uaa.client-secret           | Yes |                   | Cloud Foundry UAA Client Secret
+| doppler.url                 | Yes |                   | Cloud Foundry Doppler URL
+| doppler.subscription-id     | No  | prometheus        | Cloud Foundry Doppler Subscription ID
+| doppler.idle-timeout-seconds| No  | 5                 | Cloud Foundry Doppler Idle Timeout (in seconds)
+| skip-ssl-verify             | No  | false             | Disable SSL Verify |
 
 ### UAA Client
 
