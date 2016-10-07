@@ -36,7 +36,7 @@ func New(
 func (uaa *UAATokenRefresher) RefreshAuthToken() (string, error) {
 	authToken, err := uaa.client.GetAuthToken(uaa.clientID, uaa.clientSecret, uaa.skipSSLValidation)
 	if err != nil {
-		log.Errorf("Error getting oauth token: %s. Please check your username and password.", err.Error())
+		log.Errorf("Error getting oauth token: %s. Please check your Client ID and Secret.", err.Error())
 		return "", err
 	}
 
