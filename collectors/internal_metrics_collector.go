@@ -15,6 +15,7 @@ type internalMetricsCollector struct {
 	totalCounterEventsReceivedDesc    *prometheus.Desc
 	totalValueMetricsReceivedDesc     *prometheus.Desc
 	slowConsumerAlertDesc             *prometheus.Desc
+	lastReceivedMetricTimestampDesc   *prometheus.Desc
 }
 
 func NewInternalMetricsCollector(
@@ -58,7 +59,14 @@ func NewInternalMetricsCollector(
 
 	slowConsumerAlertDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "slow_consumer"),
-		"Nozzle could not keep up with Cloud Foundry firehose.",
+		"Nozzle could not keep up with Cloud Foundry Firehose.",
+		[]string{},
+		nil,
+	)
+
+	lastReceivedMetricTimestampDesc := prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "last_received_metric_timestamp"),
+		"Last received metric timestamp (milliseconds since epoch).",
 		[]string{},
 		nil,
 	)
@@ -72,6 +80,7 @@ func NewInternalMetricsCollector(
 		totalCounterEventsReceivedDesc:    totalCounterEventsReceivedDesc,
 		totalValueMetricsReceivedDesc:     totalValueMetricsReceivedDesc,
 		slowConsumerAlertDesc:             slowConsumerAlertDesc,
+		lastReceivedMetricTimestampDesc:   lastReceivedMetricTimestampDesc,
 	}
 	return collector
 }
@@ -119,4 +128,5 @@ func (c internalMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.totalCounterEventsReceivedDesc
 	ch <- c.totalValueMetricsReceivedDesc
 	ch <- c.slowConsumerAlertDesc
+	ch <- c.lastReceivedMetricTimestampDesc
 }

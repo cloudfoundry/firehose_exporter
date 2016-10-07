@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/cloudfoundry/sonde-go/events"
 )
@@ -22,6 +23,7 @@ func NewStore() *Store {
 			TotalCounterEventsReceived:    0,
 			TotalValueMetricsReceived:     0,
 			SlowConsumerAlert:             false,
+			LastReceivedMetricTimestamp:   0,
 		},
 		containerMetrics: make(map[string]ContainerMetric),
 		counterMetrics:   make(map[string]CounterMetric),
@@ -35,8 +37,10 @@ func (s *Store) AddMetric(envelope *events.Envelope) {
 	case events.Envelope_ContainerMetric:
 		s.internalMetrics.TotalMetricsReceived++
 		s.internalMetrics.TotalContainerMetricsReceived++
+		s.internalMetrics.LastReceivedMetricTimestamp = time.Now().Unix()
 		containerMetric := ContainerMetric{
 			Origin:           envelope.GetOrigin(),
+			Timestamp:        envelope.GetTimestamp(),
 			Deployment:       envelope.GetDeployment(),
 			Job:              envelope.GetJob(),
 			Index:            envelope.GetIndex(),
@@ -55,8 +59,10 @@ func (s *Store) AddMetric(envelope *events.Envelope) {
 	case events.Envelope_CounterEvent:
 		s.internalMetrics.TotalMetricsReceived++
 		s.internalMetrics.TotalCounterEventsReceived++
+		s.internalMetrics.LastReceivedMetricTimestamp = time.Now().Unix()
 		counterMetric := CounterMetric{
 			Origin:     envelope.GetOrigin(),
+			Timestamp:  envelope.GetTimestamp(),
 			Deployment: envelope.GetDeployment(),
 			Job:        envelope.GetJob(),
 			Index:      envelope.GetIndex(),
@@ -71,8 +77,10 @@ func (s *Store) AddMetric(envelope *events.Envelope) {
 	case events.Envelope_ValueMetric:
 		s.internalMetrics.TotalMetricsReceived++
 		s.internalMetrics.TotalValueMetricsReceived++
+		s.internalMetrics.LastReceivedMetricTimestamp = time.Now().Unix()
 		valueMetric := ValueMetric{
 			Origin:     envelope.GetOrigin(),
+			Timestamp:  envelope.GetTimestamp(),
 			Deployment: envelope.GetDeployment(),
 			Job:        envelope.GetJob(),
 			Index:      envelope.GetIndex(),

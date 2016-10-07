@@ -7,12 +7,14 @@ type InternalMetrics struct {
 	TotalCounterEventsReceived    float64
 	TotalValueMetricsReceived     float64
 	SlowConsumerAlert             bool
+	LastReceivedMetricTimestamp   int64
 }
 
 type ContainerMetrics map[string]ContainerMetric
 
 type ContainerMetric struct {
 	Origin           string
+	Timestamp        int64
 	Deployment       string
 	Job              string
 	Index            string
@@ -31,6 +33,7 @@ type CounterMetrics map[string]CounterMetric
 
 type CounterMetric struct {
 	Origin     string
+	Timestamp  int64
 	Deployment string
 	Job        string
 	Index      string
@@ -45,6 +48,7 @@ type ValueMetrics map[string]ValueMetric
 
 type ValueMetric struct {
 	Origin     string
+	Timestamp  int64
 	Deployment string
 	Job        string
 	Index      string
