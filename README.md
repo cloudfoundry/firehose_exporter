@@ -1,4 +1,4 @@
-# Cloud Foundry Firehose Exporter
+# Cloud Foundry Firehose Exporter [![Build Status](https://travis-ci.org/cloudfoundry-community/firehose_exporter.png)](https://travis-ci.org/cloudfoundry-community/firehose_exporter)
 
 A [Prometheus][prometheus] exporter for [Cloud Foundry Firehose][firehose] metrics. It exports `ContainerMetric`, `CounterEvent` and `ValueMetric` events.
 
