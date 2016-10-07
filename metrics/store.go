@@ -26,17 +26,9 @@ func NewStore(
 	metricsExpiry time.Duration,
 ) *Store {
 	return &Store{
-		metricsGarbage: metricsGarbage,
-		metricsExpiry:  metricsExpiry,
-		internalMetrics: InternalMetrics{
-			TotalEnvelopesReceived:        0,
-			TotalMetricsReceived:          0,
-			TotalContainerMetricsReceived: 0,
-			TotalCounterEventsReceived:    0,
-			TotalValueMetricsReceived:     0,
-			SlowConsumerAlert:             false,
-			LastReceivedMetricTimestamp:   0,
-		},
+		metricsGarbage:   metricsGarbage,
+		metricsExpiry:    metricsExpiry,
+		internalMetrics:  InternalMetrics{},
 		containerMetrics: make(map[string]ContainerMetric),
 		counterMetrics:   make(map[string]CounterMetric),
 		valueMetrics:     make(map[string]ValueMetric),
