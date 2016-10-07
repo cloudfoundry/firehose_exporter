@@ -78,7 +78,7 @@ func (n *FirehoseNozzle) parseEnvelopes() error {
 
 func (n *FirehoseNozzle) handleMessage(envelope *events.Envelope) {
 	if envelope.GetEventType() == events.Envelope_CounterEvent && envelope.CounterEvent.GetName() == "TruncatingBuffer.DroppedMessages" && envelope.GetOrigin() == "doppler" {
-		log.Infof("We've intercepted an upstream message which indicates that the nozzle or the TrafficController is not keeping up. Please try scaling up the nozzle.")
+		log.Infof("We've intercepted an upstream message which indicates that the Nozzle or the TrafficController is not keeping up. Please try scaling up the Nozzle.")
 		n.metricsStore.AlertSlowConsumerError()
 	}
 }
@@ -90,16 +90,16 @@ func (n *FirehoseNozzle) handleError(err error) {
 		case websocket.CloseNormalClosure:
 		// no op
 		case websocket.ClosePolicyViolation:
-			log.Errorf("Error while reading from the firehose: %v", err)
-			log.Errorf("Disconnected because nozzle couldn't keep up. Please try scaling up the nozzle.")
+			log.Errorf("Error while reading from the Firehose: %v", err)
+			log.Errorf("Disconnected because Nozzle couldn't keep up. Please try scaling up the Nozzle.")
 			n.metricsStore.AlertSlowConsumerError()
 		default:
-			log.Errorf("Error while reading from the firehose: %v", err)
+			log.Errorf("Error while reading from the Firehose: %v", err)
 		}
 	default:
-		log.Errorf("Error while reading from the firehose: %v", err)
+		log.Errorf("Error while reading from the Firehose: %v", err)
 	}
 
-	log.Infof("Closing connection with traffic controller due to %v", err)
+	log.Info("Closing connection with Firehose...")
 	n.consumer.Close()
 }
