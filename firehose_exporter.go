@@ -30,6 +30,10 @@ var (
 		"metrics.namespace", "firehose_exporter",
 		"Metrics Namespace.",
 	)
+	metricsGarbage = flag.Duration(
+		"metrics.garbage", 1*time.Minute,
+		"How long to run the metrics garbage.",
+	)
 	showVersion = flag.Bool(
 		"version", false,
 		"Print version information.",
@@ -61,7 +65,7 @@ var (
 		"Cloud Foundry Doppler Idle Timeout (in seconds).",
 	)
 	dopplerMetricExpiry = flag.Duration(
-		"doppler.metric-expiry", 1*time.Minute,
+		"doppler.metric-expiry", 5*time.Minute,
 		"How long a Cloud Foundry Doppler metric is valid.",
 	)
 
@@ -97,7 +101,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	metricsStore := metrics.NewStore(*dopplerMetricExpiry)
+	metricsStore := metrics.NewStore(*metricsGarbage, *dopplerMetricExpiry)
 	go metricsStore.Start()
 
 	nozzle := firehosenozzle.New(

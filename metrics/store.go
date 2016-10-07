@@ -9,7 +9,8 @@ import (
 )
 
 type Store struct {
-	metricExpiry          time.Duration
+	metricsGarbage        time.Duration
+	metricsExpiry         time.Duration
 	internalMetrics       InternalMetrics
 	internalMetricsMutex  sync.Mutex
 	containerMetrics      ContainerMetrics
@@ -20,9 +21,13 @@ type Store struct {
 	valueMetricsMutex     sync.Mutex
 }
 
-func NewStore(metricExpiry time.Duration) *Store {
+func NewStore(
+	metricsGarbage time.Duration,
+	metricsExpiry time.Duration,
+) *Store {
 	return &Store{
-		metricExpiry: metricExpiry,
+		metricsGarbage: metricsGarbage,
+		metricsExpiry:  metricsExpiry,
 		internalMetrics: InternalMetrics{
 			TotalEnvelopesReceived:        0,
 			TotalMetricsReceived:          0,
@@ -39,7 +44,7 @@ func NewStore(metricExpiry time.Duration) *Store {
 }
 
 func (s *Store) Start() {
-	ticker := time.NewTicker(s.metricExpiry).C
+	ticker := time.NewTicker(s.metricsGarbage).C
 	for {
 		select {
 		case <-ticker:
@@ -129,7 +134,7 @@ func (s *Store) expireContainerMetrics() {
 	s.containerMetricsMutex.Lock()
 	now := time.Now()
 	for k, containerMetric := range s.containerMetrics {
-		validUntil := time.Unix(containerMetric.Timestamp, 0).Add(s.metricExpiry)
+		validUntil := time.Unix(containerMetric.Timestamp, 0).Add(s.metricsExpiry)
 		if validUntil.Before(now) {
 			delete(s.containerMetrics, k)
 		}
@@ -167,7 +172,7 @@ func (s *Store) expireCounterMetrics() {
 	s.counterMetricsMutex.Lock()
 	now := time.Now()
 	for k, counterMetric := range s.counterMetrics {
-		validUntil := time.Unix(counterMetric.Timestamp, 0).Add(s.metricExpiry)
+		validUntil := time.Unix(counterMetric.Timestamp, 0).Add(s.metricsExpiry)
 		if validUntil.Before(now) {
 			delete(s.counterMetrics, k)
 		}
@@ -205,7 +210,7 @@ func (s *Store) expireValueMetrics() {
 	s.valueMetricsMutex.Lock()
 	now := time.Now()
 	for k, valueMetric := range s.valueMetrics {
-		validUntil := time.Unix(valueMetric.Timestamp, 0).Add(s.metricExpiry)
+		validUntil := time.Unix(valueMetric.Timestamp, 0).Add(s.metricsExpiry)
 		if validUntil.Before(now) {
 			delete(s.valueMetrics, k)
 		}

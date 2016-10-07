@@ -14,6 +14,7 @@ make
 | Flag | Required | Default | Description
 | ---- | -------- | ------- | -----------
 | metrics.namespace           | No  | firehose_exporter | Metrics Namespace
+| metrics.garbage             | No  | 1 minute          | How long to run the metrics garbage
 | web.listen-address          | No  | :9186             | Address to listen on for web interface and telemetry
 | web.telemetry-path          | No  | /metrics          | Path under which to expose Prometheus metrics
 | uaa.url                     | Yes |                   | Cloud Foundry UAA URL
@@ -22,7 +23,7 @@ make
 | doppler.url                 | Yes |                   | Cloud Foundry Doppler URL
 | doppler.subscription-id     | No  | prometheus        | Cloud Foundry Doppler Subscription ID
 | doppler.idle-timeout-seconds| No  | 5                 | Cloud Foundry Doppler Idle Timeout (in seconds)
-| doppler.metric-expiry       | No  | 1 minute          | How long a Cloud Foundry Doppler metric is valid
+| doppler.metric-expiry       | No  | 5 minute          | How long a Cloud Foundry Doppler metric is valid
 | skip-ssl-verify             | No  | false             | Disable SSL Verify |
 
 ### UAA Client
