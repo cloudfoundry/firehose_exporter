@@ -14,6 +14,11 @@ style:
 	@echo ">> checking code style"
 	@! gofmt -d $(shell find . -path ./vendor -prune -o -name '*.go' -print) | grep '^'
 
+deps:
+	# Ginkgo and omega test tools
+	@$(GO) get github.com/onsi/ginkgo/ginkgo
+	@$(GO) get github.com/onsi/gomega
+
 test:
 	@echo ">> running tests"
 	@$(GINKGO) -r -race .
