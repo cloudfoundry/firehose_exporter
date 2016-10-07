@@ -11,20 +11,20 @@ make
 
 ### Flags
 
-| Flag | Required | Default | Description
-| ---- | -------- | ------- | -----------
-| metrics.namespace           | No  | firehose_exporter | Metrics Namespace
-| metrics.garbage             | No  | 1 minute          | How long to run the metrics garbage
-| web.listen-address          | No  | :9186             | Address to listen on for web interface and telemetry
-| web.telemetry-path          | No  | /metrics          | Path under which to expose Prometheus metrics
-| uaa.url                     | Yes |                   | Cloud Foundry UAA URL
-| uaa.client-id               | Yes |                   | Cloud Foundry UAA Client ID
-| uaa.client-secret           | Yes |                   | Cloud Foundry UAA Client Secret
-| doppler.url                 | Yes |                   | Cloud Foundry Doppler URL
-| doppler.subscription-id     | No  | prometheus        | Cloud Foundry Doppler Subscription ID
-| doppler.idle-timeout-seconds| No  | 5                 | Cloud Foundry Doppler Idle Timeout (in seconds)
-| doppler.metric-expiry       | No  | 5 minute          | How long a Cloud Foundry Doppler metric is valid
-| skip-ssl-verify             | No  | false             | Disable SSL Verify |
+| Flag | Environment Variable | Required | Default | Description
+| ---- | -------------------- | -------- | ------- | -----------
+| metrics.namespace | NOZZLE_METRICS_NAMESPACE | No | firehose_exporter | Metrics Namespace
+| metrics.garbage | NOZZLE_METRICS_GARBAGE | No | 1 minute | How long to run the metrics garbage
+| web.listen-address | NOZZLE_WEB_LISTEN_ADDRESS | No | :9186 | Address to listen on for web interface and telemetry
+| web.telemetry-path | NOZZLE_WEB_TELEMETRY_PATH | No | /metrics | Path under which to expose Prometheus metrics
+| uaa.url | NOZZLE_UAA_URL | Yes | | Cloud Foundry UAA URL
+| uaa.client-id | NOZZLE_UAA_CLIENT_ID | Yes | | Cloud Foundry UAA Client ID
+| uaa.client-secret | NOZZLE_UAA_CLIENT_SECRET | Yes | | Cloud Foundry UAA Client Secret
+| doppler.url | NOZZLE_DOPPLER_URL | Yes | | Cloud Foundry Doppler URL
+| doppler.subscription-id | NOZZLE_DOPPLER_SUBSCRIPTION_ID | No | prometheus | Cloud Foundry Doppler Subscription ID
+| doppler.idle-timeout-seconds| NOZZLE_DOPPLER_IDLE_TIMEOUT_SECONDS | No | 5 | Cloud Foundry Doppler Idle Timeout (in seconds)
+| doppler.metric-expiry | NOZZLE_DOPPLER_METRIC_EXPIRY | No | 5 minutes | How long a Cloud Foundry Doppler metric is valid
+| skip-ssl-verify | NOZZLE_SKIP_SSL_VERIFY | No | false | Disable SSL Verify |
 
 ### UAA Client
 

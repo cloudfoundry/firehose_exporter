@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -79,6 +80,46 @@ func init() {
 	prometheus.MustRegister(version.NewCollector("firehose_exporter"))
 }
 
+func overrideWithEnvVar(name string, value *string) {
+	envValue := os.Getenv(name)
+	if envValue != "" {
+		*value = envValue
+	}
+}
+
+func overrideWithEnvUint(name string, value *uint) {
+	envValue := os.Getenv(name)
+	if envValue != "" {
+		intValue, err := strconv.Atoi(envValue)
+		if err != nil {
+			log.Fatalf("Invalid `%s`: %s", name, err)
+		}
+		*value = uint(intValue)
+	}
+}
+
+func overrideWithEnvDuration(name string, value *time.Duration) {
+	envValue := os.Getenv(name)
+	if envValue != "" {
+		var err error
+		*value, err = time.ParseDuration(envValue)
+		if err != nil {
+			log.Fatalf("Invalid `%s`: %s", name, err)
+		}
+	}
+}
+
+func overrideWithEnvBool(name string, value *bool) {
+	envValue := os.Getenv(name)
+	if envValue != "" {
+		var err error
+		*value, err = strconv.ParseBool(envValue)
+		if err != nil {
+			log.Fatalf("Invalid `%s`: %s", name, err)
+		}
+	}
+}
+
 func main() {
 	flag.Parse()
 
@@ -89,6 +130,19 @@ func main() {
 
 	log.Infoln("Starting firehose_exporter", version.Info())
 	log.Infoln("Build context", version.BuildContext())
+
+	overrideWithEnvVar("NOZZLE_WEB_LISTEN_ADDRESS", listenAddress)
+	overrideWithEnvVar("NOZZLE_WEB_TELEMETRY_PATH", metricsPath)
+	overrideWithEnvVar("NOZZLE_METRICS_NAMESPACE", metricsNamespace)
+	overrideWithEnvDuration("NOZZLE_METRICS_GARBAGE", metricsGarbage)
+	overrideWithEnvVar("NOZZLE_UAA_URL", uaaUrl)
+	overrideWithEnvVar("NOZZLE_UAA_CLIENT_ID", uaaClientID)
+	overrideWithEnvVar("NOZZLE_UAA_CLIENT_SECRET", uaaClientSecret)
+	overrideWithEnvVar("NOZZLE_DOPPLER_URL", dopplerUrl)
+	overrideWithEnvVar("NOZZLE_DOPPLER_SUBSCRIPTION_ID", dopplerSubscriptionID)
+	overrideWithEnvUint("NOZZLE_DOPPLER_IDLE_TIMEOUT_SECONDS", dopplerIdleTimeoutSeconds)
+	overrideWithEnvDuration("NOZZLE_DOPPLER_METRIC_EXPIRY", dopplerMetricExpiry)
+	overrideWithEnvBool("NOZZLE_SKIP_SSL_VERIFY", skipSSLValidation)
 
 	authTokenRefresher, err := uaatokenrefresher.New(
 		*uaaUrl,
