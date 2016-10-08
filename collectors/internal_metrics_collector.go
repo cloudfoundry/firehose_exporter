@@ -35,7 +35,7 @@ func NewInternalMetricsCollector(
 
 	lastReceivedEnvelopeTimestampDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "last_received_envelope_timestamp"),
-		"Last received envelope timestamp from Cloud Foundry Firehose (milliseconds since epoch).",
+		"Number of seconds since 1970 of last envelope received from Cloud Foundry Firehose.",
 		[]string{},
 		nil,
 	)
@@ -49,7 +49,7 @@ func NewInternalMetricsCollector(
 
 	lastReceivedMetricTimestampDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "last_received_metric_timestamp"),
-		"Last received metric timestamp from Cloud Foundry Firehose (milliseconds since epoch).",
+		"Number of seconds since 1970 of last metric received from Cloud Foundry Firehose.",
 		[]string{},
 		nil,
 	)
@@ -63,7 +63,7 @@ func NewInternalMetricsCollector(
 
 	lastReceivedContainerMetricTimestamp := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "last_received_container_metric_timestamp"),
-		"Last received container metric timestamp from Cloud Foundry Firehose (milliseconds since epoch).",
+		"Number of seconds since 1970 of last container metric received from Cloud Foundry Firehose.",
 		[]string{},
 		nil,
 	)
@@ -77,7 +77,7 @@ func NewInternalMetricsCollector(
 
 	lastReceivedCounterEventTimestamp := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "last_received_counter_event_timestamp"),
-		"Last received counter event timestamp from Cloud Foundry Firehose (milliseconds since epoch).",
+		"Number of seconds since 1970 of last counter event received from Cloud Foundry Firehose.",
 		[]string{},
 		nil,
 	)
@@ -91,7 +91,7 @@ func NewInternalMetricsCollector(
 
 	lastReceivedValueMetricTimestamp := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "last_received_value_metric_timestamp"),
-		"Last received value metric timestamp from Cloud Foundry Firehose (milliseconds since epoch).",
+		"Number of seconds since 1970 of last value metric received from Cloud Foundry Firehose.",
 		[]string{},
 		nil,
 	)
@@ -132,7 +132,7 @@ func (c internalMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 
 	ch <- prometheus.MustNewConstMetric(
 		c.lastReceivedEnvelopeTimestampDesc,
-		prometheus.CounterValue,
+		prometheus.GaugeValue,
 		float64(internalMetrics.LastReceivedEnvelopTimestamp),
 	)
 
@@ -144,7 +144,7 @@ func (c internalMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 
 	ch <- prometheus.MustNewConstMetric(
 		c.lastReceivedMetricTimestampDesc,
-		prometheus.CounterValue,
+		prometheus.GaugeValue,
 		float64(internalMetrics.LastReceivedMetricTimestamp),
 	)
 
@@ -156,7 +156,7 @@ func (c internalMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 
 	ch <- prometheus.MustNewConstMetric(
 		c.lastReceivedContainerMetricTimestamp,
-		prometheus.CounterValue,
+		prometheus.GaugeValue,
 		float64(internalMetrics.LastReceivedContainerMetricTimestamp),
 	)
 
@@ -168,7 +168,7 @@ func (c internalMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 
 	ch <- prometheus.MustNewConstMetric(
 		c.lastReceivedCounterEventTimestamp,
-		prometheus.CounterValue,
+		prometheus.GaugeValue,
 		float64(internalMetrics.LastReceivedCounterEventTimestamp),
 	)
 
@@ -180,7 +180,7 @@ func (c internalMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 
 	ch <- prometheus.MustNewConstMetric(
 		c.lastReceivedValueMetricTimestamp,
-		prometheus.CounterValue,
+		prometheus.GaugeValue,
 		float64(internalMetrics.LastReceivedValueMetricTimestamp),
 	)
 
