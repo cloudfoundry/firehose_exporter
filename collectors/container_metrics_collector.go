@@ -24,35 +24,35 @@ func NewContainerMetricsCollector(
 ) *containerMetricsCollector {
 	cpuPercentageMetricDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, container_metrics_subsystem, "cpu_percentage"),
-		"Cloud Foundry firehose container metric: CPU used, on a scale of 0 to 100.",
+		"Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100.",
 		[]string{"origin", "deployment", "job", "index", "ip", "application_id", "instance_id"},
 		nil,
 	)
 
 	memoryBytesMetricDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, container_metrics_subsystem, "memory_bytes"),
-		"Cloud Foundry firehose container metric: bytes of memory used.",
+		"Cloud Foundry Firehose container metric: bytes of memory used.",
 		[]string{"origin", "deployment", "job", "index", "ip", "application_id", "instance_id"},
 		nil,
 	)
 
 	diskBytesMetricDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, container_metrics_subsystem, "disk_bytes"),
-		"Cloud Foundry firehose container metric: bytes of disk used.",
+		"Cloud Foundry Firehose container metric: bytes of disk used.",
 		[]string{"origin", "deployment", "job", "index", "ip", "application_id", "instance_id"},
 		nil,
 	)
 
 	memoryBytesQuotaMetricDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, container_metrics_subsystem, "memory_bytes_quota"),
-		"Cloud Foundry firehose container metric: maximum bytes of memory allocated to container.",
+		"Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container.",
 		[]string{"origin", "deployment", "job", "index", "ip", "application_id", "instance_id"},
 		nil,
 	)
 
 	diskBytesQuotaMetricDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, container_metrics_subsystem, "disk_bytes_quota"),
-		"Cloud Foundry firehose container metric: maximum bytes of disk allocated to container.",
+		"Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container.",
 		[]string{"origin", "deployment", "job", "index", "ip", "application_id", "instance_id"},
 		nil,
 	)
