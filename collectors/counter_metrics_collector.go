@@ -36,15 +36,33 @@ func NewCounterMetricsCollector(
 
 func (c counterMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, counterMetric := range c.metricsStore.GetCounterMetrics() {
+		metricName := counterMetric.Origin + "_total_" + utils.NormalizeName(counterMetric.Name)
 		ch <- prometheus.MustNewConstMetric(
 			prometheus.NewDesc(
-				prometheus.BuildFQName(c.namespace, counter_events_subsystem, utils.NormalizeName(counterMetric.Name)),
-				fmt.Sprintf("Cloud Foundry firehose '%s' counter event.", counterMetric.Name),
+				prometheus.BuildFQName(c.namespace, counter_events_subsystem, metricName),
+				fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event.", counterMetric.Name),
 				[]string{"origin", "deployment", "job", "index", "ip"},
 				nil,
 			),
 			prometheus.CounterValue,
 			float64(counterMetric.Total),
+			counterMetric.Origin,
+			counterMetric.Deployment,
+			counterMetric.Job,
+			counterMetric.Index,
+			counterMetric.IP,
+		)
+
+		metricName = counterMetric.Origin + "_delta_" + utils.NormalizeName(counterMetric.Name)
+		ch <- prometheus.MustNewConstMetric(
+			prometheus.NewDesc(
+				prometheus.BuildFQName(c.namespace, counter_events_subsystem, metricName),
+				fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event.", counterMetric.Name),
+				[]string{"origin", "deployment", "job", "index", "ip"},
+				nil,
+			),
+			prometheus.GaugeValue,
+			float64(counterMetric.Delta),
 			counterMetric.Origin,
 			counterMetric.Deployment,
 			counterMetric.Job,
