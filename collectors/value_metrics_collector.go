@@ -36,10 +36,11 @@ func NewValueMetricsCollector(
 
 func (c valueMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, valueMetric := range c.metricsStore.GetValueMetrics() {
+		metricName := utils.NormalizeName(valueMetric.Origin) + "_" + utils.NormalizeName(valueMetric.Name)
 		ch <- prometheus.MustNewConstMetric(
 			prometheus.NewDesc(
-				prometheus.BuildFQName(c.namespace, value_metrics_subsystem, utils.NormalizeName(valueMetric.Name)),
-				fmt.Sprintf("Cloud Foundry firehose '%s' value metric.", valueMetric.Name),
+				prometheus.BuildFQName(c.namespace, value_metrics_subsystem, metricName),
+				fmt.Sprintf("Cloud Foundry Firehose '%s' value metric.", valueMetric.Name),
 				[]string{"origin", "deployment", "job", "index", "ip", "unit"},
 				nil,
 			),
