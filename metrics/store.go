@@ -79,7 +79,7 @@ func (s *Store) expireInternalMetrics() {
 func (s *Store) AddMetric(envelope *events.Envelope) {
 	s.internalMetricsMutex.Lock()
 	s.internalMetrics.TotalEnvelopesReceived++
-	s.internalMetrics.LastReceivedEnvelopTimestamp = time.Now().Unix()
+	s.internalMetrics.LastReceivedEnvelopTimestamp = time.Now().UnixNano()
 	s.internalMetricsMutex.Unlock()
 
 	switch envelope.GetEventType() {
@@ -95,9 +95,9 @@ func (s *Store) AddMetric(envelope *events.Envelope) {
 func (s *Store) addContainerMetric(envelope *events.Envelope) {
 	s.internalMetricsMutex.Lock()
 	s.internalMetrics.TotalMetricsReceived++
-	s.internalMetrics.LastReceivedMetricTimestamp = time.Now().Unix()
+	s.internalMetrics.LastReceivedMetricTimestamp = time.Now().UnixNano()
 	s.internalMetrics.TotalContainerMetricsReceived++
-	s.internalMetrics.LastReceivedContainerMetricTimestamp = time.Now().Unix()
+	s.internalMetrics.LastReceivedContainerMetricTimestamp = time.Now().UnixNano()
 	s.internalMetricsMutex.Unlock()
 
 	s.containerMetricsMutex.Lock()
@@ -137,9 +137,9 @@ func (s *Store) expireContainerMetrics() {
 func (s *Store) addCounterMetric(envelope *events.Envelope) {
 	s.internalMetricsMutex.Lock()
 	s.internalMetrics.TotalMetricsReceived++
-	s.internalMetrics.LastReceivedMetricTimestamp = time.Now().Unix()
+	s.internalMetrics.LastReceivedMetricTimestamp = time.Now().UnixNano()
 	s.internalMetrics.TotalCounterEventsReceived++
-	s.internalMetrics.LastReceivedCounterEventTimestamp = time.Now().Unix()
+	s.internalMetrics.LastReceivedCounterEventTimestamp = time.Now().UnixNano()
 	s.internalMetricsMutex.Unlock()
 
 	s.counterMetricsMutex.Lock()
@@ -175,9 +175,9 @@ func (s *Store) expireCounterMetrics() {
 func (s *Store) addValueMetric(envelope *events.Envelope) {
 	s.internalMetricsMutex.Lock()
 	s.internalMetrics.TotalMetricsReceived++
-	s.internalMetrics.LastReceivedMetricTimestamp = time.Now().Unix()
+	s.internalMetrics.LastReceivedMetricTimestamp = time.Now().UnixNano()
 	s.internalMetrics.TotalValueMetricsReceived++
-	s.internalMetrics.LastReceivedValueMetricTimestamp = time.Now().Unix()
+	s.internalMetrics.LastReceivedValueMetricTimestamp = time.Now().UnixNano()
 	s.internalMetricsMutex.Unlock()
 
 	s.valueMetricsMutex.Lock()
