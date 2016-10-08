@@ -36,7 +36,7 @@ func NewCounterMetricsCollector(
 
 func (c counterMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, counterMetric := range c.metricsStore.GetCounterMetrics() {
-		metricName := counterMetric.Origin + "_total_" + utils.NormalizeName(counterMetric.Name)
+		metricName := utils.NormalizeName(counterMetric.Origin) + "_total_" + utils.NormalizeName(counterMetric.Name)
 		ch <- prometheus.MustNewConstMetric(
 			prometheus.NewDesc(
 				prometheus.BuildFQName(c.namespace, counter_events_subsystem, metricName),
@@ -53,7 +53,7 @@ func (c counterMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			counterMetric.IP,
 		)
 
-		metricName = counterMetric.Origin + "_delta_" + utils.NormalizeName(counterMetric.Name)
+		metricName = utils.NormalizeName(counterMetric.Origin) + "_delta_" + utils.NormalizeName(counterMetric.Name)
 		ch <- prometheus.MustNewConstMetric(
 			prometheus.NewDesc(
 				prometheus.BuildFQName(c.namespace, counter_events_subsystem, metricName),
