@@ -41,7 +41,7 @@ func (c valueMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			prometheus.NewDesc(
 				prometheus.BuildFQName(c.namespace, value_metrics_subsystem, metricName),
 				fmt.Sprintf("Cloud Foundry Firehose '%s' value metric.", valueMetric.Name),
-				[]string{"origin", "deployment", "job", "index", "ip", "unit"},
+				[]string{"origin", "bosh_deployment", "bosh_job", "bosh_index", "bosh_ip", "unit"},
 				nil,
 			),
 			prometheus.GaugeValue,
