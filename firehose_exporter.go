@@ -77,7 +77,7 @@ var (
 )
 
 func init() {
-	prometheus.MustRegister(version.NewCollector("firehose_exporter"))
+	prometheus.MustRegister(version.NewCollector(*metricsNamespace))
 }
 
 func overrideWithEnvVar(name string, value *string) {
@@ -151,7 +151,7 @@ func main() {
 		*skipSSLValidation,
 	)
 	if err != nil {
-		log.Errorf("Error creating uaa client: %s", err.Error())
+		log.Errorf("Error creating UAA client: %s", err.Error())
 		os.Exit(1)
 	}
 
