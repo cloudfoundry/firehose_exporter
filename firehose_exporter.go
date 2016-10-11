@@ -64,8 +64,8 @@ var (
 		"Metrics Namespace ($FIREHOSE_EXPORTER_METRICS_NAMESPACE).",
 	)
 	metricsGarbage = flag.Duration(
-		"metrics.garbage", 1*time.Minute,
-		"How long to run the metrics garbage ($FIREHOSE_EXPORTER_METRICS_GARBAGE_DURATION).",
+		"metrics.garbage", 2*time.Minute,
+		"How long to run the metrics garbage ($FIREHOSE_EXPORTER_METRICS_GARBAGE).",
 	)
 
 	showVersion = flag.Bool(
@@ -98,7 +98,7 @@ func overrideFlagsWithEnvVars() {
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRY", dopplerMetricExpiry)
 	overrideWithEnvBool("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY", skipSSLValidation)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_METRICS_NAMESPACE", metricsNamespace)
-	overrideWithEnvDuration("FIREHOSE_EXPORTER_METRICS_GARBAGE_DURATION", metricsGarbage)
+	overrideWithEnvDuration("FIREHOSE_EXPORTER_METRICS_GARBAGE", metricsGarbage)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS", listenAddress)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH", metricsPath)
 }
