@@ -11,6 +11,7 @@ import (
 type containerMetricsCollector struct {
 	namespace                  string
 	metricsStore               *metrics.Store
+	deploymentsFilter          map[string]struct{}
 	cpuPercentageMetricDesc    *prometheus.Desc
 	memoryBytesMetricDesc      *prometheus.Desc
 	diskBytesMetricDesc        *prometheus.Desc
@@ -21,6 +22,7 @@ type containerMetricsCollector struct {
 func NewContainerMetricsCollector(
 	namespace string,
 	metricsStore *metrics.Store,
+	dopplerDeployments []string,
 ) *containerMetricsCollector {
 	cpuPercentageMetricDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, container_metrics_subsystem, "cpu_percentage"),
@@ -57,9 +59,15 @@ func NewContainerMetricsCollector(
 		nil,
 	)
 
+	deploymentsFilter := map[string]struct{}{}
+	for _, deployment := range dopplerDeployments {
+		deploymentsFilter[deployment] = struct{}{}
+	}
+
 	collector := &containerMetricsCollector{
 		namespace:                  namespace,
 		metricsStore:               metricsStore,
+		deploymentsFilter:          deploymentsFilter,
 		cpuPercentageMetricDesc:    cpuPercentageMetricDesc,
 		memoryBytesMetricDesc:      memoryBytesMetricDesc,
 		diskBytesMetricDesc:        diskBytesMetricDesc,
@@ -71,66 +79,69 @@ func NewContainerMetricsCollector(
 
 func (c containerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, containerMetric := range c.metricsStore.GetContainerMetrics() {
-		ch <- prometheus.MustNewConstMetric(
-			c.cpuPercentageMetricDesc,
-			prometheus.GaugeValue,
-			containerMetric.CpuPercentage,
-			containerMetric.Origin,
-			containerMetric.Deployment,
-			containerMetric.Job,
-			containerMetric.Index,
-			containerMetric.IP,
-			containerMetric.ApplicationId,
-			strconv.Itoa(int(containerMetric.InstanceIndex)),
-		)
-		ch <- prometheus.MustNewConstMetric(
-			c.memoryBytesMetricDesc,
-			prometheus.GaugeValue,
-			float64(containerMetric.MemoryBytes),
-			containerMetric.Origin,
-			containerMetric.Deployment,
-			containerMetric.Job,
-			containerMetric.Index,
-			containerMetric.IP,
-			containerMetric.ApplicationId,
-			strconv.Itoa(int(containerMetric.InstanceIndex)),
-		)
-		ch <- prometheus.MustNewConstMetric(
-			c.diskBytesMetricDesc,
-			prometheus.GaugeValue,
-			float64(containerMetric.DiskBytes),
-			containerMetric.Origin,
-			containerMetric.Deployment,
-			containerMetric.Job,
-			containerMetric.Index,
-			containerMetric.IP,
-			containerMetric.ApplicationId,
-			strconv.Itoa(int(containerMetric.InstanceIndex)),
-		)
-		ch <- prometheus.MustNewConstMetric(
-			c.memoryBytesQuotaMetricDesc,
-			prometheus.GaugeValue,
-			float64(containerMetric.MemoryBytesQuota),
-			containerMetric.Origin,
-			containerMetric.Deployment,
-			containerMetric.Job,
-			containerMetric.Index,
-			containerMetric.IP,
-			containerMetric.ApplicationId,
-			strconv.Itoa(int(containerMetric.InstanceIndex)),
-		)
-		ch <- prometheus.MustNewConstMetric(
-			c.diskBytesQuotaMetricDesc,
-			prometheus.GaugeValue,
-			float64(containerMetric.DiskBytesQuota),
-			containerMetric.Origin,
-			containerMetric.Deployment,
-			containerMetric.Job,
-			containerMetric.Index,
-			containerMetric.IP,
-			containerMetric.ApplicationId,
-			strconv.Itoa(int(containerMetric.InstanceIndex)),
-		)
+		_, ok := c.deploymentsFilter[containerMetric.Deployment]
+		if len(c.deploymentsFilter) == 0 || ok {
+			ch <- prometheus.MustNewConstMetric(
+				c.cpuPercentageMetricDesc,
+				prometheus.GaugeValue,
+				containerMetric.CpuPercentage,
+				containerMetric.Origin,
+				containerMetric.Deployment,
+				containerMetric.Job,
+				containerMetric.Index,
+				containerMetric.IP,
+				containerMetric.ApplicationId,
+				strconv.Itoa(int(containerMetric.InstanceIndex)),
+			)
+			ch <- prometheus.MustNewConstMetric(
+				c.memoryBytesMetricDesc,
+				prometheus.GaugeValue,
+				float64(containerMetric.MemoryBytes),
+				containerMetric.Origin,
+				containerMetric.Deployment,
+				containerMetric.Job,
+				containerMetric.Index,
+				containerMetric.IP,
+				containerMetric.ApplicationId,
+				strconv.Itoa(int(containerMetric.InstanceIndex)),
+			)
+			ch <- prometheus.MustNewConstMetric(
+				c.diskBytesMetricDesc,
+				prometheus.GaugeValue,
+				float64(containerMetric.DiskBytes),
+				containerMetric.Origin,
+				containerMetric.Deployment,
+				containerMetric.Job,
+				containerMetric.Index,
+				containerMetric.IP,
+				containerMetric.ApplicationId,
+				strconv.Itoa(int(containerMetric.InstanceIndex)),
+			)
+			ch <- prometheus.MustNewConstMetric(
+				c.memoryBytesQuotaMetricDesc,
+				prometheus.GaugeValue,
+				float64(containerMetric.MemoryBytesQuota),
+				containerMetric.Origin,
+				containerMetric.Deployment,
+				containerMetric.Job,
+				containerMetric.Index,
+				containerMetric.IP,
+				containerMetric.ApplicationId,
+				strconv.Itoa(int(containerMetric.InstanceIndex)),
+			)
+			ch <- prometheus.MustNewConstMetric(
+				c.diskBytesQuotaMetricDesc,
+				prometheus.GaugeValue,
+				float64(containerMetric.DiskBytesQuota),
+				containerMetric.Origin,
+				containerMetric.Deployment,
+				containerMetric.Job,
+				containerMetric.Index,
+				containerMetric.IP,
+				containerMetric.ApplicationId,
+				strconv.Itoa(int(containerMetric.InstanceIndex)),
+			)
+		}
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -54,6 +55,8 @@ var (
 		"How long a Cloud Foundry Doppler metric is valid ($FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRY).",
 	)
 
+	dopplerDeployments sliceString
+
 	skipSSLValidation = flag.Bool(
 		"skip-ssl-verify", false,
 		"Disable SSL Verify ($FIREHOSE_EXPORTER_SKIP_SSL_VERIFY).",
@@ -63,6 +66,7 @@ var (
 		"metrics.namespace", "firehose_exporter",
 		"Metrics Namespace ($FIREHOSE_EXPORTER_METRICS_NAMESPACE).",
 	)
+
 	metricsGarbage = flag.Duration(
 		"metrics.garbage", 2*time.Minute,
 		"How long to run the metrics garbage ($FIREHOSE_EXPORTER_METRICS_GARBAGE).",
@@ -84,7 +88,24 @@ var (
 	)
 )
 
+type sliceString []string
+
+func (ss *sliceString) String() string {
+	return fmt.Sprint(*ss)
+}
+
+func (ss *sliceString) Set(value string) error {
+	*ss = append(*ss, value)
+
+	return nil
+}
+
 func init() {
+	flag.Var(
+		&dopplerDeployments, "doppler.deployment",
+		"Filter metrics to an specific BOSH deployment (this flag can be specified multiple times)",
+	)
+
 	prometheus.MustRegister(version.NewCollector(*metricsNamespace))
 }
 
@@ -96,6 +117,7 @@ func overrideFlagsWithEnvVars() {
 	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID", dopplerSubscriptionID)
 	overrideWithEnvUint("FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT_SECONDS", dopplerIdleTimeoutSeconds)
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRY", dopplerMetricExpiry)
+	overrideWithEnvSliceString("FIREHOSE_EXPORTER_DOPPLER_DEPLOYMENTS", &dopplerDeployments)
 	overrideWithEnvBool("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY", skipSSLValidation)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_METRICS_NAMESPACE", metricsNamespace)
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_METRICS_GARBAGE", metricsGarbage)
@@ -143,6 +165,15 @@ func overrideWithEnvBool(name string, value *bool) {
 	}
 }
 
+func overrideWithEnvSliceString(name string, value *sliceString) {
+	envValue := os.Getenv(name)
+	if envValue != "" {
+		for _, val := range strings.Split(envValue, ",") {
+			*value = append(*value, val)
+		}
+	}
+}
+
 func main() {
 	flag.Parse()
 	overrideFlagsWithEnvVars()
@@ -184,13 +215,13 @@ func main() {
 	internalMetricsCollector := collectors.NewInternalMetricsCollector(*metricsNamespace, metricsStore)
 	prometheus.MustRegister(internalMetricsCollector)
 
-	containerMetricsCollector := collectors.NewContainerMetricsCollector(*metricsNamespace, metricsStore)
+	containerMetricsCollector := collectors.NewContainerMetricsCollector(*metricsNamespace, metricsStore, dopplerDeployments)
 	prometheus.MustRegister(containerMetricsCollector)
 
-	counterMetricsCollector := collectors.NewCounterMetricsCollector(*metricsNamespace, metricsStore)
+	counterMetricsCollector := collectors.NewCounterMetricsCollector(*metricsNamespace, metricsStore, dopplerDeployments)
 	prometheus.MustRegister(counterMetricsCollector)
 
-	valueMetricsCollector := collectors.NewValueMetricsCollector(*metricsNamespace, metricsStore)
+	valueMetricsCollector := collectors.NewValueMetricsCollector(*metricsNamespace, metricsStore, dopplerDeployments)
 	prometheus.MustRegister(valueMetricsCollector)
 
 	http.Handle(*metricsPath, prometheus.Handler())
