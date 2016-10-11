@@ -19,65 +19,88 @@ import (
 )
 
 var (
-	listenAddress = flag.String(
-		"web.listen-address", ":9186",
-		"Address to listen on for web interface and telemetry.",
+	uaaUrl = flag.String(
+		"uaa.url", "",
+		"Cloud Foundry UAA URL ($FIREHOSE_EXPORTER_UAA_URL).",
 	)
-	metricsPath = flag.String(
-		"web.telemetry-path", "/metrics",
-		"Path under which to expose Prometheus metrics.",
+
+	uaaClientID = flag.String(
+		"uaa.client-id", "",
+		"Cloud Foundry UAA Client ID ($FIREHOSE_EXPORTER_UAA_CLIENT_ID).",
 	)
+
+	uaaClientSecret = flag.String(
+		"uaa.client-secret", "",
+		"Cloud Foundry UAA Client Secret ($FIREHOSE_EXPORTER_UAA_CLIENT_SECRET).",
+	)
+
+	dopplerUrl = flag.String(
+		"doppler.url", "",
+		"Cloud Foundry Doppler URL ($FIREHOSE_EXPORTER_DOPPLER_URL).",
+	)
+
+	dopplerSubscriptionID = flag.String(
+		"doppler.subscription-id", "prometheus",
+		"Cloud Foundry Doppler Subscription ID ($FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID).",
+	)
+
+	dopplerIdleTimeoutSeconds = flag.Uint(
+		"doppler.idle-timeout-seconds", 5,
+		"Cloud Foundry Doppler Idle Timeout in seconds ($FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT_SECONDS).",
+	)
+
+	dopplerMetricExpiry = flag.Duration(
+		"doppler.metric-expiry", 5*time.Minute,
+		"How long a Cloud Foundry Doppler metric is valid ($FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRY).",
+	)
+
+	skipSSLValidation = flag.Bool(
+		"skip-ssl-verify", false,
+		"Disable SSL Verify ($FIREHOSE_EXPORTER_SKIP_SSL_VERIFY).",
+	)
+
 	metricsNamespace = flag.String(
 		"metrics.namespace", "firehose_exporter",
-		"Metrics Namespace.",
+		"Metrics Namespace ($FIREHOSE_EXPORTER_METRICS_NAMESPACE).",
 	)
 	metricsGarbage = flag.Duration(
 		"metrics.garbage", 1*time.Minute,
-		"How long to run the metrics garbage.",
+		"How long to run the metrics garbage ($FIREHOSE_EXPORTER_METRICS_GARBAGE_DURATION).",
 	)
+
 	showVersion = flag.Bool(
 		"version", false,
 		"Print version information.",
 	)
 
-	uaaUrl = flag.String(
-		"uaa.url", "",
-		"Cloud Foundry UAA URL.",
-	)
-	uaaClientID = flag.String(
-		"uaa.client-id", "",
-		"Cloud Foundry UAA Client ID.",
-	)
-	uaaClientSecret = flag.String(
-		"uaa.client-secret", "",
-		"Cloud Foundry UAA Client Secret.",
+	listenAddress = flag.String(
+		"web.listen-address", ":9186",
+		"Address to listen on for web interface and telemetry ($FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS).",
 	)
 
-	dopplerUrl = flag.String(
-		"doppler.url", "",
-		"Cloud Foundry Doppler URL.",
-	)
-	dopplerSubscriptionID = flag.String(
-		"doppler.subscription-id", "prometheus",
-		"Cloud Foundry Doppler Subscription ID.",
-	)
-	dopplerIdleTimeoutSeconds = flag.Uint(
-		"doppler.idle-timeout-seconds", 5,
-		"Cloud Foundry Doppler Idle Timeout (in seconds).",
-	)
-	dopplerMetricExpiry = flag.Duration(
-		"doppler.metric-expiry", 5*time.Minute,
-		"How long a Cloud Foundry Doppler metric is valid.",
-	)
-
-	skipSSLValidation = flag.Bool(
-		"skip-ssl-verify", false,
-		"Disable SSL Verify.",
+	metricsPath = flag.String(
+		"web.telemetry-path", "/metrics",
+		"Path under which to expose Prometheus metrics ($FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH).",
 	)
 )
 
 func init() {
 	prometheus.MustRegister(version.NewCollector(*metricsNamespace))
+}
+
+func overrideFlagsWithEnvVars() {
+	overrideWithEnvVar("FIREHOSE_EXPORTER_UAA_URL", uaaUrl)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_UAA_CLIENT_ID", uaaClientID)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_UAA_CLIENT_SECRET", uaaClientSecret)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_URL", dopplerUrl)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID", dopplerSubscriptionID)
+	overrideWithEnvUint("FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT_SECONDS", dopplerIdleTimeoutSeconds)
+	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRY", dopplerMetricExpiry)
+	overrideWithEnvBool("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY", skipSSLValidation)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_METRICS_NAMESPACE", metricsNamespace)
+	overrideWithEnvDuration("FIREHOSE_EXPORTER_METRICS_GARBAGE_DURATION", metricsGarbage)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS", listenAddress)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH", metricsPath)
 }
 
 func overrideWithEnvVar(name string, value *string) {
@@ -122,6 +145,7 @@ func overrideWithEnvBool(name string, value *bool) {
 
 func main() {
 	flag.Parse()
+	overrideFlagsWithEnvVars()
 
 	if *showVersion {
 		fmt.Fprintln(os.Stdout, version.Print("firehose_exporter"))
@@ -130,19 +154,6 @@ func main() {
 
 	log.Infoln("Starting firehose_exporter", version.Info())
 	log.Infoln("Build context", version.BuildContext())
-
-	overrideWithEnvVar("NOZZLE_WEB_LISTEN_ADDRESS", listenAddress)
-	overrideWithEnvVar("NOZZLE_WEB_TELEMETRY_PATH", metricsPath)
-	overrideWithEnvVar("NOZZLE_METRICS_NAMESPACE", metricsNamespace)
-	overrideWithEnvDuration("NOZZLE_METRICS_GARBAGE", metricsGarbage)
-	overrideWithEnvVar("NOZZLE_UAA_URL", uaaUrl)
-	overrideWithEnvVar("NOZZLE_UAA_CLIENT_ID", uaaClientID)
-	overrideWithEnvVar("NOZZLE_UAA_CLIENT_SECRET", uaaClientSecret)
-	overrideWithEnvVar("NOZZLE_DOPPLER_URL", dopplerUrl)
-	overrideWithEnvVar("NOZZLE_DOPPLER_SUBSCRIPTION_ID", dopplerSubscriptionID)
-	overrideWithEnvUint("NOZZLE_DOPPLER_IDLE_TIMEOUT_SECONDS", dopplerIdleTimeoutSeconds)
-	overrideWithEnvDuration("NOZZLE_DOPPLER_METRIC_EXPIRY", dopplerMetricExpiry)
-	overrideWithEnvBool("NOZZLE_SKIP_SSL_VERIFY", skipSSLValidation)
 
 	authTokenRefresher, err := uaatokenrefresher.New(
 		*uaaUrl,
