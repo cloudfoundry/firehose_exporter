@@ -61,7 +61,7 @@ uaac client add prometheus-firehose \
 | doppler.subscription-id<br />FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID | No | prometheus | Cloud Foundry Doppler Subscription ID
 | doppler.idle-timeout-seconds<br />FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT_SECONDS | No | 5 | Cloud Foundry Doppler Idle Timeout (in seconds)
 | doppler.metric-expiry<br />FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRY | No | 5 minutes | How long a Cloud Foundry Doppler metric is valid
-| bosh.deployment<br />FIREHOSE_EXPORTER_DOPPLER_DEPLOYMENTS | No | | Filter metrics to an specific BOSH deployment (this flag can be specified multiple times)
+| doppler.deployment<br />FIREHOSE_EXPORTER_DOPPLER_DEPLOYMENTS | No | | Filter metrics to an specific BOSH deployment (this flag can be specified multiple times)
 | skip-ssl-verify<br />FIREHOSE_EXPORTER_SKIP_SSL_VERIFY | No | false | Disable SSL Verify |
 | metrics.namespace<br />FIREHOSE_EXPORTER_METRICS_NAMESPACE | No | firehose_exporter | Metrics Namespace
 | metrics.garbage<br />FIREHOSE_EXPORTER_METRICS_GARBAGE | No | 2 minute | How long to run the metrics garbage
