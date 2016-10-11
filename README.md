@@ -2,29 +2,37 @@
 
 A [Prometheus][prometheus] exporter for [Cloud Foundry Firehose][firehose] metrics. It exports `ContainerMetric`, `CounterEvent` and `ValueMetric` events.
 
-## Building and running
+## Installation
+
+### Locally
+
+Using the standard `go install` (you must have [Go][golang] already installed in your local machine):
 
 ```bash
-make
-./firehose_exporter <flags>
+$ go install github.com/cloudfoundry-community/firehose_exporter
+$ firehose_exporter <flags>
 ```
 
-### Flags
+### Cloud Foundry
 
-| Flag / Environment Variable | Required | Default | Description
-| --------------------------- | -------- | ------- | -----------
-| metrics.namespace<br>NOZZLE_METRICS_NAMESPACE | No | firehose_exporter | Metrics Namespace
-| metrics.garbage<br>NOZZLE_METRICS_GARBAGE | No | 1 minute | How long to run the metrics garbage
-| web.listen-address<br>NOZZLE_WEB_LISTEN_ADDRESS | No | :9186 | Address to listen on for web interface and telemetry
-| web.telemetry-path<br>NOZZLE_WEB_TELEMETRY_PATH | No | /metrics | Path under which to expose Prometheus metrics
-| uaa.url<br>NOZZLE_UAA_URL | Yes | | Cloud Foundry UAA URL
-| uaa.client-id<br>NOZZLE_UAA_CLIENT_ID | Yes | | Cloud Foundry UAA Client ID
-| uaa.client-secret<br>NOZZLE_UAA_CLIENT_SECRET | Yes | | Cloud Foundry UAA Client Secret
-| doppler.url<br>NOZZLE_DOPPLER_URL | Yes | | Cloud Foundry Doppler URL
-| doppler.subscription-id<br>NOZZLE_DOPPLER_SUBSCRIPTION_ID | No | prometheus | Cloud Foundry Doppler Subscription ID
-| doppler.idle-timeout-seconds<br>NOZZLE_DOPPLER_IDLE_TIMEOUT_SECONDS | No | 5 | Cloud Foundry Doppler Idle Timeout (in seconds)
-| doppler.metric-expiry<br>NOZZLE_DOPPLER_METRIC_EXPIRY | No | 5 minutes | How long a Cloud Foundry Doppler metric is valid
-| skip-ssl-verify<br>NOZZLE_SKIP_SSL_VERIFY | No | false | Disable SSL Verify |
+The exporter can be deployed to an already existing [Cloud Foundry][cloudfoundry] environment:
+
+```bash
+$ git clone https://github.com/cloudfoundry-community/firehose_exporter.git
+$ cd firehose_exporter
+```
+
+Modify the included [application manifest file][manifest] to include your [Cloud Foundry Firehose][firehose] properties. Then you can push the exporter to your Cloud Foundry environment:
+
+```bash
+$ cf push
+```
+
+### BOSH
+
+This exporter can be deployed using the [Prometheus BOSH Release][prometheus-boshrelease].
+
+## Usage
 
 ### UAA Client
 
@@ -42,22 +50,26 @@ uaac client add prometheus-firehose \
   --authorities doppler.firehose
 ```
 
-## Running tests
+### Flags
 
-```bash
-make test
-```
+| Flag / Environment Variable | Required | Default | Description
+| --------------------------- | -------- | ------- | -----------
+| uaa.url<br />FIREHOSE_EXPORTER_UAA_URL | Yes | | Cloud Foundry UAA URL
+| uaa.client-id<br />FIREHOSE_EXPORTER_UAA_CLIENT_ID | Yes | | Cloud Foundry UAA Client ID
+| uaa.client-secret<br />FIREHOSE_EXPORTER_UAA_CLIENT_SECRET | Yes | | Cloud Foundry UAA Client Secret
+| doppler.url<br />FIREHOSE_EXPORTER_DOPPLER_URL | Yes | | Cloud Foundry Doppler URL
+| doppler.subscription-id<br />FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID | No | prometheus | Cloud Foundry Doppler Subscription ID
+| doppler.idle-timeout-seconds<br />FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT_SECONDS | No | 5 | Cloud Foundry Doppler Idle Timeout (in seconds)
+| doppler.metric-expiry<br />FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRY | No | 5 minutes | How long a Cloud Foundry Doppler metric is valid
+| skip-ssl-verify<br />FIREHOSE_EXPORTER_SKIP_SSL_VERIFY | No | false | Disable SSL Verify |
+| metrics.namespace<br />FIREHOSE_EXPORTER_METRICS_NAMESPACE | No | firehose_exporter | Metrics Namespace
+| metrics.garbage<br />FIREHOSE_EXPORTER_METRICS_GARBAGE | No | 2 minute | How long to run the metrics garbage
+| web.listen-address<br />FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS | No | :9186 | Address to listen on for web interface and telemetry
+| web.telemetry-path<br />FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH | No | /metrics | Path under which to expose Prometheus metrics
 
-## Using Docker
-
-You can deploy this exporter using the [frodenas/firehose-exporter][hub] Docker image. For example:
-
-```bash
-docker pull frodenas/firehose-exporter
-
-docker run -d -p 9186:9186 frodenas/firehose-exporter <flags>
-```
-
+[cloudfoundry]: https://www.cloudfoundry.org/
 [firehose]: https://docs.cloudfoundry.org/loggregator/architecture.html#firehose
-[hub]: https://hub.docker.com/r/frodenas/firehose-exporter/
+[golang]: https://golang.org/
+[manifest]: https://github.com/cloudfoundry-community/firehose_exporter/blob/master/manifest.yml
 [prometheus]: https://prometheus.io/
+[prometheus-boshrelease]: https://github.com/cloudfoundry-community/prometheus-boshrelease
