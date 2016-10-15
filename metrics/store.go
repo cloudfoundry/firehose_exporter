@@ -141,6 +141,10 @@ func (s *Store) GetValueMetrics() ValueMetrics {
 	return valueMetrics
 }
 
+func (s *Store) FlushValueMetrics() {
+	s.valueMetrics.Flush()
+}
+
 func (s *Store) AlertSlowConsumerError() {
 	s.internalMetrics.Set(SlowConsumerAlertKey, true, cache.DefaultExpiration)
 	s.internalMetrics.Set(LastSlowConsumerAlertTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)

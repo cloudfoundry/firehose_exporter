@@ -9,7 +9,7 @@ import (
 	"github.com/cloudfoundry-community/firehose_exporter/utils"
 )
 
-type valueMetricsCollector struct {
+type ValueMetricsCollector struct {
 	namespace                 string
 	metricsStore              *metrics.Store
 	deploymentsFilter         map[string]struct{}
@@ -20,7 +20,7 @@ func NewValueMetricsCollector(
 	namespace string,
 	metricsStore *metrics.Store,
 	dopplerDeployments []string,
-) *valueMetricsCollector {
+) *ValueMetricsCollector {
 	valueMetricsCollectorDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, value_metrics_subsystem, "collector"),
 		"Cloud Foundry Firehose value metrics collector.",
@@ -33,7 +33,7 @@ func NewValueMetricsCollector(
 		deploymentsFilter[deployment] = struct{}{}
 	}
 
-	collector := &valueMetricsCollector{
+	collector := &ValueMetricsCollector{
 		namespace:                 namespace,
 		metricsStore:              metricsStore,
 		deploymentsFilter:         deploymentsFilter,
@@ -42,7 +42,7 @@ func NewValueMetricsCollector(
 	return collector
 }
 
-func (c valueMetricsCollector) Collect(ch chan<- prometheus.Metric) {
+func (c ValueMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, valueMetric := range c.metricsStore.GetValueMetrics() {
 		_, ok := c.deploymentsFilter[valueMetric.Deployment]
 		if len(c.deploymentsFilter) == 0 || ok {
@@ -67,6 +67,6 @@ func (c valueMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 }
 
-func (c valueMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
+func (c ValueMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.valueMetricsCollectorDesc
 }
