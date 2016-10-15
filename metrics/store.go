@@ -131,6 +131,10 @@ func (s *Store) GetCounterMetrics() CounterMetrics {
 	return counterMetrics
 }
 
+func (s *Store) FlushCounterMetrics() {
+	s.counterMetrics.Flush()
+}
+
 func (s *Store) GetValueMetrics() ValueMetrics {
 	valueMetrics := ValueMetrics{}
 	for _, valueMetric := range s.valueMetrics.Items() {

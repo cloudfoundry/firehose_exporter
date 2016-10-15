@@ -9,7 +9,7 @@ import (
 	"github.com/cloudfoundry-community/firehose_exporter/utils"
 )
 
-type counterMetricsCollector struct {
+type CounterMetricsCollector struct {
 	namespace                   string
 	metricsStore                *metrics.Store
 	deploymentsFilter           map[string]struct{}
@@ -20,7 +20,7 @@ func NewCounterMetricsCollector(
 	namespace string,
 	metricsStore *metrics.Store,
 	dopplerDeployments []string,
-) *counterMetricsCollector {
+) *CounterMetricsCollector {
 	counterMetricsCollectorDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, counter_events_subsystem, "collector"),
 		"Cloud Foundry Firehose counter metrics collector.",
@@ -33,7 +33,7 @@ func NewCounterMetricsCollector(
 		deploymentsFilter[deployment] = struct{}{}
 	}
 
-	collector := &counterMetricsCollector{
+	collector := &CounterMetricsCollector{
 		namespace:                   namespace,
 		metricsStore:                metricsStore,
 		deploymentsFilter:           deploymentsFilter,
@@ -42,7 +42,7 @@ func NewCounterMetricsCollector(
 	return collector
 }
 
-func (c counterMetricsCollector) Collect(ch chan<- prometheus.Metric) {
+func (c CounterMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, counterMetric := range c.metricsStore.GetCounterMetrics() {
 		_, ok := c.deploymentsFilter[counterMetric.Deployment]
 		if len(c.deploymentsFilter) == 0 || ok {
@@ -83,6 +83,6 @@ func (c counterMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 }
 
-func (c counterMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
+func (c CounterMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.counterMetricsCollectorDesc
 }
