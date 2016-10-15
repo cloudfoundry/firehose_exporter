@@ -2,85 +2,153 @@ package metrics
 
 import (
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/cloudfoundry/sonde-go/events"
+	"github.com/patrickmn/go-cache"
 )
 
 type Store struct {
-	metricsGarbage        time.Duration
-	metricsExpiry         time.Duration
-	internalMetrics       InternalMetrics
-	internalMetricsMutex  sync.Mutex
-	containerMetrics      ContainerMetrics
-	containerMetricsMutex sync.Mutex
-	counterMetrics        CounterMetrics
-	counterMetricsMutex   sync.Mutex
-	valueMetrics          ValueMetrics
-	valueMetricsMutex     sync.Mutex
+	metricsGarbage   time.Duration
+	metricsExpiry    time.Duration
+	internalMetrics  *cache.Cache
+	containerMetrics *cache.Cache
+	counterMetrics   *cache.Cache
+	valueMetrics     *cache.Cache
 }
 
 func NewStore(
 	metricsGarbage time.Duration,
 	metricsExpiry time.Duration,
 ) *Store {
+	internalMetrics := cache.New(metricsExpiry, metricsGarbage)
+	internalMetrics.Set(TotalEnvelopesReceivedKey, int64(0), cache.NoExpiration)
+	internalMetrics.Set(LastEnvelopReceivedTimestampKey, int64(0), cache.NoExpiration)
+	internalMetrics.Set(TotalMetricsReceivedKey, int64(0), cache.NoExpiration)
+	internalMetrics.Set(LastMetricReceivedTimestampKey, int64(0), cache.NoExpiration)
+	internalMetrics.Set(TotalContainerMetricsReceivedKey, int64(0), cache.NoExpiration)
+	internalMetrics.Set(LastContainerMetricReceivedTimestampKey, int64(0), cache.NoExpiration)
+	internalMetrics.Set(TotalCounterEventsReceivedKey, int64(0), cache.NoExpiration)
+	internalMetrics.Set(LastCounterEventReceivedTimestampKey, int64(0), cache.NoExpiration)
+	internalMetrics.Set(TotalValueMetricsReceivedKey, int64(0), cache.NoExpiration)
+	internalMetrics.Set(LastValueMetricReceivedTimestampKey, int64(0), cache.NoExpiration)
+	internalMetrics.Set(SlowConsumerAlertKey, false, cache.DefaultExpiration)
+	internalMetrics.Set(LastSlowConsumerAlertTimestampKey, int64(0), cache.NoExpiration)
+
+	containerMetrics := cache.New(metricsExpiry, metricsGarbage)
+	counterMetrics := cache.New(metricsExpiry, metricsGarbage)
+	valueMetrics := cache.New(metricsExpiry, metricsGarbage)
+
 	return &Store{
 		metricsGarbage:   metricsGarbage,
 		metricsExpiry:    metricsExpiry,
-		internalMetrics:  InternalMetrics{},
-		containerMetrics: make(map[string]ContainerMetric),
-		counterMetrics:   make(map[string]CounterMetric),
-		valueMetrics:     make(map[string]ValueMetric),
-	}
-}
-
-func (s *Store) Start() {
-	ticker := time.NewTicker(s.metricsGarbage).C
-	for {
-		select {
-		case <-ticker:
-			s.expireInternalMetrics()
-			s.expireContainerMetrics()
-			s.expireCounterMetrics()
-			s.expireValueMetrics()
-		}
+		internalMetrics:  internalMetrics,
+		containerMetrics: containerMetrics,
+		counterMetrics:   counterMetrics,
+		valueMetrics:     valueMetrics,
 	}
 }
 
 func (s *Store) GetInternalMetrics() InternalMetrics {
-	return s.internalMetrics
+	internalMetrics := InternalMetrics{}
+
+	totalEnvelopesReceived, ok := s.internalMetrics.Get(TotalEnvelopesReceivedKey)
+	if ok {
+		internalMetrics.TotalEnvelopesReceived = totalEnvelopesReceived.(int64)
+	}
+	lastEnvelopReceivedTimestamp, ok := s.internalMetrics.Get(LastEnvelopReceivedTimestampKey)
+	if ok {
+		internalMetrics.LastEnvelopReceivedTimestamp = lastEnvelopReceivedTimestamp.(int64)
+	}
+
+	totalMetricsReceived, ok := s.internalMetrics.Get(TotalMetricsReceivedKey)
+	if ok {
+		internalMetrics.TotalMetricsReceived = totalMetricsReceived.(int64)
+	}
+	lastMetricReceivedTimestamp, ok := s.internalMetrics.Get(LastMetricReceivedTimestampKey)
+	if ok {
+		internalMetrics.LastMetricReceivedTimestamp = lastMetricReceivedTimestamp.(int64)
+	}
+
+	totalContainerMetricsReceived, ok := s.internalMetrics.Get(TotalContainerMetricsReceivedKey)
+	if ok {
+		internalMetrics.TotalContainerMetricsReceived = totalContainerMetricsReceived.(int64)
+	}
+	lastContainerMetricReceivedTimestamp, ok := s.internalMetrics.Get(LastContainerMetricReceivedTimestampKey)
+	if ok {
+		internalMetrics.LastContainerMetricReceivedTimestamp = lastContainerMetricReceivedTimestamp.(int64)
+	}
+
+	totalCounterEventsReceived, ok := s.internalMetrics.Get(TotalCounterEventsReceivedKey)
+	if ok {
+		internalMetrics.TotalCounterEventsReceived = totalCounterEventsReceived.(int64)
+	}
+	lastCounterEventReceivedTimestamp, ok := s.internalMetrics.Get(LastCounterEventReceivedTimestampKey)
+	if ok {
+		internalMetrics.LastCounterEventReceivedTimestamp = lastCounterEventReceivedTimestamp.(int64)
+	}
+
+	totalValueMetricsReceived, ok := s.internalMetrics.Get(TotalValueMetricsReceivedKey)
+	if ok {
+		internalMetrics.TotalValueMetricsReceived = totalValueMetricsReceived.(int64)
+	}
+	lastValueMetricReceivedTimestamp, ok := s.internalMetrics.Get(LastValueMetricReceivedTimestampKey)
+	if ok {
+		internalMetrics.LastValueMetricReceivedTimestamp = lastValueMetricReceivedTimestamp.(int64)
+	}
+
+	slowConsumerAlert, ok := s.internalMetrics.Get(SlowConsumerAlertKey)
+	if ok {
+		internalMetrics.SlowConsumerAlert = slowConsumerAlert.(bool)
+	} else {
+		internalMetrics.SlowConsumerAlert = false
+	}
+	lastSlowConsumerAlertTimestamp, ok := s.internalMetrics.Get(LastSlowConsumerAlertTimestampKey)
+	if ok {
+		internalMetrics.LastSlowConsumerAlertTimestamp = lastSlowConsumerAlertTimestamp.(int64)
+	}
+
+	return internalMetrics
 }
 
 func (s *Store) GetContainerMetrics() ContainerMetrics {
-	return s.containerMetrics
+	containerMetrics := ContainerMetrics{}
+	for _, containerMetric := range s.containerMetrics.Items() {
+		if !containerMetric.Expired() {
+			containerMetrics = append(containerMetrics, containerMetric.Object.(ContainerMetric))
+		}
+	}
+	return containerMetrics
 }
 
 func (s *Store) GetCounterMetrics() CounterMetrics {
-	return s.counterMetrics
+	counterMetrics := CounterMetrics{}
+	for _, counterMetric := range s.counterMetrics.Items() {
+		if !counterMetric.Expired() {
+			counterMetrics = append(counterMetrics, counterMetric.Object.(CounterMetric))
+		}
+	}
+	return counterMetrics
 }
 
 func (s *Store) GetValueMetrics() ValueMetrics {
-	return s.valueMetrics
+	valueMetrics := ValueMetrics{}
+	for _, valueMetric := range s.valueMetrics.Items() {
+		if !valueMetric.Expired() {
+			valueMetrics = append(valueMetrics, valueMetric.Object.(ValueMetric))
+		}
+	}
+	return valueMetrics
 }
 
 func (s *Store) AlertSlowConsumerError() {
-	s.internalMetricsMutex.Lock()
-	s.internalMetrics.SlowConsumerAlert = true
-	s.internalMetricsMutex.Unlock()
-}
-
-func (s *Store) expireInternalMetrics() {
-	s.internalMetricsMutex.Lock()
-	s.internalMetrics.SlowConsumerAlert = false
-	s.internalMetricsMutex.Unlock()
+	s.internalMetrics.Set(SlowConsumerAlertKey, true, cache.DefaultExpiration)
+	s.internalMetrics.Set(LastSlowConsumerAlertTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
 }
 
 func (s *Store) AddMetric(envelope *events.Envelope) {
-	s.internalMetricsMutex.Lock()
-	s.internalMetrics.TotalEnvelopesReceived++
-	s.internalMetrics.LastReceivedEnvelopTimestamp = time.Now().UnixNano()
-	s.internalMetricsMutex.Unlock()
+	s.internalMetrics.IncrementInt64(TotalEnvelopesReceivedKey, 1)
+	s.internalMetrics.Set(LastEnvelopReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
 
 	switch envelope.GetEventType() {
 	case events.Envelope_ContainerMetric:
@@ -93,14 +161,11 @@ func (s *Store) AddMetric(envelope *events.Envelope) {
 }
 
 func (s *Store) addContainerMetric(envelope *events.Envelope) {
-	s.internalMetricsMutex.Lock()
-	s.internalMetrics.TotalMetricsReceived++
-	s.internalMetrics.LastReceivedMetricTimestamp = time.Now().UnixNano()
-	s.internalMetrics.TotalContainerMetricsReceived++
-	s.internalMetrics.LastReceivedContainerMetricTimestamp = time.Now().UnixNano()
-	s.internalMetricsMutex.Unlock()
+	s.internalMetrics.IncrementInt64(TotalMetricsReceivedKey, 1)
+	s.internalMetrics.Set(LastMetricReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
+	s.internalMetrics.IncrementInt64(TotalContainerMetricsReceivedKey, 1)
+	s.internalMetrics.Set(LastContainerMetricReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
 
-	s.containerMetricsMutex.Lock()
 	containerMetric := ContainerMetric{
 		Origin:           envelope.GetOrigin(),
 		Timestamp:        envelope.GetTimestamp(),
@@ -117,32 +182,16 @@ func (s *Store) addContainerMetric(envelope *events.Envelope) {
 		MemoryBytesQuota: envelope.GetContainerMetric().GetMemoryBytesQuota(),
 		DiskBytesQuota:   envelope.GetContainerMetric().GetDiskBytesQuota(),
 	}
-	containerKey := envelope.GetContainerMetric().GetApplicationId() + strconv.Itoa(int(containerMetric.InstanceIndex))
-	s.containerMetrics[containerKey] = containerMetric
-	s.containerMetricsMutex.Unlock()
-}
-
-func (s *Store) expireContainerMetrics() {
-	s.containerMetricsMutex.Lock()
-	now := time.Now()
-	for k, containerMetric := range s.containerMetrics {
-		validUntil := time.Unix(containerMetric.Timestamp, 0).Add(s.metricsExpiry)
-		if validUntil.Before(now) {
-			delete(s.containerMetrics, k)
-		}
-	}
-	s.containerMetricsMutex.Unlock()
+	containerMetricKey := envelope.GetContainerMetric().GetApplicationId() + strconv.Itoa(int(containerMetric.InstanceIndex))
+	s.containerMetrics.Set(containerMetricKey, containerMetric, cache.DefaultExpiration)
 }
 
 func (s *Store) addCounterMetric(envelope *events.Envelope) {
-	s.internalMetricsMutex.Lock()
-	s.internalMetrics.TotalMetricsReceived++
-	s.internalMetrics.LastReceivedMetricTimestamp = time.Now().UnixNano()
-	s.internalMetrics.TotalCounterEventsReceived++
-	s.internalMetrics.LastReceivedCounterEventTimestamp = time.Now().UnixNano()
-	s.internalMetricsMutex.Unlock()
+	s.internalMetrics.IncrementInt64(TotalMetricsReceivedKey, 1)
+	s.internalMetrics.Set(LastMetricReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
+	s.internalMetrics.IncrementInt64(TotalCounterEventsReceivedKey, 1)
+	s.internalMetrics.Set(LastCounterEventReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
 
-	s.counterMetricsMutex.Lock()
 	counterMetric := CounterMetric{
 		Origin:     envelope.GetOrigin(),
 		Timestamp:  envelope.GetTimestamp(),
@@ -155,32 +204,16 @@ func (s *Store) addCounterMetric(envelope *events.Envelope) {
 		Delta:      envelope.GetCounterEvent().GetDelta(),
 		Total:      envelope.GetCounterEvent().GetTotal(),
 	}
-	counterKey := envelope.GetCounterEvent().GetName()
-	s.counterMetrics[counterKey] = counterMetric
-	s.counterMetricsMutex.Unlock()
-}
-
-func (s *Store) expireCounterMetrics() {
-	s.counterMetricsMutex.Lock()
-	now := time.Now()
-	for k, counterMetric := range s.counterMetrics {
-		validUntil := time.Unix(counterMetric.Timestamp, 0).Add(s.metricsExpiry)
-		if validUntil.Before(now) {
-			delete(s.counterMetrics, k)
-		}
-	}
-	s.counterMetricsMutex.Unlock()
+	counterMetricKey := envelope.GetOrigin() + envelope.GetCounterEvent().GetName()
+	s.counterMetrics.Set(counterMetricKey, counterMetric, cache.DefaultExpiration)
 }
 
 func (s *Store) addValueMetric(envelope *events.Envelope) {
-	s.internalMetricsMutex.Lock()
-	s.internalMetrics.TotalMetricsReceived++
-	s.internalMetrics.LastReceivedMetricTimestamp = time.Now().UnixNano()
-	s.internalMetrics.TotalValueMetricsReceived++
-	s.internalMetrics.LastReceivedValueMetricTimestamp = time.Now().UnixNano()
-	s.internalMetricsMutex.Unlock()
+	s.internalMetrics.IncrementInt64(TotalMetricsReceivedKey, 1)
+	s.internalMetrics.Set(LastMetricReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
+	s.internalMetrics.IncrementInt64(TotalValueMetricsReceivedKey, 1)
+	s.internalMetrics.Set(LastValueMetricReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
 
-	s.valueMetricsMutex.Lock()
 	valueMetric := ValueMetric{
 		Origin:     envelope.GetOrigin(),
 		Timestamp:  envelope.GetTimestamp(),
@@ -193,19 +226,6 @@ func (s *Store) addValueMetric(envelope *events.Envelope) {
 		Value:      envelope.GetValueMetric().GetValue(),
 		Unit:       envelope.GetValueMetric().GetUnit(),
 	}
-	valueKey := envelope.GetValueMetric().GetName()
-	s.valueMetrics[valueKey] = valueMetric
-	s.valueMetricsMutex.Unlock()
-}
-
-func (s *Store) expireValueMetrics() {
-	s.valueMetricsMutex.Lock()
-	now := time.Now()
-	for k, valueMetric := range s.valueMetrics {
-		validUntil := time.Unix(valueMetric.Timestamp, 0).Add(s.metricsExpiry)
-		if validUntil.Before(now) {
-			delete(s.valueMetrics, k)
-		}
-	}
-	s.valueMetricsMutex.Unlock()
+	valueMetricKey := envelope.GetOrigin() + envelope.GetValueMetric().GetName()
+	s.valueMetrics.Set(valueMetricKey, valueMetric, cache.DefaultExpiration)
 }

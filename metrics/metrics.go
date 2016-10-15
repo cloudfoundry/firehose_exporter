@@ -1,20 +1,36 @@
 package metrics
 
+const (
+	TotalEnvelopesReceivedKey               = "TotalEnvelopesReceived"
+	LastEnvelopReceivedTimestampKey         = "LastEnvelopReceivedTimestamp"
+	TotalMetricsReceivedKey                 = "TotalMetricsReceived"
+	LastMetricReceivedTimestampKey          = "LastMetricReceivedTimestamp"
+	TotalContainerMetricsReceivedKey        = "TotalContainerMetricsReceived"
+	LastContainerMetricReceivedTimestampKey = "LastContainerMetricReceivedTimestamp"
+	TotalCounterEventsReceivedKey           = "TotalCounterEventsReceived"
+	LastCounterEventReceivedTimestampKey    = "LastCounterEventReceivedTimestamp"
+	TotalValueMetricsReceivedKey            = "TotalValueMetricsReceived"
+	LastValueMetricReceivedTimestampKey     = "LastValueMetricReceivedTimestamp"
+	SlowConsumerAlertKey                    = "SlowConsumerAlert"
+	LastSlowConsumerAlertTimestampKey       = "LastSlowConsumerAlertTimestamp"
+)
+
 type InternalMetrics struct {
-	TotalEnvelopesReceived               float64
-	LastReceivedEnvelopTimestamp         int64
-	TotalMetricsReceived                 float64
-	LastReceivedMetricTimestamp          int64
-	TotalContainerMetricsReceived        float64
-	LastReceivedContainerMetricTimestamp int64
-	TotalCounterEventsReceived           float64
-	LastReceivedCounterEventTimestamp    int64
-	TotalValueMetricsReceived            float64
-	LastReceivedValueMetricTimestamp     int64
+	TotalEnvelopesReceived               int64
+	LastEnvelopReceivedTimestamp         int64
+	TotalMetricsReceived                 int64
+	LastMetricReceivedTimestamp          int64
+	TotalContainerMetricsReceived        int64
+	LastContainerMetricReceivedTimestamp int64
+	TotalCounterEventsReceived           int64
+	LastCounterEventReceivedTimestamp    int64
+	TotalValueMetricsReceived            int64
+	LastValueMetricReceivedTimestamp     int64
 	SlowConsumerAlert                    bool
+	LastSlowConsumerAlertTimestamp       int64
 }
 
-type ContainerMetrics map[string]ContainerMetric
+type ContainerMetrics []ContainerMetric
 
 type ContainerMetric struct {
 	Origin           string
@@ -33,7 +49,7 @@ type ContainerMetric struct {
 	DiskBytesQuota   uint64
 }
 
-type CounterMetrics map[string]CounterMetric
+type CounterMetrics []CounterMetric
 
 type CounterMetric struct {
 	Origin     string
@@ -48,7 +64,7 @@ type CounterMetric struct {
 	Total      uint64
 }
 
-type ValueMetrics map[string]ValueMetric
+type ValueMetrics []ValueMetric
 
 type ValueMetric struct {
 	Origin     string

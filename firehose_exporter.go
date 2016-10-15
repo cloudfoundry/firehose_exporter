@@ -198,7 +198,6 @@ func main() {
 	}
 
 	metricsStore := metrics.NewStore(*metricsGarbage, *dopplerMetricExpiry)
-	go metricsStore.Start()
 
 	nozzle := firehosenozzle.New(
 		*dopplerUrl,
