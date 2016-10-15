@@ -60,11 +60,11 @@ uaac client add prometheus-firehose \
 | doppler.url<br />FIREHOSE_EXPORTER_DOPPLER_URL | Yes | | Cloud Foundry Doppler URL
 | doppler.subscription-id<br />FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID | No | prometheus | Cloud Foundry Doppler Subscription ID
 | doppler.idle-timeout-seconds<br />FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT_SECONDS | No | 5 | Cloud Foundry Doppler Idle Timeout (in seconds)
-| doppler.metric-expiry<br />FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRY | No | 5 minutes | How long a Cloud Foundry Doppler metric is valid
+| doppler.metric-expiration<br />FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION | No | 5 minutes | How long a Cloud Foundry Doppler metric is valid
 | doppler.deployment<br />FIREHOSE_EXPORTER_DOPPLER_DEPLOYMENTS | No | | Filter metrics to an specific BOSH deployment (this flag can be specified multiple times)
 | skip-ssl-verify<br />FIREHOSE_EXPORTER_SKIP_SSL_VERIFY | No | false | Disable SSL Verify |
 | metrics.namespace<br />FIREHOSE_EXPORTER_METRICS_NAMESPACE | No | firehose_exporter | Metrics Namespace
-| metrics.garbage<br />FIREHOSE_EXPORTER_METRICS_GARBAGE | No | 2 minute | How long to run the metrics garbage
+| metrics.cleanup-interval<br />FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL | No | 2 minutes | Metrics clean up interval
 | web.listen-address<br />FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS | No | :9186 | Address to listen on for web interface and telemetry
 | web.telemetry-path<br />FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH | No | /metrics | Path under which to expose Prometheus metrics
 

@@ -50,9 +50,9 @@ var (
 		"Cloud Foundry Doppler Idle Timeout in seconds ($FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT_SECONDS).",
 	)
 
-	dopplerMetricExpiry = flag.Duration(
-		"doppler.metric-expiry", 5*time.Minute,
-		"How long a Cloud Foundry Doppler metric is valid ($FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRY).",
+	dopplerMetricExpiration = flag.Duration(
+		"doppler.metric-expiration", 5*time.Minute,
+		"How long a Cloud Foundry Doppler metric is valid ($FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION).",
 	)
 
 	dopplerDeployments sliceString
@@ -67,9 +67,9 @@ var (
 		"Metrics Namespace ($FIREHOSE_EXPORTER_METRICS_NAMESPACE).",
 	)
 
-	metricsGarbage = flag.Duration(
-		"metrics.garbage", 2*time.Minute,
-		"How long to run the metrics garbage ($FIREHOSE_EXPORTER_METRICS_GARBAGE).",
+	metricsCleanupInterval = flag.Duration(
+		"metrics.cleanup-interval", 2*time.Minute,
+		"Metrics clean up interval ($FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL).",
 	)
 
 	showVersion = flag.Bool(
@@ -116,11 +116,11 @@ func overrideFlagsWithEnvVars() {
 	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_URL", dopplerUrl)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID", dopplerSubscriptionID)
 	overrideWithEnvUint("FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT_SECONDS", dopplerIdleTimeoutSeconds)
-	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRY", dopplerMetricExpiry)
+	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION", dopplerMetricExpiration)
 	overrideWithEnvSliceString("FIREHOSE_EXPORTER_DOPPLER_DEPLOYMENTS", &dopplerDeployments)
 	overrideWithEnvBool("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY", skipSSLValidation)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_METRICS_NAMESPACE", metricsNamespace)
-	overrideWithEnvDuration("FIREHOSE_EXPORTER_METRICS_GARBAGE", metricsGarbage)
+	overrideWithEnvDuration("FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL", metricsCleanupInterval)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS", listenAddress)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH", metricsPath)
 }
@@ -197,7 +197,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	metricsStore := metrics.NewStore(*metricsGarbage, *dopplerMetricExpiry)
+	metricsStore := metrics.NewStore(*dopplerMetricExpiration, *metricsCleanupInterval)
 
 	nozzle := firehosenozzle.New(
 		*dopplerUrl,

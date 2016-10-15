@@ -9,19 +9,19 @@ import (
 )
 
 type Store struct {
-	metricsGarbage   time.Duration
-	metricsExpiry    time.Duration
-	internalMetrics  *cache.Cache
-	containerMetrics *cache.Cache
-	counterMetrics   *cache.Cache
-	valueMetrics     *cache.Cache
+	metricsExpiration      time.Duration
+	metricsCleanupInterval time.Duration
+	internalMetrics        *cache.Cache
+	containerMetrics       *cache.Cache
+	counterMetrics         *cache.Cache
+	valueMetrics           *cache.Cache
 }
 
 func NewStore(
-	metricsGarbage time.Duration,
-	metricsExpiry time.Duration,
+	metricsExpiration time.Duration,
+	metricsCleanupInterval time.Duration,
 ) *Store {
-	internalMetrics := cache.New(metricsExpiry, metricsGarbage)
+	internalMetrics := cache.New(metricsExpiration, metricsCleanupInterval)
 	internalMetrics.Set(TotalEnvelopesReceivedKey, int64(0), cache.NoExpiration)
 	internalMetrics.Set(LastEnvelopReceivedTimestampKey, int64(0), cache.NoExpiration)
 	internalMetrics.Set(TotalMetricsReceivedKey, int64(0), cache.NoExpiration)
@@ -35,17 +35,17 @@ func NewStore(
 	internalMetrics.Set(SlowConsumerAlertKey, false, cache.DefaultExpiration)
 	internalMetrics.Set(LastSlowConsumerAlertTimestampKey, int64(0), cache.NoExpiration)
 
-	containerMetrics := cache.New(metricsExpiry, metricsGarbage)
-	counterMetrics := cache.New(metricsExpiry, metricsGarbage)
-	valueMetrics := cache.New(metricsExpiry, metricsGarbage)
+	containerMetrics := cache.New(metricsExpiration, metricsCleanupInterval)
+	counterMetrics := cache.New(metricsExpiration, metricsCleanupInterval)
+	valueMetrics := cache.New(metricsExpiration, metricsCleanupInterval)
 
 	return &Store{
-		metricsGarbage:   metricsGarbage,
-		metricsExpiry:    metricsExpiry,
-		internalMetrics:  internalMetrics,
-		containerMetrics: containerMetrics,
-		counterMetrics:   counterMetrics,
-		valueMetrics:     valueMetrics,
+		metricsExpiration:      metricsExpiration,
+		metricsCleanupInterval: metricsCleanupInterval,
+		internalMetrics:        internalMetrics,
+		containerMetrics:       containerMetrics,
+		counterMetrics:         counterMetrics,
+		valueMetrics:           valueMetrics,
 	}
 }
 
