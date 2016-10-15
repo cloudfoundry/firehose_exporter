@@ -70,6 +70,11 @@
 			"Rev": "c12348ce28de40eed0136aa2b644d0ee0650e56c"
 		},
 		{
+			"ImportPath": "github.com/patrickmn/go-cache",
+			"Comment": "v2.0.0",
+			"Rev": "1881a9bccb818787f68c52bfba648c6cf34c34fa"
+		},
+		{
 			"ImportPath": "github.com/prometheus/client_golang/prometheus",
 			"Comment": "v0.8.0-5-g8aae34f",
 			"Rev": "8aae34f3ffc9a93c75efeaad87bb192aa7750900"
