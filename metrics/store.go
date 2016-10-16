@@ -22,24 +22,11 @@ func NewStore(
 	metricsCleanupInterval time.Duration,
 ) *Store {
 	internalMetrics := cache.New(metricsExpiration, metricsCleanupInterval)
-	internalMetrics.Set(TotalEnvelopesReceivedKey, int64(0), cache.NoExpiration)
-	internalMetrics.Set(LastEnvelopReceivedTimestampKey, int64(0), cache.NoExpiration)
-	internalMetrics.Set(TotalMetricsReceivedKey, int64(0), cache.NoExpiration)
-	internalMetrics.Set(LastMetricReceivedTimestampKey, int64(0), cache.NoExpiration)
-	internalMetrics.Set(TotalContainerMetricsReceivedKey, int64(0), cache.NoExpiration)
-	internalMetrics.Set(LastContainerMetricReceivedTimestampKey, int64(0), cache.NoExpiration)
-	internalMetrics.Set(TotalCounterEventsReceivedKey, int64(0), cache.NoExpiration)
-	internalMetrics.Set(LastCounterEventReceivedTimestampKey, int64(0), cache.NoExpiration)
-	internalMetrics.Set(TotalValueMetricsReceivedKey, int64(0), cache.NoExpiration)
-	internalMetrics.Set(LastValueMetricReceivedTimestampKey, int64(0), cache.NoExpiration)
-	internalMetrics.Set(SlowConsumerAlertKey, false, cache.DefaultExpiration)
-	internalMetrics.Set(LastSlowConsumerAlertTimestampKey, int64(0), cache.NoExpiration)
-
 	containerMetrics := cache.New(metricsExpiration, metricsCleanupInterval)
 	counterEvents := cache.New(metricsExpiration, metricsCleanupInterval)
 	valueMetrics := cache.New(metricsExpiration, metricsCleanupInterval)
 
-	return &Store{
+	store := &Store{
 		metricsExpiration:      metricsExpiration,
 		metricsCleanupInterval: metricsCleanupInterval,
 		internalMetrics:        internalMetrics,
@@ -47,68 +34,74 @@ func NewStore(
 		counterEvents:          counterEvents,
 		valueMetrics:           valueMetrics,
 	}
+	store.SetInternalMetrics(InternalMetrics{})
+
+	return store
 }
 
 func (s *Store) GetInternalMetrics() InternalMetrics {
 	internalMetrics := InternalMetrics{}
 
-	totalEnvelopesReceived, ok := s.internalMetrics.Get(TotalEnvelopesReceivedKey)
-	if ok {
+	if totalEnvelopesReceived, ok := s.internalMetrics.Get(TotalEnvelopesReceivedKey); ok {
 		internalMetrics.TotalEnvelopesReceived = totalEnvelopesReceived.(int64)
 	}
-	lastEnvelopReceivedTimestamp, ok := s.internalMetrics.Get(LastEnvelopReceivedTimestampKey)
-	if ok {
+	if lastEnvelopReceivedTimestamp, ok := s.internalMetrics.Get(LastEnvelopReceivedTimestampKey); ok {
 		internalMetrics.LastEnvelopReceivedTimestamp = lastEnvelopReceivedTimestamp.(int64)
 	}
 
-	totalMetricsReceived, ok := s.internalMetrics.Get(TotalMetricsReceivedKey)
-	if ok {
+	if totalMetricsReceived, ok := s.internalMetrics.Get(TotalMetricsReceivedKey); ok {
 		internalMetrics.TotalMetricsReceived = totalMetricsReceived.(int64)
 	}
-	lastMetricReceivedTimestamp, ok := s.internalMetrics.Get(LastMetricReceivedTimestampKey)
-	if ok {
+	if lastMetricReceivedTimestamp, ok := s.internalMetrics.Get(LastMetricReceivedTimestampKey); ok {
 		internalMetrics.LastMetricReceivedTimestamp = lastMetricReceivedTimestamp.(int64)
 	}
 
-	totalContainerMetricsReceived, ok := s.internalMetrics.Get(TotalContainerMetricsReceivedKey)
-	if ok {
+	if totalContainerMetricsReceived, ok := s.internalMetrics.Get(TotalContainerMetricsReceivedKey); ok {
 		internalMetrics.TotalContainerMetricsReceived = totalContainerMetricsReceived.(int64)
 	}
-	lastContainerMetricReceivedTimestamp, ok := s.internalMetrics.Get(LastContainerMetricReceivedTimestampKey)
-	if ok {
+	if lastContainerMetricReceivedTimestamp, ok := s.internalMetrics.Get(LastContainerMetricReceivedTimestampKey); ok {
 		internalMetrics.LastContainerMetricReceivedTimestamp = lastContainerMetricReceivedTimestamp.(int64)
 	}
 
-	totalCounterEventsReceived, ok := s.internalMetrics.Get(TotalCounterEventsReceivedKey)
-	if ok {
+	if totalCounterEventsReceived, ok := s.internalMetrics.Get(TotalCounterEventsReceivedKey); ok {
 		internalMetrics.TotalCounterEventsReceived = totalCounterEventsReceived.(int64)
 	}
-	lastCounterEventReceivedTimestamp, ok := s.internalMetrics.Get(LastCounterEventReceivedTimestampKey)
-	if ok {
+	if lastCounterEventReceivedTimestamp, ok := s.internalMetrics.Get(LastCounterEventReceivedTimestampKey); ok {
 		internalMetrics.LastCounterEventReceivedTimestamp = lastCounterEventReceivedTimestamp.(int64)
 	}
 
-	totalValueMetricsReceived, ok := s.internalMetrics.Get(TotalValueMetricsReceivedKey)
-	if ok {
+	if totalValueMetricsReceived, ok := s.internalMetrics.Get(TotalValueMetricsReceivedKey); ok {
 		internalMetrics.TotalValueMetricsReceived = totalValueMetricsReceived.(int64)
 	}
-	lastValueMetricReceivedTimestamp, ok := s.internalMetrics.Get(LastValueMetricReceivedTimestampKey)
-	if ok {
+	if lastValueMetricReceivedTimestamp, ok := s.internalMetrics.Get(LastValueMetricReceivedTimestampKey); ok {
 		internalMetrics.LastValueMetricReceivedTimestamp = lastValueMetricReceivedTimestamp.(int64)
 	}
 
-	slowConsumerAlert, ok := s.internalMetrics.Get(SlowConsumerAlertKey)
-	if ok {
+	if slowConsumerAlert, ok := s.internalMetrics.Get(SlowConsumerAlertKey); ok {
 		internalMetrics.SlowConsumerAlert = slowConsumerAlert.(bool)
 	} else {
 		internalMetrics.SlowConsumerAlert = false
 	}
-	lastSlowConsumerAlertTimestamp, ok := s.internalMetrics.Get(LastSlowConsumerAlertTimestampKey)
-	if ok {
+	if lastSlowConsumerAlertTimestamp, ok := s.internalMetrics.Get(LastSlowConsumerAlertTimestampKey); ok {
 		internalMetrics.LastSlowConsumerAlertTimestamp = lastSlowConsumerAlertTimestamp.(int64)
 	}
 
 	return internalMetrics
+}
+
+func (s *Store) SetInternalMetrics(internalMetrics InternalMetrics) {
+	s.internalMetrics.Set(TotalEnvelopesReceivedKey, int64(internalMetrics.TotalEnvelopesReceived), cache.NoExpiration)
+	s.internalMetrics.Set(LastEnvelopReceivedTimestampKey, int64(internalMetrics.LastEnvelopReceivedTimestamp), cache.NoExpiration)
+	s.internalMetrics.Set(TotalMetricsReceivedKey, int64(internalMetrics.TotalMetricsReceived), cache.NoExpiration)
+	s.internalMetrics.Set(LastMetricReceivedTimestampKey, int64(internalMetrics.LastMetricReceivedTimestamp), cache.NoExpiration)
+	s.internalMetrics.Set(TotalContainerMetricsReceivedKey, int64(internalMetrics.TotalContainerMetricsReceived), cache.NoExpiration)
+	s.internalMetrics.Set(LastContainerMetricReceivedTimestampKey, int64(internalMetrics.LastContainerMetricReceivedTimestamp), cache.NoExpiration)
+	s.internalMetrics.Set(TotalCounterEventsReceivedKey, int64(internalMetrics.TotalCounterEventsReceived), cache.NoExpiration)
+	s.internalMetrics.Set(LastCounterEventReceivedTimestampKey, int64(internalMetrics.LastCounterEventReceivedTimestamp), cache.NoExpiration)
+	s.internalMetrics.Set(TotalValueMetricsReceivedKey, int64(internalMetrics.TotalValueMetricsReceived), cache.NoExpiration)
+	s.internalMetrics.Set(LastValueMetricReceivedTimestampKey, int64(internalMetrics.LastValueMetricReceivedTimestamp), cache.NoExpiration)
+	s.internalMetrics.Set(SlowConsumerAlertKey, internalMetrics.SlowConsumerAlert, cache.DefaultExpiration)
+	s.internalMetrics.Set(LastSlowConsumerAlertTimestampKey, int64(internalMetrics.LastSlowConsumerAlertTimestamp), cache.NoExpiration)
 }
 
 func (s *Store) GetContainerMetrics() ContainerMetrics {

@@ -6,7 +6,7 @@ import (
 	"github.com/cloudfoundry-community/firehose_exporter/metrics"
 )
 
-type internalMetricsCollector struct {
+type InternalMetricsCollector struct {
 	namespace                                string
 	metricsStore                             *metrics.Store
 	totalEnvelopesReceivedDesc               *prometheus.Desc
@@ -26,7 +26,7 @@ type internalMetricsCollector struct {
 func NewInternalMetricsCollector(
 	namespace string,
 	metricsStore *metrics.Store,
-) *internalMetricsCollector {
+) *InternalMetricsCollector {
 	totalEnvelopesReceivedDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "total_envelopes_received"),
 		"Total number of envelopes received from Cloud Foundry Firehose.",
@@ -111,7 +111,7 @@ func NewInternalMetricsCollector(
 		nil,
 	)
 
-	collector := &internalMetricsCollector{
+	collector := &InternalMetricsCollector{
 		namespace:                                namespace,
 		metricsStore:                             metricsStore,
 		totalEnvelopesReceivedDesc:               totalEnvelopesReceivedDesc,
@@ -130,7 +130,7 @@ func NewInternalMetricsCollector(
 	return collector
 }
 
-func (c internalMetricsCollector) Collect(ch chan<- prometheus.Metric) {
+func (c InternalMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	internalMetrics := c.metricsStore.GetInternalMetrics()
 
 	ch <- prometheus.MustNewConstMetric(
@@ -212,10 +212,9 @@ func (c internalMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 		prometheus.GaugeValue,
 		float64(internalMetrics.LastSlowConsumerAlertTimestamp),
 	)
-
 }
 
-func (c internalMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
+func (c InternalMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.totalEnvelopesReceivedDesc
 	ch <- c.lastEnvelopeReceivedTimestampDesc
 	ch <- c.totalMetricsReceivedDesc
