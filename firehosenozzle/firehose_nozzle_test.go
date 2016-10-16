@@ -1,6 +1,7 @@
 package firehosenozzle_test
 
 import (
+	"flag"
 	"fmt"
 	"strings"
 	"time"
@@ -19,6 +20,10 @@ import (
 
 	"github.com/cloudfoundry-community/firehose_exporter/firehosenozzle"
 )
+
+func init() {
+	flag.Set("log.level", "fatal")
+}
 
 var _ = Describe("FirehoseNozzle", func() {
 	var (
