@@ -81,11 +81,11 @@ var _ = Describe("CounterMetricsCollector", func() {
 			counterEvent2Delta          = uint64(10)
 			counterEvent2Total          = uint64(2000)
 
-			metrics                 chan prometheus.Metric
-			fakeTotalCounterMetric1 prometheus.Metric
-			fakeDeltaCounterMetric1 prometheus.Metric
-			fakeTotalCounterMetric2 prometheus.Metric
-			fakeDeltaCounterMetric2 prometheus.Metric
+			metrics             chan prometheus.Metric
+			totalCounterMetric1 prometheus.Metric
+			deltaCounterMetric1 prometheus.Metric
+			totalCounterMetric2 prometheus.Metric
+			deltaCounterMetric2 prometheus.Metric
 		)
 
 		BeforeEach(func() {
@@ -125,7 +125,7 @@ var _ = Describe("CounterMetricsCollector", func() {
 
 			metrics = make(chan prometheus.Metric)
 
-			fakeTotalCounterMetric1 = prometheus.MustNewConstMetric(
+			totalCounterMetric1 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_total_"+counterEvent1NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event.", counterEvent1Name),
@@ -141,7 +141,7 @@ var _ = Describe("CounterMetricsCollector", func() {
 				boshIP,
 			)
 
-			fakeDeltaCounterMetric1 = prometheus.MustNewConstMetric(
+			deltaCounterMetric1 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_delta_"+counterEvent1NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event.", counterEvent1Name),
@@ -157,7 +157,7 @@ var _ = Describe("CounterMetricsCollector", func() {
 				boshIP,
 			)
 
-			fakeTotalCounterMetric2 = prometheus.MustNewConstMetric(
+			totalCounterMetric2 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_total_"+counterEvent2NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event.", counterEvent2Name),
@@ -173,7 +173,7 @@ var _ = Describe("CounterMetricsCollector", func() {
 				boshIP,
 			)
 
-			fakeDeltaCounterMetric2 = prometheus.MustNewConstMetric(
+			deltaCounterMetric2 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_delta_"+counterEvent2NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event.", counterEvent2Name),
@@ -195,19 +195,19 @@ var _ = Describe("CounterMetricsCollector", func() {
 		})
 
 		It("returns a counter_event_fake_origin_total_fake_counter_event_1 metric", func() {
-			Eventually(metrics).Should(Receive(Equal(fakeTotalCounterMetric1)))
+			Eventually(metrics).Should(Receive(Equal(totalCounterMetric1)))
 		})
 
 		It("returns a counter_event_fake_origin_delta_fake_counter_event_1 metric", func() {
-			Eventually(metrics).Should(Receive(Equal(fakeDeltaCounterMetric1)))
+			Eventually(metrics).Should(Receive(Equal(deltaCounterMetric1)))
 		})
 
 		It("returns a counter_event_fake_origin_total_fake_counter_event_2 metric", func() {
-			Eventually(metrics).Should(Receive(Equal(fakeTotalCounterMetric2)))
+			Eventually(metrics).Should(Receive(Equal(totalCounterMetric2)))
 		})
 
 		It("returns a counter_event_fake_origin_delta_fake_counter_event_2 metric", func() {
-			Eventually(metrics).Should(Receive(Equal(fakeDeltaCounterMetric2)))
+			Eventually(metrics).Should(Receive(Equal(deltaCounterMetric2)))
 		})
 
 		Context("when there is no counter metrics", func() {
@@ -226,19 +226,19 @@ var _ = Describe("CounterMetricsCollector", func() {
 			})
 
 			It("returns a counter_metric_fake_origin_total_fake_counter_event_1 metric", func() {
-				Eventually(metrics).Should(Receive(Equal(fakeTotalCounterMetric1)))
+				Eventually(metrics).Should(Receive(Equal(totalCounterMetric1)))
 			})
 
 			It("returns a counter_event_fake_origin_delta_fake_counter_event_1 metric", func() {
-				Eventually(metrics).Should(Receive(Equal(fakeDeltaCounterMetric1)))
+				Eventually(metrics).Should(Receive(Equal(deltaCounterMetric1)))
 			})
 
 			It("returns a couter_metric_fake_origin_total_fake_counter_event_2 metric", func() {
-				Eventually(metrics).Should(Receive(Equal(fakeTotalCounterMetric2)))
+				Eventually(metrics).Should(Receive(Equal(totalCounterMetric2)))
 			})
 
 			It("returns a counter_event_fake_origin_delta_fake_counter_event_2 metric", func() {
-				Eventually(metrics).Should(Receive(Equal(fakeDeltaCounterMetric2)))
+				Eventually(metrics).Should(Receive(Equal(deltaCounterMetric2)))
 			})
 
 			Context("and the metrics deployment does not match", func() {

@@ -81,9 +81,9 @@ var _ = Describe("ValueMetricsCollector", func() {
 			valueMetric2Value          = float64(15)
 			valueMetric2Unit           = "count"
 
-			metrics          chan prometheus.Metric
-			fakeValueMetric1 prometheus.Metric
-			fakeValueMetric2 prometheus.Metric
+			metrics      chan prometheus.Metric
+			valueMetric1 prometheus.Metric
+			valueMetric2 prometheus.Metric
 		)
 
 		BeforeEach(func() {
@@ -123,7 +123,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 
 			metrics = make(chan prometheus.Metric)
 
-			fakeValueMetric1 = prometheus.MustNewConstMetric(
+			valueMetric1 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "value_metric", originNormalized+"_"+valueMetric1NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric.", valueMetric1Name),
@@ -140,7 +140,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 				valueMetric1Unit,
 			)
 
-			fakeValueMetric2 = prometheus.MustNewConstMetric(
+			valueMetric2 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "value_metric", originNormalized+"_"+valueMetric2NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric.", valueMetric2Name),
@@ -163,11 +163,11 @@ var _ = Describe("ValueMetricsCollector", func() {
 		})
 
 		It("returns a value_metric_fake_origin_fake_value_metric_1 metric", func() {
-			Eventually(metrics).Should(Receive(Equal(fakeValueMetric1)))
+			Eventually(metrics).Should(Receive(Equal(valueMetric1)))
 		})
 
 		It("returns a value_metric_fake_origin_fake_value_metric_2 metric", func() {
-			Eventually(metrics).Should(Receive(Equal(fakeValueMetric2)))
+			Eventually(metrics).Should(Receive(Equal(valueMetric2)))
 		})
 
 		Context("when there is no value metrics", func() {
@@ -186,11 +186,11 @@ var _ = Describe("ValueMetricsCollector", func() {
 			})
 
 			It("returns a value_metric_fake_origin_fake_value_metric_1 metric", func() {
-				Eventually(metrics).Should(Receive(Equal(fakeValueMetric1)))
+				Eventually(metrics).Should(Receive(Equal(valueMetric1)))
 			})
 
 			It("returns a value_metric_fake_origin_fake_value_metric_2 metric", func() {
-				Eventually(metrics).Should(Receive(Equal(fakeValueMetric2)))
+				Eventually(metrics).Should(Receive(Equal(valueMetric2)))
 			})
 
 			Context("and the metrics deployment does not match", func() {
