@@ -217,8 +217,8 @@ func main() {
 	containerMetricsCollector := collectors.NewContainerMetricsCollector(*metricsNamespace, metricsStore, dopplerDeployments)
 	prometheus.MustRegister(containerMetricsCollector)
 
-	counterMetricsCollector := collectors.NewCounterMetricsCollector(*metricsNamespace, metricsStore, dopplerDeployments)
-	prometheus.MustRegister(counterMetricsCollector)
+	counterEventsCollector := collectors.NewCounterEventsCollector(*metricsNamespace, metricsStore, dopplerDeployments)
+	prometheus.MustRegister(counterEventsCollector)
 
 	valueMetricsCollector := collectors.NewValueMetricsCollector(*metricsNamespace, metricsStore, dopplerDeployments)
 	prometheus.MustRegister(valueMetricsCollector)

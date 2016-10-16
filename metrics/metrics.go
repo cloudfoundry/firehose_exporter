@@ -49,9 +49,9 @@ type ContainerMetric struct {
 	DiskBytesQuota   uint64
 }
 
-type CounterMetrics []CounterMetric
+type CounterEvents []CounterEvent
 
-type CounterMetric struct {
+type CounterEvent struct {
 	Origin     string
 	Timestamp  int64
 	Deployment string

@@ -15,16 +15,16 @@ import (
 	"github.com/cloudfoundry-community/firehose_exporter/collectors"
 )
 
-var _ = Describe("CounterMetricsCollector", func() {
+var _ = Describe("CounterEventsCollector", func() {
 	var (
-		namespace               string
-		metricsStore            *metrics.Store
-		metricsExpiration       time.Duration
-		metricsCleanupInterval  time.Duration
-		dopplerDeployments      []string
-		counterMetricsCollector *collectors.CounterMetricsCollector
+		namespace              string
+		metricsStore           *metrics.Store
+		metricsExpiration      time.Duration
+		metricsCleanupInterval time.Duration
+		dopplerDeployments     []string
+		counterEventsCollector *collectors.CounterEventsCollector
 
-		counterMetricsCollectorDesc *prometheus.Desc
+		counterEventsCollectorDesc *prometheus.Desc
 	)
 
 	BeforeEach(func() {
@@ -32,7 +32,7 @@ var _ = Describe("CounterMetricsCollector", func() {
 		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval)
 		dopplerDeployments = []string{}
 
-		counterMetricsCollectorDesc = prometheus.NewDesc(
+		counterEventsCollectorDesc = prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "counter_event", "collector"),
 			"Cloud Foundry Firehose counter metrics collector.",
 			nil,
@@ -41,7 +41,7 @@ var _ = Describe("CounterMetricsCollector", func() {
 	})
 
 	JustBeforeEach(func() {
-		counterMetricsCollector = collectors.NewCounterMetricsCollector(namespace, metricsStore, dopplerDeployments)
+		counterEventsCollector = collectors.NewCounterEventsCollector(namespace, metricsStore, dopplerDeployments)
 	})
 
 	Describe("Describe", func() {
@@ -54,11 +54,11 @@ var _ = Describe("CounterMetricsCollector", func() {
 		})
 
 		JustBeforeEach(func() {
-			go counterMetricsCollector.Describe(descriptions)
+			go counterEventsCollector.Describe(descriptions)
 		})
 
-		It("returns a counter_metric_collector metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(counterMetricsCollectorDesc)))
+		It("returns a counter_event_collector metric description", func() {
+			Eventually(descriptions).Should(Receive(Equal(counterEventsCollectorDesc)))
 		})
 	})
 
@@ -81,11 +81,11 @@ var _ = Describe("CounterMetricsCollector", func() {
 			counterEvent2Delta          = uint64(10)
 			counterEvent2Total          = uint64(2000)
 
-			metrics             chan prometheus.Metric
-			totalCounterMetric1 prometheus.Metric
-			deltaCounterMetric1 prometheus.Metric
-			totalCounterMetric2 prometheus.Metric
-			deltaCounterMetric2 prometheus.Metric
+			metrics            chan prometheus.Metric
+			totalCounterEvent1 prometheus.Metric
+			deltaCounterEvent1 prometheus.Metric
+			totalCounterEvent2 prometheus.Metric
+			deltaCounterEvent2 prometheus.Metric
 		)
 
 		BeforeEach(func() {
@@ -125,7 +125,7 @@ var _ = Describe("CounterMetricsCollector", func() {
 
 			metrics = make(chan prometheus.Metric)
 
-			totalCounterMetric1 = prometheus.MustNewConstMetric(
+			totalCounterEvent1 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_total_"+counterEvent1NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event.", counterEvent1Name),
@@ -141,7 +141,7 @@ var _ = Describe("CounterMetricsCollector", func() {
 				boshIP,
 			)
 
-			deltaCounterMetric1 = prometheus.MustNewConstMetric(
+			deltaCounterEvent1 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_delta_"+counterEvent1NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event.", counterEvent1Name),
@@ -157,7 +157,7 @@ var _ = Describe("CounterMetricsCollector", func() {
 				boshIP,
 			)
 
-			totalCounterMetric2 = prometheus.MustNewConstMetric(
+			totalCounterEvent2 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_total_"+counterEvent2NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event.", counterEvent2Name),
@@ -173,7 +173,7 @@ var _ = Describe("CounterMetricsCollector", func() {
 				boshIP,
 			)
 
-			deltaCounterMetric2 = prometheus.MustNewConstMetric(
+			deltaCounterEvent2 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_delta_"+counterEvent2NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event.", counterEvent2Name),
@@ -191,28 +191,28 @@ var _ = Describe("CounterMetricsCollector", func() {
 		})
 
 		JustBeforeEach(func() {
-			go counterMetricsCollector.Collect(metrics)
+			go counterEventsCollector.Collect(metrics)
 		})
 
 		It("returns a counter_event_fake_origin_total_fake_counter_event_1 metric", func() {
-			Eventually(metrics).Should(Receive(Equal(totalCounterMetric1)))
+			Eventually(metrics).Should(Receive(Equal(totalCounterEvent1)))
 		})
 
 		It("returns a counter_event_fake_origin_delta_fake_counter_event_1 metric", func() {
-			Eventually(metrics).Should(Receive(Equal(deltaCounterMetric1)))
+			Eventually(metrics).Should(Receive(Equal(deltaCounterEvent1)))
 		})
 
 		It("returns a counter_event_fake_origin_total_fake_counter_event_2 metric", func() {
-			Eventually(metrics).Should(Receive(Equal(totalCounterMetric2)))
+			Eventually(metrics).Should(Receive(Equal(totalCounterEvent2)))
 		})
 
 		It("returns a counter_event_fake_origin_delta_fake_counter_event_2 metric", func() {
-			Eventually(metrics).Should(Receive(Equal(deltaCounterMetric2)))
+			Eventually(metrics).Should(Receive(Equal(deltaCounterEvent2)))
 		})
 
 		Context("when there is no counter metrics", func() {
 			BeforeEach(func() {
-				metricsStore.FlushCounterMetrics()
+				metricsStore.FlushCounterEvents()
 			})
 
 			It("does not return any metric", func() {
@@ -225,20 +225,20 @@ var _ = Describe("CounterMetricsCollector", func() {
 				dopplerDeployments = []string{"fake-deployment-name"}
 			})
 
-			It("returns a counter_metric_fake_origin_total_fake_counter_event_1 metric", func() {
-				Eventually(metrics).Should(Receive(Equal(totalCounterMetric1)))
+			It("returns a counter_event_fake_origin_total_fake_counter_event_1 metric", func() {
+				Eventually(metrics).Should(Receive(Equal(totalCounterEvent1)))
 			})
 
 			It("returns a counter_event_fake_origin_delta_fake_counter_event_1 metric", func() {
-				Eventually(metrics).Should(Receive(Equal(deltaCounterMetric1)))
+				Eventually(metrics).Should(Receive(Equal(deltaCounterEvent1)))
 			})
 
 			It("returns a couter_metric_fake_origin_total_fake_counter_event_2 metric", func() {
-				Eventually(metrics).Should(Receive(Equal(totalCounterMetric2)))
+				Eventually(metrics).Should(Receive(Equal(totalCounterEvent2)))
 			})
 
 			It("returns a counter_event_fake_origin_delta_fake_counter_event_2 metric", func() {
-				Eventually(metrics).Should(Receive(Equal(deltaCounterMetric2)))
+				Eventually(metrics).Should(Receive(Equal(deltaCounterEvent2)))
 			})
 
 			Context("and the metrics deployment does not match", func() {

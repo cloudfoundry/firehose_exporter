@@ -13,7 +13,7 @@ type Store struct {
 	metricsCleanupInterval time.Duration
 	internalMetrics        *cache.Cache
 	containerMetrics       *cache.Cache
-	counterMetrics         *cache.Cache
+	counterEvents          *cache.Cache
 	valueMetrics           *cache.Cache
 }
 
@@ -36,7 +36,7 @@ func NewStore(
 	internalMetrics.Set(LastSlowConsumerAlertTimestampKey, int64(0), cache.NoExpiration)
 
 	containerMetrics := cache.New(metricsExpiration, metricsCleanupInterval)
-	counterMetrics := cache.New(metricsExpiration, metricsCleanupInterval)
+	counterEvents := cache.New(metricsExpiration, metricsCleanupInterval)
 	valueMetrics := cache.New(metricsExpiration, metricsCleanupInterval)
 
 	return &Store{
@@ -44,7 +44,7 @@ func NewStore(
 		metricsCleanupInterval: metricsCleanupInterval,
 		internalMetrics:        internalMetrics,
 		containerMetrics:       containerMetrics,
-		counterMetrics:         counterMetrics,
+		counterEvents:          counterEvents,
 		valueMetrics:           valueMetrics,
 	}
 }
@@ -125,18 +125,18 @@ func (s *Store) FlushContainerMetrics() {
 	s.containerMetrics.Flush()
 }
 
-func (s *Store) GetCounterMetrics() CounterMetrics {
-	counterMetrics := CounterMetrics{}
-	for _, counterMetric := range s.counterMetrics.Items() {
-		if !counterMetric.Expired() {
-			counterMetrics = append(counterMetrics, counterMetric.Object.(CounterMetric))
+func (s *Store) GetCounterEvents() CounterEvents {
+	counterEvents := CounterEvents{}
+	for _, counterEvent := range s.counterEvents.Items() {
+		if !counterEvent.Expired() {
+			counterEvents = append(counterEvents, counterEvent.Object.(CounterEvent))
 		}
 	}
-	return counterMetrics
+	return counterEvents
 }
 
-func (s *Store) FlushCounterMetrics() {
-	s.counterMetrics.Flush()
+func (s *Store) FlushCounterEvents() {
+	s.counterEvents.Flush()
 }
 
 func (s *Store) GetValueMetrics() ValueMetrics {
@@ -166,7 +166,7 @@ func (s *Store) AddMetric(envelope *events.Envelope) {
 	case events.Envelope_ContainerMetric:
 		s.addContainerMetric(envelope)
 	case events.Envelope_CounterEvent:
-		s.addCounterMetric(envelope)
+		s.addCounterEvent(envelope)
 	case events.Envelope_ValueMetric:
 		s.addValueMetric(envelope)
 	}
@@ -198,13 +198,13 @@ func (s *Store) addContainerMetric(envelope *events.Envelope) {
 	s.containerMetrics.Set(containerMetricKey, containerMetric, cache.DefaultExpiration)
 }
 
-func (s *Store) addCounterMetric(envelope *events.Envelope) {
+func (s *Store) addCounterEvent(envelope *events.Envelope) {
 	s.internalMetrics.IncrementInt64(TotalMetricsReceivedKey, 1)
 	s.internalMetrics.Set(LastMetricReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
 	s.internalMetrics.IncrementInt64(TotalCounterEventsReceivedKey, 1)
 	s.internalMetrics.Set(LastCounterEventReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
 
-	counterMetric := CounterMetric{
+	counterEvent := CounterEvent{
 		Origin:     envelope.GetOrigin(),
 		Timestamp:  envelope.GetTimestamp(),
 		Deployment: envelope.GetDeployment(),
@@ -216,8 +216,8 @@ func (s *Store) addCounterMetric(envelope *events.Envelope) {
 		Delta:      envelope.GetCounterEvent().GetDelta(),
 		Total:      envelope.GetCounterEvent().GetTotal(),
 	}
-	counterMetricKey := envelope.GetOrigin() + envelope.GetCounterEvent().GetName()
-	s.counterMetrics.Set(counterMetricKey, counterMetric, cache.DefaultExpiration)
+	counterEventKey := envelope.GetOrigin() + envelope.GetCounterEvent().GetName()
+	s.counterEvents.Set(counterEventKey, counterEvent, cache.DefaultExpiration)
 }
 
 func (s *Store) addValueMetric(envelope *events.Envelope) {
