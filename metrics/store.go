@@ -104,6 +104,25 @@ func (s *Store) SetInternalMetrics(internalMetrics InternalMetrics) {
 	s.internalMetrics.Set(LastSlowConsumerAlertTimestampKey, int64(internalMetrics.LastSlowConsumerAlertTimestamp), cache.NoExpiration)
 }
 
+func (s *Store) AlertSlowConsumerError() {
+	s.internalMetrics.Set(SlowConsumerAlertKey, true, cache.DefaultExpiration)
+	s.internalMetrics.Set(LastSlowConsumerAlertTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
+}
+
+func (s *Store) AddMetric(envelope *events.Envelope) {
+	s.internalMetrics.IncrementInt64(TotalEnvelopesReceivedKey, 1)
+	s.internalMetrics.Set(LastEnvelopReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
+
+	switch envelope.GetEventType() {
+	case events.Envelope_ContainerMetric:
+		s.addContainerMetric(envelope)
+	case events.Envelope_CounterEvent:
+		s.addCounterEvent(envelope)
+	case events.Envelope_ValueMetric:
+		s.addValueMetric(envelope)
+	}
+}
+
 func (s *Store) GetContainerMetrics() ContainerMetrics {
 	containerMetrics := ContainerMetrics{}
 	for _, containerMetric := range s.containerMetrics.Items() {
@@ -144,25 +163,6 @@ func (s *Store) GetValueMetrics() ValueMetrics {
 
 func (s *Store) FlushValueMetrics() {
 	s.valueMetrics.Flush()
-}
-
-func (s *Store) AlertSlowConsumerError() {
-	s.internalMetrics.Set(SlowConsumerAlertKey, true, cache.DefaultExpiration)
-	s.internalMetrics.Set(LastSlowConsumerAlertTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
-}
-
-func (s *Store) AddMetric(envelope *events.Envelope) {
-	s.internalMetrics.IncrementInt64(TotalEnvelopesReceivedKey, 1)
-	s.internalMetrics.Set(LastEnvelopReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
-
-	switch envelope.GetEventType() {
-	case events.Envelope_ContainerMetric:
-		s.addContainerMetric(envelope)
-	case events.Envelope_CounterEvent:
-		s.addCounterEvent(envelope)
-	case events.Envelope_ValueMetric:
-		s.addValueMetric(envelope)
-	}
 }
 
 func (s *Store) addContainerMetric(envelope *events.Envelope) {
