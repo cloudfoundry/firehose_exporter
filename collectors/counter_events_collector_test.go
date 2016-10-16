@@ -81,7 +81,7 @@ var _ = Describe("CounterEventsCollector", func() {
 			counterEvent2Delta          = uint64(10)
 			counterEvent2Total          = uint64(2000)
 
-			metrics            chan prometheus.Metric
+			counterEventsChan  chan prometheus.Metric
 			totalCounterEvent1 prometheus.Metric
 			deltaCounterEvent1 prometheus.Metric
 			totalCounterEvent2 prometheus.Metric
@@ -123,7 +123,7 @@ var _ = Describe("CounterEventsCollector", func() {
 				},
 			)
 
-			metrics = make(chan prometheus.Metric)
+			counterEventsChan = make(chan prometheus.Metric)
 
 			totalCounterEvent1 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
@@ -191,23 +191,23 @@ var _ = Describe("CounterEventsCollector", func() {
 		})
 
 		JustBeforeEach(func() {
-			go counterEventsCollector.Collect(metrics)
+			go counterEventsCollector.Collect(counterEventsChan)
 		})
 
 		It("returns a counter_event_fake_origin_total_fake_counter_event_1 metric", func() {
-			Eventually(metrics).Should(Receive(Equal(totalCounterEvent1)))
+			Eventually(counterEventsChan).Should(Receive(Equal(totalCounterEvent1)))
 		})
 
 		It("returns a counter_event_fake_origin_delta_fake_counter_event_1 metric", func() {
-			Eventually(metrics).Should(Receive(Equal(deltaCounterEvent1)))
+			Eventually(counterEventsChan).Should(Receive(Equal(deltaCounterEvent1)))
 		})
 
 		It("returns a counter_event_fake_origin_total_fake_counter_event_2 metric", func() {
-			Eventually(metrics).Should(Receive(Equal(totalCounterEvent2)))
+			Eventually(counterEventsChan).Should(Receive(Equal(totalCounterEvent2)))
 		})
 
 		It("returns a counter_event_fake_origin_delta_fake_counter_event_2 metric", func() {
-			Eventually(metrics).Should(Receive(Equal(deltaCounterEvent2)))
+			Eventually(counterEventsChan).Should(Receive(Equal(deltaCounterEvent2)))
 		})
 
 		Context("when there is no counter metrics", func() {
@@ -216,7 +216,7 @@ var _ = Describe("CounterEventsCollector", func() {
 			})
 
 			It("does not return any metric", func() {
-				Consistently(metrics).ShouldNot(Receive())
+				Consistently(counterEventsChan).ShouldNot(Receive())
 			})
 		})
 
@@ -226,19 +226,19 @@ var _ = Describe("CounterEventsCollector", func() {
 			})
 
 			It("returns a counter_event_fake_origin_total_fake_counter_event_1 metric", func() {
-				Eventually(metrics).Should(Receive(Equal(totalCounterEvent1)))
+				Eventually(counterEventsChan).Should(Receive(Equal(totalCounterEvent1)))
 			})
 
 			It("returns a counter_event_fake_origin_delta_fake_counter_event_1 metric", func() {
-				Eventually(metrics).Should(Receive(Equal(deltaCounterEvent1)))
+				Eventually(counterEventsChan).Should(Receive(Equal(deltaCounterEvent1)))
 			})
 
 			It("returns a couter_metric_fake_origin_total_fake_counter_event_2 metric", func() {
-				Eventually(metrics).Should(Receive(Equal(totalCounterEvent2)))
+				Eventually(counterEventsChan).Should(Receive(Equal(totalCounterEvent2)))
 			})
 
 			It("returns a counter_event_fake_origin_delta_fake_counter_event_2 metric", func() {
-				Eventually(metrics).Should(Receive(Equal(deltaCounterEvent2)))
+				Eventually(counterEventsChan).Should(Receive(Equal(deltaCounterEvent2)))
 			})
 
 			Context("and the metrics deployment does not match", func() {
@@ -247,7 +247,7 @@ var _ = Describe("CounterEventsCollector", func() {
 				})
 
 				It("does not return any metric", func() {
-					Consistently(metrics).ShouldNot(Receive())
+					Consistently(counterEventsChan).ShouldNot(Receive())
 				})
 			})
 		})

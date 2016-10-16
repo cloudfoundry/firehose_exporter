@@ -134,7 +134,7 @@ var _ = Describe("ContainerMetricsCollector", func() {
 			containerMetric2MemoryBytesQuota = uint64(4000)
 			containerMetric2DiskBytesQuota   = uint64(5000)
 
-			metrics                 chan prometheus.Metric
+			containerMetricsChan    chan prometheus.Metric
 			cpuPercentageMetric1    prometheus.Metric
 			memoryBytesMetric1      prometheus.Metric
 			diskBytesMetric1        prometheus.Metric
@@ -190,7 +190,7 @@ var _ = Describe("ContainerMetricsCollector", func() {
 				},
 			)
 
-			metrics = make(chan prometheus.Metric)
+			containerMetricsChan = make(chan prometheus.Metric)
 
 			cpuPercentageMetric1 = prometheus.MustNewConstMetric(
 				cpuPercentageMetricDesc,
@@ -324,47 +324,47 @@ var _ = Describe("ContainerMetricsCollector", func() {
 		})
 
 		JustBeforeEach(func() {
-			go containerMetricsCollector.Collect(metrics)
+			go containerMetricsCollector.Collect(containerMetricsChan)
 		})
 
 		It("returns a container_metric_cpu_percentage metric for FakeApplicationId1", func() {
-			Eventually(metrics).Should(Receive(Equal(cpuPercentageMetric1)))
+			Eventually(containerMetricsChan).Should(Receive(Equal(cpuPercentageMetric1)))
 		})
 
 		It("returns a container_metric_memory_bytes metric for FakeApplicationId1", func() {
-			Eventually(metrics).Should(Receive(Equal(memoryBytesMetric1)))
+			Eventually(containerMetricsChan).Should(Receive(Equal(memoryBytesMetric1)))
 		})
 
 		It("returns a container_metric_disk_bytes metric for FakeApplicationId1", func() {
-			Eventually(metrics).Should(Receive(Equal(diskBytesMetric1)))
+			Eventually(containerMetricsChan).Should(Receive(Equal(diskBytesMetric1)))
 		})
 
 		It("returns a container_metric_memory_bytes_quota metric for FakeApplicationId1", func() {
-			Eventually(metrics).Should(Receive(Equal(memoryBytesQuotaMetric1)))
+			Eventually(containerMetricsChan).Should(Receive(Equal(memoryBytesQuotaMetric1)))
 		})
 
 		It("returns a container_metric_disk_bytes_quota metric for FakeApplicationId1", func() {
-			Eventually(metrics).Should(Receive(Equal(diskBytesQuotaMetric1)))
+			Eventually(containerMetricsChan).Should(Receive(Equal(diskBytesQuotaMetric1)))
 		})
 
 		It("returns a container_metric_cpu_percentage metric for FakeApplicationId2", func() {
-			Eventually(metrics).Should(Receive(Equal(cpuPercentageMetric2)))
+			Eventually(containerMetricsChan).Should(Receive(Equal(cpuPercentageMetric2)))
 		})
 
 		It("returns a container_metric_memory_bytes metric for FakeApplicationId2", func() {
-			Eventually(metrics).Should(Receive(Equal(memoryBytesMetric2)))
+			Eventually(containerMetricsChan).Should(Receive(Equal(memoryBytesMetric2)))
 		})
 
 		It("returns a container_metric_disk_bytes metric for FakeApplicationId2", func() {
-			Eventually(metrics).Should(Receive(Equal(diskBytesMetric2)))
+			Eventually(containerMetricsChan).Should(Receive(Equal(diskBytesMetric2)))
 		})
 
 		It("returns a container_metric_memory_bytes_quota metric for FakeApplicationId2", func() {
-			Eventually(metrics).Should(Receive(Equal(memoryBytesQuotaMetric2)))
+			Eventually(containerMetricsChan).Should(Receive(Equal(memoryBytesQuotaMetric2)))
 		})
 
 		It("returns a container_metric_disk_bytes_quota metric for FakeApplicationId2", func() {
-			Eventually(metrics).Should(Receive(Equal(diskBytesQuotaMetric2)))
+			Eventually(containerMetricsChan).Should(Receive(Equal(diskBytesQuotaMetric2)))
 		})
 
 		Context("when there is no container metrics", func() {
@@ -373,7 +373,7 @@ var _ = Describe("ContainerMetricsCollector", func() {
 			})
 
 			It("does not return any metric", func() {
-				Consistently(metrics).ShouldNot(Receive())
+				Consistently(containerMetricsChan).ShouldNot(Receive())
 			})
 		})
 
@@ -383,43 +383,43 @@ var _ = Describe("ContainerMetricsCollector", func() {
 			})
 
 			It("returns a container_metric_cpu_percentage metric for FakeApplicationId1", func() {
-				Eventually(metrics).Should(Receive(Equal(cpuPercentageMetric1)))
+				Eventually(containerMetricsChan).Should(Receive(Equal(cpuPercentageMetric1)))
 			})
 
 			It("returns a container_metric_memory_bytes metric for FakeApplicationId1", func() {
-				Eventually(metrics).Should(Receive(Equal(memoryBytesMetric1)))
+				Eventually(containerMetricsChan).Should(Receive(Equal(memoryBytesMetric1)))
 			})
 
 			It("returns a container_metric_disk_bytes metric for FakeApplicationId1", func() {
-				Eventually(metrics).Should(Receive(Equal(diskBytesMetric1)))
+				Eventually(containerMetricsChan).Should(Receive(Equal(diskBytesMetric1)))
 			})
 
 			It("returns a container_metric_memory_bytes_quota metric for FakeApplicationId1", func() {
-				Eventually(metrics).Should(Receive(Equal(memoryBytesQuotaMetric1)))
+				Eventually(containerMetricsChan).Should(Receive(Equal(memoryBytesQuotaMetric1)))
 			})
 
 			It("returns a container_metric_disk_bytes_quota metric for FakeApplicationId1", func() {
-				Eventually(metrics).Should(Receive(Equal(diskBytesQuotaMetric1)))
+				Eventually(containerMetricsChan).Should(Receive(Equal(diskBytesQuotaMetric1)))
 			})
 
 			It("returns a container_metric_cpu_percentage metric for FakeApplicationId2", func() {
-				Eventually(metrics).Should(Receive(Equal(cpuPercentageMetric2)))
+				Eventually(containerMetricsChan).Should(Receive(Equal(cpuPercentageMetric2)))
 			})
 
 			It("returns a container_metric_memory_bytes metric for FakeApplicationId2", func() {
-				Eventually(metrics).Should(Receive(Equal(memoryBytesMetric2)))
+				Eventually(containerMetricsChan).Should(Receive(Equal(memoryBytesMetric2)))
 			})
 
 			It("returns a container_metric_disk_bytes metric for FakeApplicationId2", func() {
-				Eventually(metrics).Should(Receive(Equal(diskBytesMetric2)))
+				Eventually(containerMetricsChan).Should(Receive(Equal(diskBytesMetric2)))
 			})
 
 			It("returns a container_metric_memory_bytes_quota metric for FakeApplicationId2", func() {
-				Eventually(metrics).Should(Receive(Equal(memoryBytesQuotaMetric2)))
+				Eventually(containerMetricsChan).Should(Receive(Equal(memoryBytesQuotaMetric2)))
 			})
 
 			It("returns a container_metric_disk_bytes_quota metric for FakeApplicationId2", func() {
-				Eventually(metrics).Should(Receive(Equal(diskBytesQuotaMetric2)))
+				Eventually(containerMetricsChan).Should(Receive(Equal(diskBytesQuotaMetric2)))
 			})
 
 			Context("and the metrics deployment does not match", func() {
@@ -428,7 +428,7 @@ var _ = Describe("ContainerMetricsCollector", func() {
 				})
 
 				It("does not return any metric", func() {
-					Consistently(metrics).ShouldNot(Receive())
+					Consistently(containerMetricsChan).ShouldNot(Receive())
 				})
 			})
 		})
