@@ -121,6 +121,10 @@ func (s *Store) GetContainerMetrics() ContainerMetrics {
 	return containerMetrics
 }
 
+func (s *Store) FlushContainerMetrics() {
+	s.containerMetrics.Flush()
+}
+
 func (s *Store) GetCounterMetrics() CounterMetrics {
 	counterMetrics := CounterMetrics{}
 	for _, counterMetric := range s.counterMetrics.Items() {

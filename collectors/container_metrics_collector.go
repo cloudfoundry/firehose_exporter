@@ -8,7 +8,7 @@ import (
 	"github.com/cloudfoundry-community/firehose_exporter/metrics"
 )
 
-type containerMetricsCollector struct {
+type ContainerMetricsCollector struct {
 	namespace                  string
 	metricsStore               *metrics.Store
 	deploymentsFilter          map[string]struct{}
@@ -23,7 +23,7 @@ func NewContainerMetricsCollector(
 	namespace string,
 	metricsStore *metrics.Store,
 	dopplerDeployments []string,
-) *containerMetricsCollector {
+) *ContainerMetricsCollector {
 	cpuPercentageMetricDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, container_metrics_subsystem, "cpu_percentage"),
 		"Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100.",
@@ -64,7 +64,7 @@ func NewContainerMetricsCollector(
 		deploymentsFilter[deployment] = struct{}{}
 	}
 
-	collector := &containerMetricsCollector{
+	collector := &ContainerMetricsCollector{
 		namespace:                  namespace,
 		metricsStore:               metricsStore,
 		deploymentsFilter:          deploymentsFilter,
@@ -77,7 +77,7 @@ func NewContainerMetricsCollector(
 	return collector
 }
 
-func (c containerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
+func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, containerMetric := range c.metricsStore.GetContainerMetrics() {
 		_, ok := c.deploymentsFilter[containerMetric.Deployment]
 		if len(c.deploymentsFilter) == 0 || ok {
@@ -145,7 +145,7 @@ func (c containerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 }
 
-func (c containerMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
+func (c ContainerMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.cpuPercentageMetricDesc
 	ch <- c.memoryBytesMetricDesc
 	ch <- c.diskBytesMetricDesc
