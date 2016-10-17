@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"bytes"
 	"strconv"
 	"time"
 
@@ -187,8 +188,7 @@ func (s *Store) addContainerMetric(envelope *events.Envelope) {
 		MemoryBytesQuota: envelope.GetContainerMetric().GetMemoryBytesQuota(),
 		DiskBytesQuota:   envelope.GetContainerMetric().GetDiskBytesQuota(),
 	}
-	containerMetricKey := envelope.GetContainerMetric().GetApplicationId() + strconv.Itoa(int(containerMetric.InstanceIndex))
-	s.containerMetrics.Set(containerMetricKey, containerMetric, cache.DefaultExpiration)
+	s.containerMetrics.Set(s.metricKey(envelope), containerMetric, cache.DefaultExpiration)
 }
 
 func (s *Store) addCounterEvent(envelope *events.Envelope) {
@@ -209,8 +209,7 @@ func (s *Store) addCounterEvent(envelope *events.Envelope) {
 		Delta:      envelope.GetCounterEvent().GetDelta(),
 		Total:      envelope.GetCounterEvent().GetTotal(),
 	}
-	counterEventKey := envelope.GetOrigin() + envelope.GetCounterEvent().GetName()
-	s.counterEvents.Set(counterEventKey, counterEvent, cache.DefaultExpiration)
+	s.counterEvents.Set(s.metricKey(envelope), counterEvent, cache.DefaultExpiration)
 }
 
 func (s *Store) addValueMetric(envelope *events.Envelope) {
@@ -231,6 +230,27 @@ func (s *Store) addValueMetric(envelope *events.Envelope) {
 		Value:      envelope.GetValueMetric().GetValue(),
 		Unit:       envelope.GetValueMetric().GetUnit(),
 	}
-	valueMetricKey := envelope.GetOrigin() + envelope.GetValueMetric().GetName()
-	s.valueMetrics.Set(valueMetricKey, valueMetric, cache.DefaultExpiration)
+	s.valueMetrics.Set(s.metricKey(envelope), valueMetric, cache.DefaultExpiration)
+}
+
+func (s *Store) metricKey(envelope *events.Envelope) string {
+	var buffer bytes.Buffer
+
+	buffer.WriteString(envelope.GetOrigin())
+	buffer.WriteString(envelope.GetDeployment())
+	buffer.WriteString(envelope.GetJob())
+	buffer.WriteString(envelope.GetIndex())
+	buffer.WriteString(envelope.GetIp())
+
+	switch envelope.GetEventType() {
+	case events.Envelope_ContainerMetric:
+		buffer.WriteString(envelope.GetContainerMetric().GetApplicationId())
+		buffer.WriteString(strconv.Itoa(int(envelope.GetContainerMetric().GetInstanceIndex())))
+	case events.Envelope_CounterEvent:
+		buffer.WriteString(envelope.GetCounterEvent().GetName())
+	case events.Envelope_ValueMetric:
+		buffer.WriteString(envelope.GetValueMetric().GetName())
+	}
+
+	return buffer.String()
 }

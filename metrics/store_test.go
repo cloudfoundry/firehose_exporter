@@ -21,7 +21,8 @@ var _ = Describe("Store", func() {
 		origin          = "fake-origin"
 		boshDeployment  = "fake-deployment-name"
 		boshJob         = "fake-job-name"
-		boshIndex       = "0"
+		boshIndex0      = "0"
+		boshIndex1      = "1"
 		boshIP          = "1.2.3.4"
 		metricTimestamp = time.Now().Unix() * 1000
 
@@ -218,8 +219,9 @@ var _ = Describe("Store", func() {
 					Timestamp:  proto.Int64(metricTimestamp),
 					Deployment: proto.String(boshDeployment),
 					Job:        proto.String(boshJob),
-					Index:      proto.String(boshIndex),
+					Index:      proto.String(boshIndex0),
 					Ip:         proto.String(boshIP),
+					Tags:       map[string]string{},
 					Error: &events.Error{
 						Source:  proto.String("error-source"),
 						Code:    proto.Int32(127),
@@ -235,8 +237,9 @@ var _ = Describe("Store", func() {
 					Timestamp:  proto.Int64(metricTimestamp),
 					Deployment: proto.String(boshDeployment),
 					Job:        proto.String(boshJob),
-					Index:      proto.String(boshIndex),
+					Index:      proto.String(boshIndex0),
 					Ip:         proto.String(boshIP),
+					Tags:       map[string]string{},
 					ContainerMetric: &events.ContainerMetric{
 						ApplicationId:    proto.String(containerMetricApplicationId),
 						InstanceIndex:    proto.Int32(containerMetricInstanceIndex),
@@ -254,8 +257,9 @@ var _ = Describe("Store", func() {
 				Timestamp:        metricTimestamp,
 				Deployment:       boshDeployment,
 				Job:              boshJob,
-				Index:            boshIndex,
+				Index:            boshIndex0,
 				IP:               boshIP,
+				Tags:             map[string]string{},
 				ApplicationId:    containerMetricApplicationId,
 				InstanceIndex:    containerMetricInstanceIndex,
 				CpuPercentage:    containerMetricCpuPercentage,
@@ -272,8 +276,9 @@ var _ = Describe("Store", func() {
 					Timestamp:  proto.Int64(metricTimestamp),
 					Deployment: proto.String(boshDeployment),
 					Job:        proto.String(boshJob),
-					Index:      proto.String(boshIndex),
+					Index:      proto.String(boshIndex0),
 					Ip:         proto.String(boshIP),
+					Tags:       map[string]string{},
 					CounterEvent: &events.CounterEvent{
 						Name:  proto.String(counterEventName),
 						Delta: proto.Uint64(counterEventDelta),
@@ -287,8 +292,9 @@ var _ = Describe("Store", func() {
 				Timestamp:  metricTimestamp,
 				Deployment: boshDeployment,
 				Job:        boshJob,
-				Index:      boshIndex,
+				Index:      boshIndex0,
 				IP:         boshIP,
+				Tags:       map[string]string{},
 				Name:       counterEventName,
 				Delta:      counterEventDelta,
 				Total:      counterEventTotal,
@@ -301,8 +307,9 @@ var _ = Describe("Store", func() {
 					Timestamp:  proto.Int64(metricTimestamp),
 					Deployment: proto.String(boshDeployment),
 					Job:        proto.String(boshJob),
-					Index:      proto.String(boshIndex),
+					Index:      proto.String(boshIndex0),
 					Ip:         proto.String(boshIP),
+					Tags:       map[string]string{},
 					ValueMetric: &events.ValueMetric{
 						Name:  proto.String(valueMetricName),
 						Value: proto.Float64(valueMetricValue),
@@ -316,56 +323,59 @@ var _ = Describe("Store", func() {
 				Timestamp:  metricTimestamp,
 				Deployment: boshDeployment,
 				Job:        boshJob,
-				Index:      boshIndex,
+				Index:      boshIndex0,
 				IP:         boshIP,
+				Tags:       map[string]string{},
 				Name:       valueMetricName,
 				Value:      valueMetricValue,
 				Unit:       valueMetricUnit,
 			}
+		})
 
+		JustBeforeEach(func() {
 			internalMetrics = metricsStore.GetInternalMetrics()
 			containerMetrics = metricsStore.GetContainerMetrics()
 			counterEvents = metricsStore.GetCounterEvents()
 			valueMetrics = metricsStore.GetValueMetrics()
 		})
 
-		It("returns the TotalEnvelopesReceived", func() {
+		It("increments the TotalEnvelopesReceived", func() {
 			Expect(internalMetrics.TotalEnvelopesReceived).To(Equal(int64(4)))
 		})
 
-		It("returns the LastEnvelopReceivedTimestamp", func() {
+		It("sets the LastEnvelopReceivedTimestamp", func() {
 			Expect(internalMetrics.LastEnvelopReceivedTimestamp).ToNot(Equal(int64(0)))
 		})
 
-		It("returns the TotalMetricsReceived", func() {
+		It("increments the TotalMetricsReceived", func() {
 			Expect(internalMetrics.TotalMetricsReceived).To(Equal(int64(3)))
 		})
 
-		It("returns the LastMetricReceivedTimestamp", func() {
+		It("sets the LastMetricReceivedTimestamp", func() {
 			Expect(internalMetrics.LastMetricReceivedTimestamp).ToNot(Equal(int64(0)))
 		})
 
-		It("returns the TotalContainerMetricsReceived", func() {
+		It("increments the TotalContainerMetricsReceived", func() {
 			Expect(internalMetrics.TotalContainerMetricsReceived).To(Equal(int64(1)))
 		})
 
-		It("returns the LastContainerMetricReceivedTimestamp", func() {
+		It("sets the LastContainerMetricReceivedTimestamp", func() {
 			Expect(internalMetrics.LastContainerMetricReceivedTimestamp).ToNot(Equal(int64(0)))
 		})
 
-		It("returns the TotalCounterEventsReceived", func() {
+		It("increments the TotalCounterEventsReceived", func() {
 			Expect(internalMetrics.TotalCounterEventsReceived).To(Equal(int64(1)))
 		})
 
-		It("returns the LastCounterEventReceivedTimestamp", func() {
+		It("sets the LastCounterEventReceivedTimestamp", func() {
 			Expect(internalMetrics.LastCounterEventReceivedTimestamp).ToNot(Equal(int64(0)))
 		})
 
-		It("returns the TotalValueMetricsReceived", func() {
+		It("increments the TotalValueMetricsReceived", func() {
 			Expect(internalMetrics.TotalValueMetricsReceived).To(Equal(int64(1)))
 		})
 
-		It("returns the LastValueMetricReceivedTimestamp", func() {
+		It("sets the LastValueMetricReceivedTimestamp", func() {
 			Expect(internalMetrics.LastValueMetricReceivedTimestamp).ToNot(Equal(int64(0)))
 		})
 
@@ -383,9 +393,203 @@ var _ = Describe("Store", func() {
 			Expect(len(valueMetrics)).To(Equal(1))
 			Expect(valueMetrics[0]).To(Equal(valueMetric))
 		})
+
+		Context("when adding the same metric with same labels", func() {
+			BeforeEach(func() {
+				metricsStore.AddMetric(
+					&events.Envelope{
+						Origin:     proto.String(origin),
+						EventType:  events.Envelope_ContainerMetric.Enum(),
+						Timestamp:  proto.Int64(metricTimestamp),
+						Deployment: proto.String(boshDeployment),
+						Job:        proto.String(boshJob),
+						Index:      proto.String(boshIndex0),
+						Ip:         proto.String(boshIP),
+						Tags:       map[string]string{},
+						ContainerMetric: &events.ContainerMetric{
+							ApplicationId:    proto.String(containerMetricApplicationId),
+							InstanceIndex:    proto.Int32(containerMetricInstanceIndex),
+							CpuPercentage:    proto.Float64(containerMetricCpuPercentage),
+							MemoryBytes:      proto.Uint64(containerMetricMemoryBytes),
+							DiskBytes:        proto.Uint64(containerMetricDiskBytes),
+							MemoryBytesQuota: proto.Uint64(containerMetricMemoryBytesQuota),
+							DiskBytesQuota:   proto.Uint64(containerMetricDiskBytesQuota),
+						},
+					},
+				)
+
+				metricsStore.AddMetric(
+					&events.Envelope{
+						Origin:     proto.String(origin),
+						EventType:  events.Envelope_CounterEvent.Enum(),
+						Timestamp:  proto.Int64(metricTimestamp),
+						Deployment: proto.String(boshDeployment),
+						Job:        proto.String(boshJob),
+						Index:      proto.String(boshIndex0),
+						Ip:         proto.String(boshIP),
+						Tags:       map[string]string{},
+						CounterEvent: &events.CounterEvent{
+							Name:  proto.String(counterEventName),
+							Delta: proto.Uint64(counterEventDelta),
+							Total: proto.Uint64(counterEventTotal),
+						},
+					},
+				)
+
+				metricsStore.AddMetric(
+					&events.Envelope{
+						Origin:     proto.String(origin),
+						EventType:  events.Envelope_ValueMetric.Enum(),
+						Timestamp:  proto.Int64(metricTimestamp),
+						Deployment: proto.String(boshDeployment),
+						Job:        proto.String(boshJob),
+						Index:      proto.String(boshIndex0),
+						Ip:         proto.String(boshIP),
+						Tags:       map[string]string{},
+						ValueMetric: &events.ValueMetric{
+							Name:  proto.String(valueMetricName),
+							Value: proto.Float64(valueMetricValue),
+							Unit:  proto.String(valueMetricUnit),
+						},
+					},
+				)
+			})
+
+			It("increments the TotalEnvelopesReceived", func() {
+				Expect(internalMetrics.TotalEnvelopesReceived).To(Equal(int64(7)))
+			})
+
+			It("increments the TotalMetricsReceived", func() {
+				Expect(internalMetrics.TotalMetricsReceived).To(Equal(int64(6)))
+			})
+
+			It("increments the TotalContainerMetricsReceived", func() {
+				Expect(internalMetrics.TotalContainerMetricsReceived).To(Equal(int64(2)))
+			})
+
+			It("increments the TotalCounterEventsReceived", func() {
+				Expect(internalMetrics.TotalCounterEventsReceived).To(Equal(int64(2)))
+			})
+
+			It("increments the TotalValueMetricsReceived", func() {
+				Expect(internalMetrics.TotalValueMetricsReceived).To(Equal(int64(2)))
+			})
+
+			It("does not add the duplicate container metric", func() {
+				Expect(len(containerMetrics)).To(Equal(1))
+				Expect(containerMetrics[0]).To(Equal(containerMetric))
+			})
+
+			It("does not add the duplicate counter event", func() {
+				Expect(len(counterEvents)).To(Equal(1))
+				Expect(counterEvents[0]).To(Equal(counterEvent))
+			})
+
+			It("does not add the duplicate value metric", func() {
+				Expect(len(valueMetrics)).To(Equal(1))
+				Expect(valueMetrics[0]).To(Equal(valueMetric))
+			})
+		})
+
+		Context("when adding the same metric with different labels", func() {
+			BeforeEach(func() {
+				metricsStore.AddMetric(
+					&events.Envelope{
+						Origin:     proto.String(origin),
+						EventType:  events.Envelope_ContainerMetric.Enum(),
+						Timestamp:  proto.Int64(metricTimestamp),
+						Deployment: proto.String(boshDeployment),
+						Job:        proto.String(boshJob),
+						Index:      proto.String(boshIndex1),
+						Ip:         proto.String(boshIP),
+						Tags:       map[string]string{},
+						ContainerMetric: &events.ContainerMetric{
+							ApplicationId:    proto.String(containerMetricApplicationId),
+							InstanceIndex:    proto.Int32(containerMetricInstanceIndex),
+							CpuPercentage:    proto.Float64(containerMetricCpuPercentage),
+							MemoryBytes:      proto.Uint64(containerMetricMemoryBytes),
+							DiskBytes:        proto.Uint64(containerMetricDiskBytes),
+							MemoryBytesQuota: proto.Uint64(containerMetricMemoryBytesQuota),
+							DiskBytesQuota:   proto.Uint64(containerMetricDiskBytesQuota),
+						},
+					},
+				)
+
+				metricsStore.AddMetric(
+					&events.Envelope{
+						Origin:     proto.String(origin),
+						EventType:  events.Envelope_CounterEvent.Enum(),
+						Timestamp:  proto.Int64(metricTimestamp),
+						Deployment: proto.String(boshDeployment),
+						Job:        proto.String(boshJob),
+						Index:      proto.String(boshIndex1),
+						Ip:         proto.String(boshIP),
+						Tags:       map[string]string{},
+						CounterEvent: &events.CounterEvent{
+							Name:  proto.String(counterEventName),
+							Delta: proto.Uint64(counterEventDelta),
+							Total: proto.Uint64(counterEventTotal),
+						},
+					},
+				)
+
+				metricsStore.AddMetric(
+					&events.Envelope{
+						Origin:     proto.String(origin),
+						EventType:  events.Envelope_ValueMetric.Enum(),
+						Timestamp:  proto.Int64(metricTimestamp),
+						Deployment: proto.String(boshDeployment),
+						Job:        proto.String(boshJob),
+						Index:      proto.String(boshIndex1),
+						Ip:         proto.String(boshIP),
+						Tags:       map[string]string{},
+						ValueMetric: &events.ValueMetric{
+							Name:  proto.String(valueMetricName),
+							Value: proto.Float64(valueMetricValue),
+							Unit:  proto.String(valueMetricUnit),
+						},
+					},
+				)
+			})
+
+			It("increments the TotalEnvelopesReceived", func() {
+				Expect(internalMetrics.TotalEnvelopesReceived).To(Equal(int64(7)))
+			})
+
+			It("increments the TotalMetricsReceived", func() {
+				Expect(internalMetrics.TotalMetricsReceived).To(Equal(int64(6)))
+			})
+
+			It("increments the TotalContainerMetricsReceived", func() {
+				Expect(internalMetrics.TotalContainerMetricsReceived).To(Equal(int64(2)))
+			})
+
+			It("increments the TotalCounterEventsReceived", func() {
+				Expect(internalMetrics.TotalCounterEventsReceived).To(Equal(int64(2)))
+			})
+
+			It("increments the TotalValueMetricsReceived", func() {
+				Expect(internalMetrics.TotalValueMetricsReceived).To(Equal(int64(2)))
+			})
+
+			It("adds the container metric", func() {
+				Expect(len(containerMetrics)).To(Equal(2))
+				Expect(containerMetrics[0]).To(Equal(containerMetric))
+			})
+
+			It("adds the counter event", func() {
+				Expect(len(counterEvents)).To(Equal(2))
+				Expect(counterEvents[0]).To(Equal(counterEvent))
+			})
+
+			It("adds the value metric", func() {
+				Expect(len(valueMetrics)).To(Equal(2))
+				Expect(valueMetrics[0]).To(Equal(valueMetric))
+			})
+		})
 	})
 
-	Describe("GetContainerMetrics", func() {
+	Context("ContainerMetrics", func() {
 		BeforeEach(func() {
 			metricsStore.AddMetric(
 				&events.Envelope{
@@ -394,7 +598,7 @@ var _ = Describe("Store", func() {
 					Timestamp:  proto.Int64(metricTimestamp),
 					Deployment: proto.String(boshDeployment),
 					Job:        proto.String(boshJob),
-					Index:      proto.String(boshIndex),
+					Index:      proto.String(boshIndex0),
 					Ip:         proto.String(boshIP),
 					Tags:       map[string]string{},
 					ContainerMetric: &events.ContainerMetric{
@@ -414,7 +618,7 @@ var _ = Describe("Store", func() {
 				Timestamp:        metricTimestamp,
 				Deployment:       boshDeployment,
 				Job:              boshJob,
-				Index:            boshIndex,
+				Index:            boshIndex0,
 				IP:               boshIP,
 				Tags:             map[string]string{},
 				ApplicationId:    containerMetricApplicationId,
@@ -425,67 +629,32 @@ var _ = Describe("Store", func() {
 				MemoryBytesQuota: containerMetricMemoryBytesQuota,
 				DiskBytesQuota:   containerMetricDiskBytesQuota,
 			}
-
-			containerMetrics = metricsStore.GetContainerMetrics()
 		})
 
-		It("returns the container metrics", func() {
-			Expect(len(containerMetrics)).To(Equal(1))
-			Expect(containerMetrics[0]).To(Equal(containerMetric))
-		})
-	})
+		Describe("GetContainerMetrics", func() {
+			BeforeEach(func() {
+				containerMetrics = metricsStore.GetContainerMetrics()
+			})
 
-	Describe("FlushContainerMetrics", func() {
-		BeforeEach(func() {
-			metricsStore.AddMetric(
-				&events.Envelope{
-					Origin:     proto.String(origin),
-					EventType:  events.Envelope_ContainerMetric.Enum(),
-					Timestamp:  proto.Int64(metricTimestamp),
-					Deployment: proto.String(boshDeployment),
-					Job:        proto.String(boshJob),
-					Index:      proto.String(boshIndex),
-					Ip:         proto.String(boshIP),
-					Tags:       map[string]string{},
-					ContainerMetric: &events.ContainerMetric{
-						ApplicationId:    proto.String(containerMetricApplicationId),
-						InstanceIndex:    proto.Int32(containerMetricInstanceIndex),
-						CpuPercentage:    proto.Float64(containerMetricCpuPercentage),
-						MemoryBytes:      proto.Uint64(containerMetricMemoryBytes),
-						DiskBytes:        proto.Uint64(containerMetricDiskBytes),
-						MemoryBytesQuota: proto.Uint64(containerMetricMemoryBytesQuota),
-						DiskBytesQuota:   proto.Uint64(containerMetricDiskBytesQuota),
-					},
-				},
-			)
-
-			containerMetric = metrics.ContainerMetric{
-				Origin:           origin,
-				Timestamp:        metricTimestamp,
-				Deployment:       boshDeployment,
-				Job:              boshJob,
-				Index:            boshIndex,
-				IP:               boshIP,
-				Tags:             map[string]string{},
-				ApplicationId:    containerMetricApplicationId,
-				InstanceIndex:    containerMetricInstanceIndex,
-				CpuPercentage:    containerMetricCpuPercentage,
-				MemoryBytes:      containerMetricMemoryBytes,
-				DiskBytes:        containerMetricDiskBytes,
-				MemoryBytesQuota: containerMetricMemoryBytesQuota,
-				DiskBytesQuota:   containerMetricDiskBytesQuota,
-			}
-
-			metricsStore.FlushContainerMetrics()
-			containerMetrics = metricsStore.GetContainerMetrics()
+			It("returns the container metrics", func() {
+				Expect(len(containerMetrics)).To(Equal(1))
+				Expect(containerMetrics[0]).To(Equal(containerMetric))
+			})
 		})
 
-		It("returns empty container metrics", func() {
-			Expect(len(containerMetrics)).To(Equal(0))
+		Describe("FlushContainerMetrics", func() {
+			BeforeEach(func() {
+				metricsStore.FlushContainerMetrics()
+				containerMetrics = metricsStore.GetContainerMetrics()
+			})
+
+			It("returns empty container metrics", func() {
+				Expect(len(containerMetrics)).To(Equal(0))
+			})
 		})
 	})
 
-	Describe("GetCounterEvents", func() {
+	Context("CounterEvents", func() {
 		BeforeEach(func() {
 			metricsStore.AddMetric(
 				&events.Envelope{
@@ -494,7 +663,7 @@ var _ = Describe("Store", func() {
 					Timestamp:  proto.Int64(metricTimestamp),
 					Deployment: proto.String(boshDeployment),
 					Job:        proto.String(boshJob),
-					Index:      proto.String(boshIndex),
+					Index:      proto.String(boshIndex0),
 					Ip:         proto.String(boshIP),
 					Tags:       map[string]string{},
 					CounterEvent: &events.CounterEvent{
@@ -510,66 +679,39 @@ var _ = Describe("Store", func() {
 				Timestamp:  metricTimestamp,
 				Deployment: boshDeployment,
 				Job:        boshJob,
-				Index:      boshIndex,
+				Index:      boshIndex0,
 				IP:         boshIP,
 				Tags:       map[string]string{},
 				Name:       counterEventName,
 				Delta:      counterEventDelta,
 				Total:      counterEventTotal,
 			}
-
-			counterEvents = metricsStore.GetCounterEvents()
 		})
 
-		It("returns the counter events", func() {
-			Expect(len(counterEvents)).To(Equal(1))
-			Expect(counterEvents[0]).To(Equal(counterEvent))
-		})
-	})
+		Describe("GetCounterEvents", func() {
+			BeforeEach(func() {
+				counterEvents = metricsStore.GetCounterEvents()
+			})
 
-	Describe("FlushCounterEvents", func() {
-		BeforeEach(func() {
-			metricsStore.AddMetric(
-				&events.Envelope{
-					Origin:     proto.String(origin),
-					EventType:  events.Envelope_CounterEvent.Enum(),
-					Timestamp:  proto.Int64(metricTimestamp),
-					Deployment: proto.String(boshDeployment),
-					Job:        proto.String(boshJob),
-					Index:      proto.String(boshIndex),
-					Ip:         proto.String(boshIP),
-					Tags:       map[string]string{},
-					CounterEvent: &events.CounterEvent{
-						Name:  proto.String(counterEventName),
-						Delta: proto.Uint64(counterEventDelta),
-						Total: proto.Uint64(counterEventTotal),
-					},
-				},
-			)
-
-			counterEvent = metrics.CounterEvent{
-				Origin:     origin,
-				Timestamp:  metricTimestamp,
-				Deployment: boshDeployment,
-				Job:        boshJob,
-				Index:      boshIndex,
-				IP:         boshIP,
-				Tags:       map[string]string{},
-				Name:       counterEventName,
-				Delta:      counterEventDelta,
-				Total:      counterEventTotal,
-			}
-
-			metricsStore.FlushCounterEvents()
-			counterEvents = metricsStore.GetCounterEvents()
+			It("returns the counter events", func() {
+				Expect(len(counterEvents)).To(Equal(1))
+				Expect(counterEvents[0]).To(Equal(counterEvent))
+			})
 		})
 
-		It("returns empty counter events", func() {
-			Expect(len(counterEvents)).To(Equal(0))
+		Describe("FlushCounterEvents", func() {
+			BeforeEach(func() {
+				metricsStore.FlushCounterEvents()
+				counterEvents = metricsStore.GetCounterEvents()
+			})
+
+			It("returns empty counter events", func() {
+				Expect(len(counterEvents)).To(Equal(0))
+			})
 		})
 	})
 
-	Describe("GetValueMetrics", func() {
+	Context("ValueMetrics", func() {
 		BeforeEach(func() {
 			metricsStore.AddMetric(
 				&events.Envelope{
@@ -578,7 +720,7 @@ var _ = Describe("Store", func() {
 					Timestamp:  proto.Int64(metricTimestamp),
 					Deployment: proto.String(boshDeployment),
 					Job:        proto.String(boshJob),
-					Index:      proto.String(boshIndex),
+					Index:      proto.String(boshIndex0),
 					Ip:         proto.String(boshIP),
 					Tags:       map[string]string{},
 					ValueMetric: &events.ValueMetric{
@@ -594,62 +736,35 @@ var _ = Describe("Store", func() {
 				Timestamp:  metricTimestamp,
 				Deployment: boshDeployment,
 				Job:        boshJob,
-				Index:      boshIndex,
+				Index:      boshIndex0,
 				IP:         boshIP,
 				Tags:       map[string]string{},
 				Name:       valueMetricName,
 				Value:      valueMetricValue,
 				Unit:       valueMetricUnit,
 			}
-
-			valueMetrics = metricsStore.GetValueMetrics()
 		})
 
-		It("returns the value metrics", func() {
-			Expect(len(valueMetrics)).To(Equal(1))
-			Expect(valueMetrics[0]).To(Equal(valueMetric))
-		})
-	})
+		Describe("GetValueMetrics", func() {
+			BeforeEach(func() {
+				valueMetrics = metricsStore.GetValueMetrics()
+			})
 
-	Describe("FlushValueMetrics", func() {
-		BeforeEach(func() {
-			metricsStore.AddMetric(
-				&events.Envelope{
-					Origin:     proto.String(origin),
-					EventType:  events.Envelope_ValueMetric.Enum(),
-					Timestamp:  proto.Int64(metricTimestamp),
-					Deployment: proto.String(boshDeployment),
-					Job:        proto.String(boshJob),
-					Index:      proto.String(boshIndex),
-					Ip:         proto.String(boshIP),
-					Tags:       map[string]string{},
-					ValueMetric: &events.ValueMetric{
-						Name:  proto.String(valueMetricName),
-						Value: proto.Float64(valueMetricValue),
-						Unit:  proto.String(valueMetricUnit),
-					},
-				},
-			)
-
-			valueMetric = metrics.ValueMetric{
-				Origin:     origin,
-				Timestamp:  metricTimestamp,
-				Deployment: boshDeployment,
-				Job:        boshJob,
-				Index:      boshIndex,
-				IP:         boshIP,
-				Tags:       map[string]string{},
-				Name:       valueMetricName,
-				Value:      valueMetricValue,
-				Unit:       valueMetricUnit,
-			}
-
-			metricsStore.FlushValueMetrics()
-			valueMetrics = metricsStore.GetValueMetrics()
+			It("returns the value metrics", func() {
+				Expect(len(valueMetrics)).To(Equal(1))
+				Expect(valueMetrics[0]).To(Equal(valueMetric))
+			})
 		})
 
-		It("returns empty value metrics", func() {
-			Expect(len(valueMetrics)).To(Equal(0))
+		Describe("FlushValueMetrics", func() {
+			BeforeEach(func() {
+				metricsStore.FlushValueMetrics()
+				valueMetrics = metricsStore.GetValueMetrics()
+			})
+
+			It("returns empty value metrics", func() {
+				Expect(len(valueMetrics)).To(Equal(0))
+			})
 		})
 	})
 })
