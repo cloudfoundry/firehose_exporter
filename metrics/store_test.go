@@ -381,17 +381,17 @@ var _ = Describe("Store", func() {
 
 		It("adds a container metric", func() {
 			Expect(len(containerMetrics)).To(Equal(1))
-			Expect(containerMetrics[0]).To(Equal(containerMetric))
+			Expect(containerMetrics).To(ContainElement(containerMetric))
 		})
 
 		It("adds a counter event", func() {
 			Expect(len(counterEvents)).To(Equal(1))
-			Expect(counterEvents[0]).To(Equal(counterEvent))
+			Expect(counterEvents).To(ContainElement(counterEvent))
 		})
 
 		It("adds a value metric", func() {
 			Expect(len(valueMetrics)).To(Equal(1))
-			Expect(valueMetrics[0]).To(Equal(valueMetric))
+			Expect(valueMetrics).To(ContainElement(valueMetric))
 		})
 
 		Context("when adding the same metric with same labels", func() {
@@ -477,17 +477,17 @@ var _ = Describe("Store", func() {
 
 			It("does not add the duplicate container metric", func() {
 				Expect(len(containerMetrics)).To(Equal(1))
-				Expect(containerMetrics[0]).To(Equal(containerMetric))
+				Expect(containerMetrics).To(ContainElement(containerMetric))
 			})
 
 			It("does not add the duplicate counter event", func() {
 				Expect(len(counterEvents)).To(Equal(1))
-				Expect(counterEvents[0]).To(Equal(counterEvent))
+				Expect(counterEvents).To(ContainElement(counterEvent))
 			})
 
 			It("does not add the duplicate value metric", func() {
 				Expect(len(valueMetrics)).To(Equal(1))
-				Expect(valueMetrics[0]).To(Equal(valueMetric))
+				Expect(valueMetrics).To(ContainElement(valueMetric))
 			})
 		})
 
@@ -574,17 +574,17 @@ var _ = Describe("Store", func() {
 
 			It("adds the container metric", func() {
 				Expect(len(containerMetrics)).To(Equal(2))
-				Expect(containerMetrics[0]).To(Equal(containerMetric))
+				Expect(containerMetrics).To(ContainElement(containerMetric))
 			})
 
 			It("adds the counter event", func() {
 				Expect(len(counterEvents)).To(Equal(2))
-				Expect(counterEvents[0]).To(Equal(counterEvent))
+				Expect(counterEvents).To(ContainElement(counterEvent))
 			})
 
 			It("adds the value metric", func() {
 				Expect(len(valueMetrics)).To(Equal(2))
-				Expect(valueMetrics[0]).To(Equal(valueMetric))
+				Expect(valueMetrics).To(ContainElement(valueMetric))
 			})
 		})
 	})
@@ -638,7 +638,7 @@ var _ = Describe("Store", func() {
 
 			It("returns the container metrics", func() {
 				Expect(len(containerMetrics)).To(Equal(1))
-				Expect(containerMetrics[0]).To(Equal(containerMetric))
+				Expect(containerMetrics).To(ContainElement(containerMetric))
 			})
 		})
 
@@ -695,7 +695,7 @@ var _ = Describe("Store", func() {
 
 			It("returns the counter events", func() {
 				Expect(len(counterEvents)).To(Equal(1))
-				Expect(counterEvents[0]).To(Equal(counterEvent))
+				Expect(counterEvents).To(ContainElement(counterEvent))
 			})
 		})
 
@@ -752,7 +752,7 @@ var _ = Describe("Store", func() {
 
 			It("returns the value metrics", func() {
 				Expect(len(valueMetrics)).To(Equal(1))
-				Expect(valueMetrics[0]).To(Equal(valueMetric))
+				Expect(valueMetrics).To(ContainElement(valueMetric))
 			})
 		})
 
