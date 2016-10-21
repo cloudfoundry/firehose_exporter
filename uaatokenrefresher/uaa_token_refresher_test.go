@@ -4,8 +4,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/cloudfoundry-community/firehose_exporter/uaatokenrefresher"
 	"github.com/cloudfoundry-community/firehose_exporter/uaatokenrefresher/fakes"
+
+	. "github.com/cloudfoundry-community/firehose_exporter/uaatokenrefresher"
 )
 
 var _ = Describe("UAATokenRefresher", func() {
@@ -14,7 +15,7 @@ var _ = Describe("UAATokenRefresher", func() {
 		fakeToken string
 
 		fakeUAA            *fakes.FakeUAA
-		authTokenRefresher *uaatokenrefresher.UAATokenRefresher
+		authTokenRefresher *UAATokenRefresher
 	)
 
 	BeforeEach(func() {
@@ -22,7 +23,7 @@ var _ = Describe("UAATokenRefresher", func() {
 		fakeToken = fakeUAA.AuthToken()
 		fakeUAA.Start()
 
-		authTokenRefresher, err = uaatokenrefresher.New(
+		authTokenRefresher, err = New(
 			fakeUAA.URL(), "client-id", "client-secret", true,
 		)
 	})

@@ -12,7 +12,7 @@ import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/cloudfoundry-community/firehose_exporter/collectors"
+	. "github.com/cloudfoundry-community/firehose_exporter/collectors"
 )
 
 var _ = Describe("ValueMetricsCollector", func() {
@@ -22,7 +22,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 		metricsExpiration      time.Duration
 		metricsCleanupInterval time.Duration
 		dopplerDeployments     []string
-		valueMetricsCollector  *collectors.ValueMetricsCollector
+		valueMetricsCollector  *ValueMetricsCollector
 
 		valueMetricsCollectorDesc *prometheus.Desc
 	)
@@ -41,7 +41,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 	})
 
 	JustBeforeEach(func() {
-		valueMetricsCollector = collectors.NewValueMetricsCollector(namespace, metricsStore, dopplerDeployments)
+		valueMetricsCollector = NewValueMetricsCollector(namespace, metricsStore, dopplerDeployments)
 	})
 
 	Describe("Describe", func() {

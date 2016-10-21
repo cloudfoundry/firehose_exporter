@@ -9,7 +9,7 @@ import (
 	"github.com/cloudfoundry-community/firehose_exporter/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/cloudfoundry-community/firehose_exporter/collectors"
+	. "github.com/cloudfoundry-community/firehose_exporter/collectors"
 )
 
 var _ = Describe("InternalMetricsCollector", func() {
@@ -18,7 +18,7 @@ var _ = Describe("InternalMetricsCollector", func() {
 		metricsStore             *metrics.Store
 		metricsExpiration        time.Duration
 		metricsCleanupInterval   time.Duration
-		internalMetricsCollector *collectors.InternalMetricsCollector
+		internalMetricsCollector *InternalMetricsCollector
 
 		totalEnvelopesReceivedDesc               *prometheus.Desc
 		lastEnvelopeReceivedTimestampDesc        *prometheus.Desc
@@ -124,7 +124,7 @@ var _ = Describe("InternalMetricsCollector", func() {
 	})
 
 	JustBeforeEach(func() {
-		internalMetricsCollector = collectors.NewInternalMetricsCollector(namespace, metricsStore)
+		internalMetricsCollector = NewInternalMetricsCollector(namespace, metricsStore)
 	})
 
 	Describe("Describe", func() {

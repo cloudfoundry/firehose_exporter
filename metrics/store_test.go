@@ -9,12 +9,12 @@ import (
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/gogo/protobuf/proto"
 
-	"github.com/cloudfoundry-community/firehose_exporter/metrics"
+	. "github.com/cloudfoundry-community/firehose_exporter/metrics"
 )
 
 var _ = Describe("Store", func() {
 	var (
-		metricsStore           *metrics.Store
+		metricsStore           *Store
 		metricsExpiration      time.Duration
 		metricsCleanupInterval time.Duration
 
@@ -42,18 +42,18 @@ var _ = Describe("Store", func() {
 		valueMetricValue = float64(2000)
 		valueMetricUnit  = "kb"
 
-		containerMetric metrics.ContainerMetric
-		counterEvent    metrics.CounterEvent
-		valueMetric     metrics.ValueMetric
+		containerMetric ContainerMetric
+		counterEvent    CounterEvent
+		valueMetric     ValueMetric
 
-		internalMetrics  metrics.InternalMetrics
-		containerMetrics metrics.ContainerMetrics
-		counterEvents    metrics.CounterEvents
-		valueMetrics     metrics.ValueMetrics
+		internalMetrics  InternalMetrics
+		containerMetrics ContainerMetrics
+		counterEvents    CounterEvents
+		valueMetrics     ValueMetrics
 	)
 
 	BeforeEach(func() {
-		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval)
+		metricsStore = NewStore(metricsExpiration, metricsCleanupInterval)
 	})
 
 	Describe("GetInternalMetrics", func() {
@@ -127,7 +127,7 @@ var _ = Describe("Store", func() {
 		)
 
 		BeforeEach(func() {
-			metricsStore.SetInternalMetrics(metrics.InternalMetrics{
+			metricsStore.SetInternalMetrics(InternalMetrics{
 				TotalEnvelopesReceived:               totalEnvelopesReceived,
 				LastEnvelopReceivedTimestamp:         lastEnvelopeReceivedTimestamp,
 				TotalMetricsReceived:                 totalMetricsReceived,
@@ -252,7 +252,7 @@ var _ = Describe("Store", func() {
 				},
 			)
 
-			containerMetric = metrics.ContainerMetric{
+			containerMetric = ContainerMetric{
 				Origin:           origin,
 				Timestamp:        metricTimestamp,
 				Deployment:       boshDeployment,
@@ -287,7 +287,7 @@ var _ = Describe("Store", func() {
 				},
 			)
 
-			counterEvent = metrics.CounterEvent{
+			counterEvent = CounterEvent{
 				Origin:     origin,
 				Timestamp:  metricTimestamp,
 				Deployment: boshDeployment,
@@ -318,7 +318,7 @@ var _ = Describe("Store", func() {
 				},
 			)
 
-			valueMetric = metrics.ValueMetric{
+			valueMetric = ValueMetric{
 				Origin:     origin,
 				Timestamp:  metricTimestamp,
 				Deployment: boshDeployment,
@@ -613,7 +613,7 @@ var _ = Describe("Store", func() {
 				},
 			)
 
-			containerMetric = metrics.ContainerMetric{
+			containerMetric = ContainerMetric{
 				Origin:           origin,
 				Timestamp:        metricTimestamp,
 				Deployment:       boshDeployment,
@@ -674,7 +674,7 @@ var _ = Describe("Store", func() {
 				},
 			)
 
-			counterEvent = metrics.CounterEvent{
+			counterEvent = CounterEvent{
 				Origin:     origin,
 				Timestamp:  metricTimestamp,
 				Deployment: boshDeployment,
@@ -731,7 +731,7 @@ var _ = Describe("Store", func() {
 				},
 			)
 
-			valueMetric = metrics.ValueMetric{
+			valueMetric = ValueMetric{
 				Origin:     origin,
 				Timestamp:  metricTimestamp,
 				Deployment: boshDeployment,

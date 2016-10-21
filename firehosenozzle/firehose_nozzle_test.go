@@ -9,16 +9,15 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	firehosefakes "github.com/cloudfoundry-community/firehose_exporter/firehosenozzle/fakes"
 	"github.com/cloudfoundry-community/firehose_exporter/metrics"
 	"github.com/cloudfoundry-community/firehose_exporter/uaatokenrefresher"
+	"github.com/cloudfoundry-community/firehose_exporter/uaatokenrefresher/fakes"
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/gogo/protobuf/proto"
 	"github.com/gorilla/websocket"
 
-	firehosefakes "github.com/cloudfoundry-community/firehose_exporter/firehosenozzle/fakes"
-	uaafakes "github.com/cloudfoundry-community/firehose_exporter/uaatokenrefresher/fakes"
-
-	"github.com/cloudfoundry-community/firehose_exporter/firehosenozzle"
+	. "github.com/cloudfoundry-community/firehose_exporter/firehosenozzle"
 )
 
 func init() {
@@ -31,7 +30,7 @@ var _ = Describe("FirehoseNozzle", func() {
 		subscriptionID     string
 		idleTimeoutSeconds uint32
 
-		fakeUAA   *uaafakes.FakeUAA
+		fakeUAA   *fakes.FakeUAA
 		fakeToken string
 
 		fakeFirehose *firehosefakes.FakeFirehose
@@ -42,7 +41,7 @@ var _ = Describe("FirehoseNozzle", func() {
 		metricsCleanupInterval time.Duration
 		metricsStore           *metrics.Store
 
-		firehoseNozzle *firehosenozzle.FirehoseNozzle
+		firehoseNozzle *FirehoseNozzle
 
 		envelope     events.Envelope
 		numEnvelopes = 10
@@ -53,7 +52,7 @@ var _ = Describe("FirehoseNozzle", func() {
 		subscriptionID = "fake-subscription-id"
 		idleTimeoutSeconds = 5
 
-		fakeUAA = uaafakes.NewFakeUAA("bearer", "123456789")
+		fakeUAA = fakes.NewFakeUAA("bearer", "123456789")
 		fakeToken = fakeUAA.AuthToken()
 		fakeUAA.Start()
 
@@ -86,7 +85,7 @@ var _ = Describe("FirehoseNozzle", func() {
 	})
 
 	JustBeforeEach(func() {
-		firehoseNozzle = firehosenozzle.New(
+		firehoseNozzle = New(
 			strings.Replace(fakeFirehose.URL(), "http:", "ws:", 1),
 			skipSSLValidation,
 			subscriptionID,
