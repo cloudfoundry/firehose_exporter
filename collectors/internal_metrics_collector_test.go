@@ -6,6 +6,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/cloudfoundry-community/firehose_exporter/filters"
 	"github.com/cloudfoundry-community/firehose_exporter/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -18,6 +19,8 @@ var _ = Describe("InternalMetricsCollector", func() {
 		metricsStore             *metrics.Store
 		metricsExpiration        time.Duration
 		metricsCleanupInterval   time.Duration
+		deploymentFilter         *filters.DeploymentFilter
+		eventFilter              *filters.EventFilter
 		internalMetricsCollector *InternalMetricsCollector
 
 		totalEnvelopesReceivedDesc               *prometheus.Desc
@@ -25,10 +28,13 @@ var _ = Describe("InternalMetricsCollector", func() {
 		totalMetricsReceivedDesc                 *prometheus.Desc
 		lastMetricReceivedTimestampDesc          *prometheus.Desc
 		totalContainerMetricsReceivedDesc        *prometheus.Desc
+		totalContainerMetricsProcessedDesc       *prometheus.Desc
 		lastContainerMetricReceivedTimestampDesc *prometheus.Desc
 		totalCounterEventsReceivedDesc           *prometheus.Desc
+		totalCounterEventsProcessedDesc          *prometheus.Desc
 		lastCounterEventReceivedTimestampDesc    *prometheus.Desc
 		totalValueMetricsReceivedDesc            *prometheus.Desc
+		totalValueMetricsProcessedDesc           *prometheus.Desc
 		lastValueMetricReceivedTimestampDesc     *prometheus.Desc
 		slowConsumerAlertDesc                    *prometheus.Desc
 		lastSlowConsumerAlertTimestampDesc       *prometheus.Desc
@@ -36,7 +42,9 @@ var _ = Describe("InternalMetricsCollector", func() {
 
 	BeforeEach(func() {
 		namespace = "test_exporter"
-		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval)
+		deploymentFilter = filters.NewDeploymentFilter([]string{})
+		eventFilter, _ = filters.NewEventFilter([]string{})
+		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval, deploymentFilter, eventFilter)
 
 		totalEnvelopesReceivedDesc = prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "", "total_envelopes_received"),
@@ -73,6 +81,13 @@ var _ = Describe("InternalMetricsCollector", func() {
 			nil,
 		)
 
+		totalContainerMetricsProcessedDesc = prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "", "total_container_metrics_processed"),
+			"Total number of container metrics processed from Cloud Foundry Firehose.",
+			[]string{},
+			nil,
+		)
+
 		lastContainerMetricReceivedTimestampDesc = prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "", "last_container_metric_received_timestamp"),
 			"Number of seconds since 1970 since last container metric received from Cloud Foundry Firehose.",
@@ -87,6 +102,13 @@ var _ = Describe("InternalMetricsCollector", func() {
 			nil,
 		)
 
+		totalCounterEventsProcessedDesc = prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "", "total_counter_events_processed"),
+			"Total number of counter events processed from Cloud Foundry Firehose.",
+			[]string{},
+			nil,
+		)
+
 		lastCounterEventReceivedTimestampDesc = prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "", "last_counter_event_received_timestamp"),
 			"Number of seconds since 1970 since last counter event received from Cloud Foundry Firehose.",
@@ -97,6 +119,13 @@ var _ = Describe("InternalMetricsCollector", func() {
 		totalValueMetricsReceivedDesc = prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "", "total_value_metrics_received"),
 			"Total number of value metrics received from Cloud Foundry Firehose.",
+			[]string{},
+			nil,
+		)
+
+		totalValueMetricsProcessedDesc = prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "", "total_value_metrics_processed"),
+			"Total number of value metrics processed from Cloud Foundry Firehose.",
 			[]string{},
 			nil,
 		)
@@ -160,6 +189,10 @@ var _ = Describe("InternalMetricsCollector", func() {
 			Eventually(descriptions).Should(Receive(Equal(totalContainerMetricsReceivedDesc)))
 		})
 
+		It("returns a total_container_metrics_processed metric description", func() {
+			Eventually(descriptions).Should(Receive(Equal(totalContainerMetricsProcessedDesc)))
+		})
+
 		It("returns a last_container_metric_received_timestamp metric description", func() {
 			Eventually(descriptions).Should(Receive(Equal(lastContainerMetricReceivedTimestampDesc)))
 		})
@@ -168,12 +201,20 @@ var _ = Describe("InternalMetricsCollector", func() {
 			Eventually(descriptions).Should(Receive(Equal(totalCounterEventsReceivedDesc)))
 		})
 
+		It("returns a total_counter_events_processed metric description", func() {
+			Eventually(descriptions).Should(Receive(Equal(totalCounterEventsProcessedDesc)))
+		})
+
 		It("returns a last_counter_event_received_timestamp metric description", func() {
 			Eventually(descriptions).Should(Receive(Equal(lastCounterEventReceivedTimestampDesc)))
 		})
 
 		It("returns a total_value_metrics_received metric description", func() {
 			Eventually(descriptions).Should(Receive(Equal(totalValueMetricsReceivedDesc)))
+		})
+
+		It("returns a total_value_metrics_processed metric description", func() {
+			Eventually(descriptions).Should(Receive(Equal(totalValueMetricsProcessedDesc)))
 		})
 
 		It("returns a last_value_metric_received_timestamp metric description", func() {
@@ -197,10 +238,13 @@ var _ = Describe("InternalMetricsCollector", func() {
 			totalMetricsReceived                 = int64(500)
 			lastMetricReceivedTimestamp          = time.Now().UnixNano()
 			totalContainerMetricsReceived        = int64(100)
+			totalContainerMetricsProcessed       = int64(50)
 			lastContainerMetricReceivedTimestamp = time.Now().UnixNano()
 			totalCounterEventsReceived           = int64(200)
+			totalCounterEventsProcessed          = int64(100)
 			lastCounterEventReceivedTimestamp    = time.Now().UnixNano()
 			totalValueMetricsReceived            = int64(300)
+			totalValueMetricsProcessed           = int64(150)
 			lastValueMetricReceivedTimestamp     = time.Now().UnixNano()
 			slowConsumerAlert                    = false
 			lastSlowConsumerAlertTimestamp       = time.Now().UnixNano()
@@ -211,10 +255,13 @@ var _ = Describe("InternalMetricsCollector", func() {
 			totalMetricsReceivedMetric                 prometheus.Metric
 			lastMetricReceivedTimestampMetric          prometheus.Metric
 			totalContainerMetricsReceivedMetric        prometheus.Metric
+			totalContainerMetricsProcessedMetric       prometheus.Metric
 			lastContainerMetricReceivedTimestampMetric prometheus.Metric
 			totalCounterEventsReceivedMetric           prometheus.Metric
+			totalCounterEventsProcessedMetric          prometheus.Metric
 			lastCounterEventReceivedTimestampMetric    prometheus.Metric
 			totalValueMetricsReceivedMetric            prometheus.Metric
+			totalValueMetricsProcessedMetric           prometheus.Metric
 			lastValueMetricReceivedTimestampMetric     prometheus.Metric
 			slowConsumerAlertMetric                    prometheus.Metric
 			lastSlowConsumerAlertTimestampMetric       prometheus.Metric
@@ -227,10 +274,13 @@ var _ = Describe("InternalMetricsCollector", func() {
 				TotalMetricsReceived:                 totalMetricsReceived,
 				LastMetricReceivedTimestamp:          lastMetricReceivedTimestamp,
 				TotalContainerMetricsReceived:        totalContainerMetricsReceived,
+				TotalContainerMetricsProcessed:       totalContainerMetricsProcessed,
 				LastContainerMetricReceivedTimestamp: lastContainerMetricReceivedTimestamp,
 				TotalCounterEventsReceived:           totalCounterEventsReceived,
+				TotalCounterEventsProcessed:          totalCounterEventsProcessed,
 				LastCounterEventReceivedTimestamp:    lastCounterEventReceivedTimestamp,
 				TotalValueMetricsReceived:            totalValueMetricsReceived,
+				TotalValueMetricsProcessed:           totalValueMetricsProcessed,
 				LastValueMetricReceivedTimestamp:     lastValueMetricReceivedTimestamp,
 				SlowConsumerAlert:                    slowConsumerAlert,
 				LastSlowConsumerAlertTimestamp:       lastSlowConsumerAlertTimestamp,
@@ -249,6 +299,7 @@ var _ = Describe("InternalMetricsCollector", func() {
 				prometheus.GaugeValue,
 				float64(lastEnvelopeReceivedTimestamp),
 			)
+
 			totalMetricsReceivedMetric = prometheus.MustNewConstMetric(
 				totalMetricsReceivedDesc,
 				prometheus.CounterValue,
@@ -267,6 +318,12 @@ var _ = Describe("InternalMetricsCollector", func() {
 				float64(totalContainerMetricsReceived),
 			)
 
+			totalContainerMetricsProcessedMetric = prometheus.MustNewConstMetric(
+				totalContainerMetricsProcessedDesc,
+				prometheus.CounterValue,
+				float64(totalContainerMetricsProcessed),
+			)
+
 			lastContainerMetricReceivedTimestampMetric = prometheus.MustNewConstMetric(
 				lastContainerMetricReceivedTimestampDesc,
 				prometheus.GaugeValue,
@@ -279,6 +336,12 @@ var _ = Describe("InternalMetricsCollector", func() {
 				float64(totalCounterEventsReceived),
 			)
 
+			totalCounterEventsProcessedMetric = prometheus.MustNewConstMetric(
+				totalCounterEventsProcessedDesc,
+				prometheus.CounterValue,
+				float64(totalCounterEventsProcessed),
+			)
+
 			lastCounterEventReceivedTimestampMetric = prometheus.MustNewConstMetric(
 				lastCounterEventReceivedTimestampDesc,
 				prometheus.GaugeValue,
@@ -289,6 +352,12 @@ var _ = Describe("InternalMetricsCollector", func() {
 				totalValueMetricsReceivedDesc,
 				prometheus.CounterValue,
 				float64(totalValueMetricsReceived),
+			)
+
+			totalValueMetricsProcessedMetric = prometheus.MustNewConstMetric(
+				totalValueMetricsProcessedDesc,
+				prometheus.CounterValue,
+				float64(totalValueMetricsProcessed),
 			)
 
 			lastValueMetricReceivedTimestampMetric = prometheus.MustNewConstMetric(
@@ -335,6 +404,10 @@ var _ = Describe("InternalMetricsCollector", func() {
 			Eventually(internalMetricsChan).Should(Receive(Equal(totalContainerMetricsReceivedMetric)))
 		})
 
+		It("returns a total_container_metrics_processed metric", func() {
+			Eventually(internalMetricsChan).Should(Receive(Equal(totalContainerMetricsProcessedMetric)))
+		})
+
 		It("returns a last_container_metric_received_timestamp", func() {
 			Eventually(internalMetricsChan).Should(Receive(Equal(lastContainerMetricReceivedTimestampMetric)))
 		})
@@ -343,12 +416,20 @@ var _ = Describe("InternalMetricsCollector", func() {
 			Eventually(internalMetricsChan).Should(Receive(Equal(totalCounterEventsReceivedMetric)))
 		})
 
+		It("returns a total_counter_events_processed metric", func() {
+			Eventually(internalMetricsChan).Should(Receive(Equal(totalCounterEventsProcessedMetric)))
+		})
+
 		It("returns a last_counter_event_received_timestamp metric", func() {
 			Eventually(internalMetricsChan).Should(Receive(Equal(lastCounterEventReceivedTimestampMetric)))
 		})
 
 		It("returns a total_value_metrics_received metric", func() {
 			Eventually(internalMetricsChan).Should(Receive(Equal(totalValueMetricsReceivedMetric)))
+		})
+
+		It("returns a total_value_metrics_processed metric", func() {
+			Eventually(internalMetricsChan).Should(Receive(Equal(totalValueMetricsProcessedMetric)))
 		})
 
 		It("returns a last_value_metric_received_timestamp metric", func() {

@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/cloudfoundry-community/firehose_exporter/filters"
 	"github.com/cloudfoundry-community/firehose_exporter/metrics"
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/gogo/protobuf/proto"
@@ -21,7 +22,8 @@ var _ = Describe("ValueMetricsCollector", func() {
 		metricsStore           *metrics.Store
 		metricsExpiration      time.Duration
 		metricsCleanupInterval time.Duration
-		dopplerDeployments     []string
+		deploymentFilter       *filters.DeploymentFilter
+		eventFilter            *filters.EventFilter
 		valueMetricsCollector  *ValueMetricsCollector
 
 		valueMetricsCollectorDesc *prometheus.Desc
@@ -29,8 +31,9 @@ var _ = Describe("ValueMetricsCollector", func() {
 
 	BeforeEach(func() {
 		namespace = "test_exporter"
-		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval)
-		dopplerDeployments = []string{}
+		deploymentFilter = filters.NewDeploymentFilter([]string{})
+		eventFilter, _ = filters.NewEventFilter([]string{})
+		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval, deploymentFilter, eventFilter)
 
 		valueMetricsCollectorDesc = prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "value_metric", "collector"),
@@ -41,7 +44,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 	})
 
 	JustBeforeEach(func() {
-		valueMetricsCollector = NewValueMetricsCollector(namespace, metricsStore, dopplerDeployments)
+		valueMetricsCollector = NewValueMetricsCollector(namespace, metricsStore)
 	})
 
 	Describe("Describe", func() {
@@ -177,30 +180,6 @@ var _ = Describe("ValueMetricsCollector", func() {
 
 			It("does not return any metric", func() {
 				Consistently(valueMetricsChan).ShouldNot(Receive())
-			})
-		})
-
-		Context("when there is a deployment filter", func() {
-			BeforeEach(func() {
-				dopplerDeployments = []string{"fake-deployment-name"}
-			})
-
-			It("returns a value_metric_fake_origin_fake_value_metric_1 metric", func() {
-				Eventually(valueMetricsChan).Should(Receive(Equal(valueMetric1)))
-			})
-
-			It("returns a value_metric_fake_origin_fake_value_metric_2 metric", func() {
-				Eventually(valueMetricsChan).Should(Receive(Equal(valueMetric2)))
-			})
-
-			Context("and the metrics deployment does not match", func() {
-				BeforeEach(func() {
-					dopplerDeployments = []string{"another-fake-deployment-name"}
-				})
-
-				It("does not return any metric", func() {
-					Consistently(valueMetricsChan).ShouldNot(Receive())
-				})
 			})
 		})
 	})

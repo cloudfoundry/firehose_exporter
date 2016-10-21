@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/cloudfoundry-community/firehose_exporter/filters"
 	"github.com/cloudfoundry-community/firehose_exporter/metrics"
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/gogo/protobuf/proto"
@@ -21,7 +22,8 @@ var _ = Describe("CounterEventsCollector", func() {
 		metricsStore           *metrics.Store
 		metricsExpiration      time.Duration
 		metricsCleanupInterval time.Duration
-		dopplerDeployments     []string
+		deploymentFilter       *filters.DeploymentFilter
+		eventFilter            *filters.EventFilter
 		counterEventsCollector *CounterEventsCollector
 
 		counterEventsCollectorDesc *prometheus.Desc
@@ -29,8 +31,9 @@ var _ = Describe("CounterEventsCollector", func() {
 
 	BeforeEach(func() {
 		namespace = "test_exporter"
-		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval)
-		dopplerDeployments = []string{}
+		deploymentFilter = filters.NewDeploymentFilter([]string{})
+		eventFilter, _ = filters.NewEventFilter([]string{})
+		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval, deploymentFilter, eventFilter)
 
 		counterEventsCollectorDesc = prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "counter_event", "collector"),
@@ -41,7 +44,7 @@ var _ = Describe("CounterEventsCollector", func() {
 	})
 
 	JustBeforeEach(func() {
-		counterEventsCollector = NewCounterEventsCollector(namespace, metricsStore, dopplerDeployments)
+		counterEventsCollector = NewCounterEventsCollector(namespace, metricsStore)
 	})
 
 	Describe("Describe", func() {
@@ -217,38 +220,6 @@ var _ = Describe("CounterEventsCollector", func() {
 
 			It("does not return any metric", func() {
 				Consistently(counterEventsChan).ShouldNot(Receive())
-			})
-		})
-
-		Context("when there is a deployment filter", func() {
-			BeforeEach(func() {
-				dopplerDeployments = []string{"fake-deployment-name"}
-			})
-
-			It("returns a counter_event_fake_origin_total_fake_counter_event_1 metric", func() {
-				Eventually(counterEventsChan).Should(Receive(Equal(totalCounterEvent1)))
-			})
-
-			It("returns a counter_event_fake_origin_delta_fake_counter_event_1 metric", func() {
-				Eventually(counterEventsChan).Should(Receive(Equal(deltaCounterEvent1)))
-			})
-
-			It("returns a couter_metric_fake_origin_total_fake_counter_event_2 metric", func() {
-				Eventually(counterEventsChan).Should(Receive(Equal(totalCounterEvent2)))
-			})
-
-			It("returns a counter_event_fake_origin_delta_fake_counter_event_2 metric", func() {
-				Eventually(counterEventsChan).Should(Receive(Equal(deltaCounterEvent2)))
-			})
-
-			Context("and the metrics deployment does not match", func() {
-				BeforeEach(func() {
-					dopplerDeployments = []string{"another-fake-deployment-name"}
-				})
-
-				It("does not return any metric", func() {
-					Consistently(counterEventsChan).ShouldNot(Receive())
-				})
 			})
 		})
 	})

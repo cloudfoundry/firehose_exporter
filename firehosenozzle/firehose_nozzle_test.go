@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/cloudfoundry-community/firehose_exporter/filters"
 	firehosefakes "github.com/cloudfoundry-community/firehose_exporter/firehosenozzle/fakes"
 	"github.com/cloudfoundry-community/firehose_exporter/metrics"
 	"github.com/cloudfoundry-community/firehose_exporter/uaatokenrefresher"
@@ -39,6 +40,8 @@ var _ = Describe("FirehoseNozzle", func() {
 
 		metricsExpiration      time.Duration
 		metricsCleanupInterval time.Duration
+		deploymentFilter       *filters.DeploymentFilter
+		eventFilter            *filters.EventFilter
 		metricsStore           *metrics.Store
 
 		firehoseNozzle *FirehoseNozzle
@@ -63,7 +66,9 @@ var _ = Describe("FirehoseNozzle", func() {
 			fakeUAA.URL(), "client-id", "client-secret", true,
 		)
 
-		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval)
+		deploymentFilter = filters.NewDeploymentFilter([]string{})
+		eventFilter, _ = filters.NewEventFilter([]string{})
+		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval, deploymentFilter, eventFilter)
 
 		for i := 0; i < numEnvelopes; i++ {
 			envelope = events.Envelope{

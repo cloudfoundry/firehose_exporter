@@ -14,6 +14,7 @@ import (
 	"github.com/prometheus/common/version"
 
 	"github.com/cloudfoundry-community/firehose_exporter/collectors"
+	"github.com/cloudfoundry-community/firehose_exporter/filters"
 	"github.com/cloudfoundry-community/firehose_exporter/firehosenozzle"
 	"github.com/cloudfoundry-community/firehose_exporter/metrics"
 	"github.com/cloudfoundry-community/firehose_exporter/uaatokenrefresher"
@@ -55,7 +56,15 @@ var (
 		"How long a Cloud Foundry Doppler metric is valid ($FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION).",
 	)
 
-	dopplerDeployments sliceString
+	dopplerDeployments = flag.String(
+		"doppler.deployments", "",
+		"Comma separated deployments to filter ($FIREHOSE_EXPORTER_DOPPLER_DEPLOYMENTS)",
+	)
+
+	dopplerEvents = flag.String(
+		"doppler.events", "",
+		"Comma separated events to filter (ContainerMetric,CounterEvent,ValueMetric) ($FIREHOSE_EXPORTER_DOPPLER_EVENTS).",
+	)
 
 	skipSSLValidation = flag.Bool(
 		"skip-ssl-verify", false,
@@ -88,24 +97,7 @@ var (
 	)
 )
 
-type sliceString []string
-
-func (ss *sliceString) String() string {
-	return fmt.Sprint(*ss)
-}
-
-func (ss *sliceString) Set(value string) error {
-	*ss = append(*ss, value)
-
-	return nil
-}
-
 func init() {
-	flag.Var(
-		&dopplerDeployments, "doppler.deployment",
-		"Filter metrics to an specific BOSH deployment (this flag can be specified multiple times)",
-	)
-
 	prometheus.MustRegister(version.NewCollector(*metricsNamespace))
 }
 
@@ -117,7 +109,8 @@ func overrideFlagsWithEnvVars() {
 	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID", dopplerSubscriptionID)
 	overrideWithEnvUint("FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT_SECONDS", dopplerIdleTimeoutSeconds)
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION", dopplerMetricExpiration)
-	overrideWithEnvSliceString("FIREHOSE_EXPORTER_DOPPLER_DEPLOYMENTS", &dopplerDeployments)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_DEPLOYMENTS", dopplerDeployments)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_EVENTS", dopplerEvents)
 	overrideWithEnvBool("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY", skipSSLValidation)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_METRICS_NAMESPACE", metricsNamespace)
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL", metricsCleanupInterval)
@@ -165,15 +158,6 @@ func overrideWithEnvBool(name string, value *bool) {
 	}
 }
 
-func overrideWithEnvSliceString(name string, value *sliceString) {
-	envValue := os.Getenv(name)
-	if envValue != "" {
-		for _, val := range strings.Split(envValue, ",") {
-			*value = append(*value, val)
-		}
-	}
-}
-
 func main() {
 	flag.Parse()
 	overrideFlagsWithEnvVars()
@@ -197,7 +181,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	metricsStore := metrics.NewStore(*dopplerMetricExpiration, *metricsCleanupInterval)
+	deploymentFilter := filters.NewDeploymentFilter(strings.Split(*dopplerDeployments, ","))
+
+	eventFilter, err := filters.NewEventFilter(strings.Split(*dopplerEvents, ","))
+	if err != nil {
+		log.Error(err)
+		os.Exit(1)
+	}
+
+	metricsStore := metrics.NewStore(*dopplerMetricExpiration, *metricsCleanupInterval, deploymentFilter, eventFilter)
 
 	nozzle := firehosenozzle.New(
 		*dopplerUrl,
@@ -214,13 +206,13 @@ func main() {
 	internalMetricsCollector := collectors.NewInternalMetricsCollector(*metricsNamespace, metricsStore)
 	prometheus.MustRegister(internalMetricsCollector)
 
-	containerMetricsCollector := collectors.NewContainerMetricsCollector(*metricsNamespace, metricsStore, dopplerDeployments)
+	containerMetricsCollector := collectors.NewContainerMetricsCollector(*metricsNamespace, metricsStore)
 	prometheus.MustRegister(containerMetricsCollector)
 
-	counterEventsCollector := collectors.NewCounterEventsCollector(*metricsNamespace, metricsStore, dopplerDeployments)
+	counterEventsCollector := collectors.NewCounterEventsCollector(*metricsNamespace, metricsStore)
 	prometheus.MustRegister(counterEventsCollector)
 
-	valueMetricsCollector := collectors.NewValueMetricsCollector(*metricsNamespace, metricsStore, dopplerDeployments)
+	valueMetricsCollector := collectors.NewValueMetricsCollector(*metricsNamespace, metricsStore)
 	prometheus.MustRegister(valueMetricsCollector)
 
 	http.Handle(*metricsPath, prometheus.Handler())

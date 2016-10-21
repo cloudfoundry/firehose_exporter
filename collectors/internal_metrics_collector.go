@@ -14,10 +14,13 @@ type InternalMetricsCollector struct {
 	totalMetricsReceivedDesc                 *prometheus.Desc
 	lastMetricReceivedTimestampDesc          *prometheus.Desc
 	totalContainerMetricsReceivedDesc        *prometheus.Desc
+	totalContainerMetricsProcessedDesc       *prometheus.Desc
 	lastContainerMetricReceivedTimestampDesc *prometheus.Desc
 	totalCounterEventsReceivedDesc           *prometheus.Desc
+	totalCounterEventsProcessedDesc          *prometheus.Desc
 	lastCounterEventReceivedTimestampDesc    *prometheus.Desc
 	totalValueMetricsReceivedDesc            *prometheus.Desc
+	totalValueMetricsProcessedDesc           *prometheus.Desc
 	lastValueMetricReceivedTimestampDesc     *prometheus.Desc
 	slowConsumerAlertDesc                    *prometheus.Desc
 	lastSlowConsumerAlertTimestampDesc       *prometheus.Desc
@@ -62,6 +65,13 @@ func NewInternalMetricsCollector(
 		nil,
 	)
 
+	totalContainerMetricsProcessedDesc := prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "total_container_metrics_processed"),
+		"Total number of container metrics processed from Cloud Foundry Firehose.",
+		[]string{},
+		nil,
+	)
+
 	lastContainerMetricReceivedTimestampDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "last_container_metric_received_timestamp"),
 		"Number of seconds since 1970 since last container metric received from Cloud Foundry Firehose.",
@@ -76,6 +86,13 @@ func NewInternalMetricsCollector(
 		nil,
 	)
 
+	totalCounterEventsProcessedDesc := prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "total_counter_events_processed"),
+		"Total number of counter events processed from Cloud Foundry Firehose.",
+		[]string{},
+		nil,
+	)
+
 	lastCounterEventReceivedTimestampDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "last_counter_event_received_timestamp"),
 		"Number of seconds since 1970 since last counter event received from Cloud Foundry Firehose.",
@@ -86,6 +103,13 @@ func NewInternalMetricsCollector(
 	totalValueMetricsReceivedDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "total_value_metrics_received"),
 		"Total number of value metrics received from Cloud Foundry Firehose.",
+		[]string{},
+		nil,
+	)
+
+	totalValueMetricsProcessedDesc := prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "total_value_metrics_processed"),
+		"Total number of value metrics processed from Cloud Foundry Firehose.",
 		[]string{},
 		nil,
 	)
@@ -119,10 +143,13 @@ func NewInternalMetricsCollector(
 		totalMetricsReceivedDesc:                 totalMetricsReceivedDesc,
 		lastMetricReceivedTimestampDesc:          lastMetricReceivedTimestampDesc,
 		totalContainerMetricsReceivedDesc:        totalContainerMetricsReceivedDesc,
+		totalContainerMetricsProcessedDesc:       totalContainerMetricsProcessedDesc,
 		lastContainerMetricReceivedTimestampDesc: lastContainerMetricReceivedTimestampDesc,
 		totalCounterEventsReceivedDesc:           totalCounterEventsReceivedDesc,
+		totalCounterEventsProcessedDesc:          totalCounterEventsProcessedDesc,
 		lastCounterEventReceivedTimestampDesc:    lastCounterEventReceivedTimestampDesc,
 		totalValueMetricsReceivedDesc:            totalValueMetricsReceivedDesc,
+		totalValueMetricsProcessedDesc:           totalValueMetricsProcessedDesc,
 		lastValueMetricReceivedTimestampDesc:     lastValueMetricReceivedTimestampDesc,
 		slowConsumerAlertDesc:                    slowConsumerAlertDesc,
 		lastSlowConsumerAlertTimestampDesc:       lastSlowConsumerAlertTimestampDesc,
@@ -164,6 +191,12 @@ func (c InternalMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	)
 
 	ch <- prometheus.MustNewConstMetric(
+		c.totalContainerMetricsProcessedDesc,
+		prometheus.CounterValue,
+		float64(internalMetrics.TotalContainerMetricsProcessed),
+	)
+
+	ch <- prometheus.MustNewConstMetric(
 		c.lastContainerMetricReceivedTimestampDesc,
 		prometheus.GaugeValue,
 		float64(internalMetrics.LastContainerMetricReceivedTimestamp),
@@ -176,6 +209,12 @@ func (c InternalMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	)
 
 	ch <- prometheus.MustNewConstMetric(
+		c.totalCounterEventsProcessedDesc,
+		prometheus.CounterValue,
+		float64(internalMetrics.TotalCounterEventsProcessed),
+	)
+
+	ch <- prometheus.MustNewConstMetric(
 		c.lastCounterEventReceivedTimestampDesc,
 		prometheus.GaugeValue,
 		float64(internalMetrics.LastCounterEventReceivedTimestamp),
@@ -185,6 +224,12 @@ func (c InternalMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 		c.totalValueMetricsReceivedDesc,
 		prometheus.CounterValue,
 		float64(internalMetrics.TotalValueMetricsReceived),
+	)
+
+	ch <- prometheus.MustNewConstMetric(
+		c.totalValueMetricsProcessedDesc,
+		prometheus.CounterValue,
+		float64(internalMetrics.TotalValueMetricsProcessed),
 	)
 
 	ch <- prometheus.MustNewConstMetric(
@@ -220,10 +265,13 @@ func (c InternalMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.totalMetricsReceivedDesc
 	ch <- c.lastMetricReceivedTimestampDesc
 	ch <- c.totalContainerMetricsReceivedDesc
+	ch <- c.totalContainerMetricsProcessedDesc
 	ch <- c.lastContainerMetricReceivedTimestampDesc
 	ch <- c.totalCounterEventsReceivedDesc
+	ch <- c.totalCounterEventsProcessedDesc
 	ch <- c.lastCounterEventReceivedTimestampDesc
 	ch <- c.totalValueMetricsReceivedDesc
+	ch <- c.totalValueMetricsProcessedDesc
 	ch <- c.lastValueMetricReceivedTimestampDesc
 	ch <- c.slowConsumerAlertDesc
 	ch <- c.lastSlowConsumerAlertTimestampDesc

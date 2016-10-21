@@ -6,10 +6,13 @@ const (
 	TotalMetricsReceivedKey                 = "TotalMetricsReceived"
 	LastMetricReceivedTimestampKey          = "LastMetricReceivedTimestamp"
 	TotalContainerMetricsReceivedKey        = "TotalContainerMetricsReceived"
+	TotalContainerMetricsProcessedKey       = "TotalContainerMetricsProcessed"
 	LastContainerMetricReceivedTimestampKey = "LastContainerMetricReceivedTimestamp"
 	TotalCounterEventsReceivedKey           = "TotalCounterEventsReceived"
+	TotalCounterEventsProcessedKey          = "TotalCounterEventsProcessed"
 	LastCounterEventReceivedTimestampKey    = "LastCounterEventReceivedTimestamp"
 	TotalValueMetricsReceivedKey            = "TotalValueMetricsReceived"
+	TotalValueMetricsProcessedKey           = "TotalValueMetricsProcessed"
 	LastValueMetricReceivedTimestampKey     = "LastValueMetricReceivedTimestamp"
 	SlowConsumerAlertKey                    = "SlowConsumerAlert"
 	LastSlowConsumerAlertTimestampKey       = "LastSlowConsumerAlertTimestamp"
@@ -21,10 +24,13 @@ type InternalMetrics struct {
 	TotalMetricsReceived                 int64
 	LastMetricReceivedTimestamp          int64
 	TotalContainerMetricsReceived        int64
+	TotalContainerMetricsProcessed       int64
 	LastContainerMetricReceivedTimestamp int64
 	TotalCounterEventsReceived           int64
+	TotalCounterEventsProcessed          int64
 	LastCounterEventReceivedTimestamp    int64
 	TotalValueMetricsReceived            int64
+	TotalValueMetricsProcessed           int64
 	LastValueMetricReceivedTimestamp     int64
 	SlowConsumerAlert                    bool
 	LastSlowConsumerAlertTimestamp       int64

@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/cloudfoundry-community/firehose_exporter/filters"
 	"github.com/cloudfoundry-community/firehose_exporter/metrics"
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/gogo/protobuf/proto"
@@ -21,7 +22,8 @@ var _ = Describe("ContainerMetricsCollector", func() {
 		metricsStore              *metrics.Store
 		metricsExpiration         time.Duration
 		metricsCleanupInterval    time.Duration
-		dopplerDeployments        []string
+		deploymentFilter          *filters.DeploymentFilter
+		eventFilter               *filters.EventFilter
 		containerMetricsCollector *ContainerMetricsCollector
 
 		cpuPercentageMetricDesc    *prometheus.Desc
@@ -33,8 +35,9 @@ var _ = Describe("ContainerMetricsCollector", func() {
 
 	BeforeEach(func() {
 		namespace = "test_exporter"
-		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval)
-		dopplerDeployments = []string{}
+		deploymentFilter = filters.NewDeploymentFilter([]string{})
+		eventFilter, _ = filters.NewEventFilter([]string{})
+		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval, deploymentFilter, eventFilter)
 
 		cpuPercentageMetricDesc = prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "container_metric", "cpu_percentage"),
@@ -73,7 +76,7 @@ var _ = Describe("ContainerMetricsCollector", func() {
 	})
 
 	JustBeforeEach(func() {
-		containerMetricsCollector = NewContainerMetricsCollector(namespace, metricsStore, dopplerDeployments)
+		containerMetricsCollector = NewContainerMetricsCollector(namespace, metricsStore)
 	})
 
 	Describe("Describe", func() {
@@ -374,62 +377,6 @@ var _ = Describe("ContainerMetricsCollector", func() {
 
 			It("does not return any metric", func() {
 				Consistently(containerMetricsChan).ShouldNot(Receive())
-			})
-		})
-
-		Context("when there is a deployment filter", func() {
-			BeforeEach(func() {
-				dopplerDeployments = []string{"fake-deployment-name"}
-			})
-
-			It("returns a container_metric_cpu_percentage metric for FakeApplicationId1", func() {
-				Eventually(containerMetricsChan).Should(Receive(Equal(cpuPercentageMetric1)))
-			})
-
-			It("returns a container_metric_memory_bytes metric for FakeApplicationId1", func() {
-				Eventually(containerMetricsChan).Should(Receive(Equal(memoryBytesMetric1)))
-			})
-
-			It("returns a container_metric_disk_bytes metric for FakeApplicationId1", func() {
-				Eventually(containerMetricsChan).Should(Receive(Equal(diskBytesMetric1)))
-			})
-
-			It("returns a container_metric_memory_bytes_quota metric for FakeApplicationId1", func() {
-				Eventually(containerMetricsChan).Should(Receive(Equal(memoryBytesQuotaMetric1)))
-			})
-
-			It("returns a container_metric_disk_bytes_quota metric for FakeApplicationId1", func() {
-				Eventually(containerMetricsChan).Should(Receive(Equal(diskBytesQuotaMetric1)))
-			})
-
-			It("returns a container_metric_cpu_percentage metric for FakeApplicationId2", func() {
-				Eventually(containerMetricsChan).Should(Receive(Equal(cpuPercentageMetric2)))
-			})
-
-			It("returns a container_metric_memory_bytes metric for FakeApplicationId2", func() {
-				Eventually(containerMetricsChan).Should(Receive(Equal(memoryBytesMetric2)))
-			})
-
-			It("returns a container_metric_disk_bytes metric for FakeApplicationId2", func() {
-				Eventually(containerMetricsChan).Should(Receive(Equal(diskBytesMetric2)))
-			})
-
-			It("returns a container_metric_memory_bytes_quota metric for FakeApplicationId2", func() {
-				Eventually(containerMetricsChan).Should(Receive(Equal(memoryBytesQuotaMetric2)))
-			})
-
-			It("returns a container_metric_disk_bytes_quota metric for FakeApplicationId2", func() {
-				Eventually(containerMetricsChan).Should(Receive(Equal(diskBytesQuotaMetric2)))
-			})
-
-			Context("and the metrics deployment does not match", func() {
-				BeforeEach(func() {
-					dopplerDeployments = []string{"another-fake-deployment-name"}
-				})
-
-				It("does not return any metric", func() {
-					Consistently(containerMetricsChan).ShouldNot(Receive())
-				})
 			})
 		})
 	})

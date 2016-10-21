@@ -6,6 +6,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/cloudfoundry-community/firehose_exporter/filters"
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/gogo/protobuf/proto"
 
@@ -17,6 +18,8 @@ var _ = Describe("Store", func() {
 		metricsStore           *Store
 		metricsExpiration      time.Duration
 		metricsCleanupInterval time.Duration
+		deploymentFilter       *filters.DeploymentFilter
+		eventFilter            *filters.EventFilter
 
 		origin          = "fake-origin"
 		boshDeployment  = "fake-deployment-name"
@@ -53,7 +56,9 @@ var _ = Describe("Store", func() {
 	)
 
 	BeforeEach(func() {
-		metricsStore = NewStore(metricsExpiration, metricsCleanupInterval)
+		deploymentFilter = filters.NewDeploymentFilter([]string{})
+		eventFilter, _ = filters.NewEventFilter([]string{})
+		metricsStore = NewStore(metricsExpiration, metricsCleanupInterval, deploymentFilter, eventFilter)
 	})
 
 	Describe("GetInternalMetrics", func() {
@@ -81,6 +86,10 @@ var _ = Describe("Store", func() {
 			Expect(internalMetrics.TotalContainerMetricsReceived).To(Equal(int64(0)))
 		})
 
+		It("returns the TotalContainerMetricsProcessed", func() {
+			Expect(internalMetrics.TotalContainerMetricsProcessed).To(Equal(int64(0)))
+		})
+
 		It("returns the LastContainerMetricReceivedTimestamp", func() {
 			Expect(internalMetrics.LastContainerMetricReceivedTimestamp).To(Equal(int64(0)))
 		})
@@ -89,12 +98,20 @@ var _ = Describe("Store", func() {
 			Expect(internalMetrics.TotalCounterEventsReceived).To(Equal(int64(0)))
 		})
 
+		It("returns the TotalCounterEventsProcessed", func() {
+			Expect(internalMetrics.TotalCounterEventsProcessed).To(Equal(int64(0)))
+		})
+
 		It("returns the LastCounterEventReceivedTimestamp", func() {
 			Expect(internalMetrics.LastCounterEventReceivedTimestamp).To(Equal(int64(0)))
 		})
 
 		It("returns the TotalValueMetricsReceived", func() {
 			Expect(internalMetrics.TotalValueMetricsReceived).To(Equal(int64(0)))
+		})
+
+		It("returns the TotalValueMetricsProcessed", func() {
+			Expect(internalMetrics.TotalValueMetricsProcessed).To(Equal(int64(0)))
 		})
 
 		It("returns the LastValueMetricReceivedTimestamp", func() {
@@ -117,10 +134,13 @@ var _ = Describe("Store", func() {
 			totalMetricsReceived                 = int64(500)
 			lastMetricReceivedTimestamp          = time.Now().UnixNano()
 			totalContainerMetricsReceived        = int64(100)
+			totalContainerMetricsProcessed       = int64(50)
 			lastContainerMetricReceivedTimestamp = time.Now().UnixNano()
 			totalCounterEventsReceived           = int64(200)
+			totalCounterEventsProcessed          = int64(100)
 			lastCounterEventReceivedTimestamp    = time.Now().UnixNano()
 			totalValueMetricsReceived            = int64(300)
+			totalValueMetricsProcessed           = int64(150)
 			lastValueMetricReceivedTimestamp     = time.Now().UnixNano()
 			slowConsumerAlert                    = true
 			lastSlowConsumerAlertTimestamp       = time.Now().UnixNano()
@@ -133,10 +153,13 @@ var _ = Describe("Store", func() {
 				TotalMetricsReceived:                 totalMetricsReceived,
 				LastMetricReceivedTimestamp:          lastMetricReceivedTimestamp,
 				TotalContainerMetricsReceived:        totalContainerMetricsReceived,
+				TotalContainerMetricsProcessed:       totalContainerMetricsProcessed,
 				LastContainerMetricReceivedTimestamp: lastContainerMetricReceivedTimestamp,
 				TotalCounterEventsReceived:           totalCounterEventsReceived,
+				TotalCounterEventsProcessed:          totalCounterEventsProcessed,
 				LastCounterEventReceivedTimestamp:    lastCounterEventReceivedTimestamp,
 				TotalValueMetricsReceived:            totalValueMetricsReceived,
+				TotalValueMetricsProcessed:           totalValueMetricsProcessed,
 				LastValueMetricReceivedTimestamp:     lastValueMetricReceivedTimestamp,
 				SlowConsumerAlert:                    slowConsumerAlert,
 				LastSlowConsumerAlertTimestamp:       lastSlowConsumerAlertTimestamp,
@@ -165,6 +188,10 @@ var _ = Describe("Store", func() {
 			Expect(internalMetrics.TotalContainerMetricsReceived).To(Equal(totalContainerMetricsReceived))
 		})
 
+		It("sets the TotalContainerMetricsProcessed", func() {
+			Expect(internalMetrics.TotalContainerMetricsProcessed).To(Equal(totalContainerMetricsProcessed))
+		})
+
 		It("sets the LastContainerMetricReceivedTimestamp", func() {
 			Expect(internalMetrics.LastContainerMetricReceivedTimestamp).To(Equal(lastContainerMetricReceivedTimestamp))
 		})
@@ -173,12 +200,20 @@ var _ = Describe("Store", func() {
 			Expect(internalMetrics.TotalCounterEventsReceived).To(Equal(totalCounterEventsReceived))
 		})
 
+		It("sets the TotalCounterEventsProcessed", func() {
+			Expect(internalMetrics.TotalCounterEventsProcessed).To(Equal(totalCounterEventsProcessed))
+		})
+
 		It("sets the LastCounterEventReceivedTimestamp", func() {
 			Expect(internalMetrics.LastCounterEventReceivedTimestamp).To(Equal(lastCounterEventReceivedTimestamp))
 		})
 
 		It("sets the TotalValueMetricsReceived", func() {
 			Expect(internalMetrics.TotalValueMetricsReceived).To(Equal(totalValueMetricsReceived))
+		})
+
+		It("sets the TotalValueMetricsProcessed", func() {
+			Expect(internalMetrics.TotalValueMetricsProcessed).To(Equal(totalValueMetricsProcessed))
 		})
 
 		It("sets the LastValueMetricReceivedTimestamp", func() {
@@ -359,6 +394,10 @@ var _ = Describe("Store", func() {
 			Expect(internalMetrics.TotalContainerMetricsReceived).To(Equal(int64(1)))
 		})
 
+		It("increments the TotalContainerMetricsProcessed", func() {
+			Expect(internalMetrics.TotalContainerMetricsProcessed).To(Equal(int64(1)))
+		})
+
 		It("sets the LastContainerMetricReceivedTimestamp", func() {
 			Expect(internalMetrics.LastContainerMetricReceivedTimestamp).ToNot(Equal(int64(0)))
 		})
@@ -367,12 +406,20 @@ var _ = Describe("Store", func() {
 			Expect(internalMetrics.TotalCounterEventsReceived).To(Equal(int64(1)))
 		})
 
+		It("increments the TotalCounterEventsProcessed", func() {
+			Expect(internalMetrics.TotalCounterEventsProcessed).To(Equal(int64(1)))
+		})
+
 		It("sets the LastCounterEventReceivedTimestamp", func() {
 			Expect(internalMetrics.LastCounterEventReceivedTimestamp).ToNot(Equal(int64(0)))
 		})
 
 		It("increments the TotalValueMetricsReceived", func() {
 			Expect(internalMetrics.TotalValueMetricsReceived).To(Equal(int64(1)))
+		})
+
+		It("increments the TotalValueMetricsProcessed", func() {
+			Expect(internalMetrics.TotalValueMetricsProcessed).To(Equal(int64(1)))
 		})
 
 		It("sets the LastValueMetricReceivedTimestamp", func() {
@@ -467,12 +514,24 @@ var _ = Describe("Store", func() {
 				Expect(internalMetrics.TotalContainerMetricsReceived).To(Equal(int64(2)))
 			})
 
+			It("increments the TotalContainerMetricsProcessed", func() {
+				Expect(internalMetrics.TotalContainerMetricsProcessed).To(Equal(int64(2)))
+			})
+
 			It("increments the TotalCounterEventsReceived", func() {
 				Expect(internalMetrics.TotalCounterEventsReceived).To(Equal(int64(2)))
 			})
 
+			It("increments the TotalCounterEventsProcessed", func() {
+				Expect(internalMetrics.TotalCounterEventsProcessed).To(Equal(int64(2)))
+			})
+
 			It("increments the TotalValueMetricsReceived", func() {
 				Expect(internalMetrics.TotalValueMetricsReceived).To(Equal(int64(2)))
+			})
+
+			It("increments the TotalValueMetricsProcessed", func() {
+				Expect(internalMetrics.TotalValueMetricsProcessed).To(Equal(int64(2)))
 			})
 
 			It("does not add the duplicate container metric", func() {
@@ -564,12 +623,24 @@ var _ = Describe("Store", func() {
 				Expect(internalMetrics.TotalContainerMetricsReceived).To(Equal(int64(2)))
 			})
 
+			It("increments the TotalContainerMetricsProcessed", func() {
+				Expect(internalMetrics.TotalContainerMetricsProcessed).To(Equal(int64(2)))
+			})
+
 			It("increments the TotalCounterEventsReceived", func() {
 				Expect(internalMetrics.TotalCounterEventsReceived).To(Equal(int64(2)))
 			})
 
+			It("increments the TotalCounterEventsProcessed", func() {
+				Expect(internalMetrics.TotalCounterEventsProcessed).To(Equal(int64(2)))
+			})
+
 			It("increments the TotalValueMetricsReceived", func() {
 				Expect(internalMetrics.TotalValueMetricsReceived).To(Equal(int64(2)))
+			})
+
+			It("increments the TotalValueMetricsProcessed", func() {
+				Expect(internalMetrics.TotalValueMetricsProcessed).To(Equal(int64(2)))
 			})
 
 			It("adds the container metric", func() {
