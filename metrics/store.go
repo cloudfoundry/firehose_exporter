@@ -126,12 +126,12 @@ func (s *Store) SetInternalMetrics(internalMetrics InternalMetrics) {
 
 func (s *Store) AlertSlowConsumerError() {
 	s.internalMetrics.Set(SlowConsumerAlertKey, true, cache.DefaultExpiration)
-	s.internalMetrics.Set(LastSlowConsumerAlertTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
+	s.internalMetrics.Set(LastSlowConsumerAlertTimestampKey, time.Now().UnixNano(), cache.NoExpiration)
 }
 
 func (s *Store) AddMetric(envelope *events.Envelope) {
 	s.internalMetrics.IncrementInt64(TotalEnvelopesReceivedKey, 1)
-	s.internalMetrics.Set(LastEnvelopReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
+	s.internalMetrics.Set(LastEnvelopReceivedTimestampKey, time.Now().UnixNano(), cache.NoExpiration)
 
 	switch envelope.GetEventType() {
 	case events.Envelope_ContainerMetric:
@@ -187,9 +187,9 @@ func (s *Store) FlushValueMetrics() {
 
 func (s *Store) addContainerMetric(envelope *events.Envelope) {
 	s.internalMetrics.IncrementInt64(TotalMetricsReceivedKey, 1)
-	s.internalMetrics.Set(LastMetricReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
+	s.internalMetrics.Set(LastMetricReceivedTimestampKey, time.Now().UnixNano(), cache.NoExpiration)
 	s.internalMetrics.IncrementInt64(TotalContainerMetricsReceivedKey, 1)
-	s.internalMetrics.Set(LastContainerMetricReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
+	s.internalMetrics.Set(LastContainerMetricReceivedTimestampKey, time.Now().UnixNano(), cache.NoExpiration)
 
 	if s.deploymentFilter.Enabled(envelope.GetDeployment()) && s.eventFilter.Enabled(envelope) {
 		s.internalMetrics.IncrementInt64(TotalContainerMetricsProcessedKey, 1)
@@ -216,9 +216,9 @@ func (s *Store) addContainerMetric(envelope *events.Envelope) {
 
 func (s *Store) addCounterEvent(envelope *events.Envelope) {
 	s.internalMetrics.IncrementInt64(TotalMetricsReceivedKey, 1)
-	s.internalMetrics.Set(LastMetricReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
+	s.internalMetrics.Set(LastMetricReceivedTimestampKey, time.Now().UnixNano(), cache.NoExpiration)
 	s.internalMetrics.IncrementInt64(TotalCounterEventsReceivedKey, 1)
-	s.internalMetrics.Set(LastCounterEventReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
+	s.internalMetrics.Set(LastCounterEventReceivedTimestampKey, time.Now().UnixNano(), cache.NoExpiration)
 
 	if s.deploymentFilter.Enabled(envelope.GetDeployment()) && s.eventFilter.Enabled(envelope) {
 		s.internalMetrics.IncrementInt64(TotalCounterEventsProcessedKey, 1)
@@ -235,15 +235,15 @@ func (s *Store) addCounterEvent(envelope *events.Envelope) {
 			Delta:      envelope.GetCounterEvent().GetDelta(),
 			Total:      envelope.GetCounterEvent().GetTotal(),
 		}
-		s.counterEvents.Set(s.metricKey(envelope), counterEvent, cache.DefaultExpiration)
+		s.counterEvents.Set(s.metricKey(envelope), counterEvent, cache.NoExpiration)
 	}
 }
 
 func (s *Store) addValueMetric(envelope *events.Envelope) {
 	s.internalMetrics.IncrementInt64(TotalMetricsReceivedKey, 1)
-	s.internalMetrics.Set(LastMetricReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
+	s.internalMetrics.Set(LastMetricReceivedTimestampKey, time.Now().UnixNano(), cache.NoExpiration)
 	s.internalMetrics.IncrementInt64(TotalValueMetricsReceivedKey, 1)
-	s.internalMetrics.Set(LastValueMetricReceivedTimestampKey, time.Now().UnixNano(), cache.DefaultExpiration)
+	s.internalMetrics.Set(LastValueMetricReceivedTimestampKey, time.Now().UnixNano(), cache.NoExpiration)
 
 	if s.deploymentFilter.Enabled(envelope.GetDeployment()) && s.eventFilter.Enabled(envelope) {
 		s.internalMetrics.IncrementInt64(TotalValueMetricsProcessedKey, 1)
@@ -260,7 +260,7 @@ func (s *Store) addValueMetric(envelope *events.Envelope) {
 			Value:      envelope.GetValueMetric().GetValue(),
 			Unit:       envelope.GetValueMetric().GetUnit(),
 		}
-		s.valueMetrics.Set(s.metricKey(envelope), valueMetric, cache.DefaultExpiration)
+		s.valueMetrics.Set(s.metricKey(envelope), valueMetric, cache.NoExpiration)
 	}
 }
 
