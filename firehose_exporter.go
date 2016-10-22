@@ -181,9 +181,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	deploymentFilter := filters.NewDeploymentFilter(strings.Split(*dopplerDeployments, ","))
+	var deployments []string
+	if *dopplerDeployments != "" {
+		deployments = strings.Split(*dopplerDeployments, ",")
+	}
+	deploymentFilter := filters.NewDeploymentFilter(deployments)
 
-	eventFilter, err := filters.NewEventFilter(strings.Split(*dopplerEvents, ","))
+	var events []string
+	if *dopplerEvents != "" {
+		events = strings.Split(*dopplerEvents, ",")
+	}
+	eventFilter, err := filters.NewEventFilter(events)
 	if err != nil {
 		log.Error(err)
 		os.Exit(1)
