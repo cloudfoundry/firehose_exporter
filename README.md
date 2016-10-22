@@ -69,7 +69,32 @@ uaac client add prometheus-firehose \
 | web.listen-address<br />FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS | No | :9186 | Address to listen on for web interface and telemetry
 | web.telemetry-path<br />FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH | No | /metrics | Path under which to expose Prometheus metrics
 
+### Metrics
+
+For a list of [Cloud Foundry Firehose][firehose] metrics check the [Cloud Foundry Component Metrics][cfmetrics] documentation.
+
+The exporter returns the following internal metrics:
+
+| Metric | Description |
+| ------ | ----------- |
+| *namespace*_total_envelopes_received | Total number of envelopes received from Cloud Foundry Firehose |
+| *namespace*_last_envelope_received_timestamp | Number of seconds since 1970 since last envelope received from Cloud Foundry Firehose |
+| *namespace*_total_metrics_received | Total number of metrics received from Cloud Foundry Firehose |
+| *namespace*_last_metric_received_timestamp | Number of seconds since 1970 since last metric received from Cloud Foundry Firehose |
+| *namespace*_total_container_metrics_received | Total number of container metrics received from Cloud Foundry Firehose |
+| *namespace*_total_container_metrics_processed | Total number of container metrics processed from Cloud Foundry Firehose |
+| *namespace*_last_container_metric_received_timestamp | Number of seconds since 1970 since last container metric received from Cloud Foundry Firehose |
+| *namespace*_total_counter_events_received | Total number of counter events received from Cloud Foundry Firehose |
+| *namespace*_total_counter_events_processed | Total number of counter events processed from Cloud Foundry Firehose |
+| *namespace*_last_counter_event_received_timestamp | Number of seconds since 1970 since last counter event received from Cloud Foundry Firehose |
+| *namespace*_total_value_metrics_received | Total number of value metrics received from Cloud Foundry Firehose |
+| *namespace*_total_value_metrics_processed | Total number of value metrics processed from Cloud Foundry Firehose |
+| *namespace*_last_value_metric_received_timestamp | Number of seconds since 1970 since last value metric received from Cloud Foundry Firehose |
+| *namespace*_slow_consumer_alert | Nozzle could not keep up with Cloud Foundry Firehose |
+| *namespace*_last_slow_consumer_alert_timestamp | Number of seconds since 1970 since last slow consumer alert received from Cloud Foundry Firehose |
+
 [cloudfoundry]: https://www.cloudfoundry.org/
+[cfmetrics]: https://docs.cloudfoundry.org/loggregator/all_metrics.html
 [firehose]: https://docs.cloudfoundry.org/loggregator/architecture.html#firehose
 [golang]: https://golang.org/
 [manifest]: https://github.com/cloudfoundry-community/firehose_exporter/blob/master/manifest.yml
