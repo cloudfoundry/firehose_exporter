@@ -130,7 +130,7 @@ var _ = Describe("CounterEventsCollector", func() {
 
 			totalCounterEvent1 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
-					prometheus.BuildFQName(namespace, "counter_event", originNormalized+counterEvent1NameNormalized+"_total"),
+					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_"+counterEvent1NameNormalized+"_total"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event.", counterEvent1Name),
 					[]string{"origin", "bosh_deployment", "bosh_job", "bosh_index", "bosh_ip"},
 					nil,
@@ -146,7 +146,7 @@ var _ = Describe("CounterEventsCollector", func() {
 
 			deltaCounterEvent1 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
-					prometheus.BuildFQName(namespace, "counter_event", originNormalized+counterEvent1NameNormalized+"_delta"),
+					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_"+counterEvent1NameNormalized+"_delta"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event.", counterEvent1Name),
 					[]string{"origin", "bosh_deployment", "bosh_job", "bosh_index", "bosh_ip"},
 					nil,
@@ -162,7 +162,7 @@ var _ = Describe("CounterEventsCollector", func() {
 
 			totalCounterEvent2 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
-					prometheus.BuildFQName(namespace, "counter_event", originNormalized+counterEvent2NameNormalized+"_total"),
+					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_"+counterEvent2NameNormalized+"_total"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event.", counterEvent2Name),
 					[]string{"origin", "bosh_deployment", "bosh_job", "bosh_index", "bosh_ip"},
 					nil,
@@ -178,7 +178,7 @@ var _ = Describe("CounterEventsCollector", func() {
 
 			deltaCounterEvent2 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
-					prometheus.BuildFQName(namespace, "counter_event", originNormalized+counterEvent2NameNormalized+"_delta"),
+					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_"+counterEvent2NameNormalized+"_delta"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event.", counterEvent2Name),
 					[]string{"origin", "bosh_deployment", "bosh_job", "bosh_index", "bosh_ip"},
 					nil,
