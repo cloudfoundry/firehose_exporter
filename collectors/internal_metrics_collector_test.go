@@ -234,20 +234,20 @@ var _ = Describe("InternalMetricsCollector", func() {
 		var (
 			internalMetrics                      metrics.InternalMetrics
 			totalEnvelopesReceived               = int64(1000)
-			lastEnvelopeReceivedTimestamp        = time.Now().UnixNano()
+			lastEnvelopeReceivedTimestamp        = time.Now().Unix()
 			totalMetricsReceived                 = int64(500)
-			lastMetricReceivedTimestamp          = time.Now().UnixNano()
+			lastMetricReceivedTimestamp          = time.Now().Unix()
 			totalContainerMetricsReceived        = int64(100)
 			totalContainerMetricsProcessed       = int64(50)
-			lastContainerMetricReceivedTimestamp = time.Now().UnixNano()
+			lastContainerMetricReceivedTimestamp = time.Now().Unix()
 			totalCounterEventsReceived           = int64(200)
 			totalCounterEventsProcessed          = int64(100)
-			lastCounterEventReceivedTimestamp    = time.Now().UnixNano()
+			lastCounterEventReceivedTimestamp    = time.Now().Unix()
 			totalValueMetricsReceived            = int64(300)
 			totalValueMetricsProcessed           = int64(150)
-			lastValueMetricReceivedTimestamp     = time.Now().UnixNano()
+			lastValueMetricReceivedTimestamp     = time.Now().Unix()
 			slowConsumerAlert                    = false
-			lastSlowConsumerAlertTimestamp       = time.Now().UnixNano()
+			lastSlowConsumerAlertTimestamp       = time.Now().Unix()
 
 			internalMetricsChan                        chan prometheus.Metric
 			totalEnvelopesReceivedMetric               prometheus.Metric
