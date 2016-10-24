@@ -13,7 +13,7 @@ func NormalizeName(name string) string {
 	for _, word := range words {
 		if word != "." && word != "_" && word != "-" {
 			lowerWord := strings.ToLower(word)
-			normalizedName = append(normalizedName, lowerWord)
+			normalizedName = append(normalizedName, strings.Replace(lowerWord, "/", ":", -1))
 		}
 	}
 	return strings.Join(normalizedName, "_")
