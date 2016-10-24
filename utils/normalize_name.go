@@ -1,9 +1,14 @@
 package utils
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/fatih/camelcase"
+)
+
+var (
+	safeNameRE = regexp.MustCompile(`[^a-zA-Z0-9_]*$`)
 )
 
 func NormalizeName(name string) string {
@@ -11,10 +16,12 @@ func NormalizeName(name string) string {
 
 	words := camelcase.Split(name)
 	for _, word := range words {
-		if word != "." && word != "_" && word != "-" {
-			lowerWord := strings.ToLower(word)
-			normalizedName = append(normalizedName, strings.Replace(lowerWord, "/", ":", -1))
+		safeWord := strings.Trim(safeNameRE.ReplaceAllLiteralString(word, "_"), "_")
+		lowerWord := strings.TrimSpace(strings.ToLower(safeWord))
+		if lowerWord != "" {
+			normalizedName = append(normalizedName, lowerWord)
 		}
 	}
+
 	return strings.Join(normalizedName, "_")
 }
