@@ -52,22 +52,22 @@ uaac client add prometheus-firehose \
 
 ### Flags
 
-| Flag / Environment Variable | Required | Default | Description
-| --------------------------- | -------- | ------- | -----------
-| uaa.url<br />FIREHOSE_EXPORTER_UAA_URL | Yes | | Cloud Foundry UAA URL
-| uaa.client-id<br />FIREHOSE_EXPORTER_UAA_CLIENT_ID | Yes | | Cloud Foundry UAA Client ID
-| uaa.client-secret<br />FIREHOSE_EXPORTER_UAA_CLIENT_SECRET | Yes | | Cloud Foundry UAA Client Secret
-| doppler.url<br />FIREHOSE_EXPORTER_DOPPLER_URL | Yes | | Cloud Foundry Doppler URL
-| doppler.subscription-id<br />FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID | No | prometheus | Cloud Foundry Doppler Subscription ID
-| doppler.idle-timeout-seconds<br />FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT_SECONDS | No | 5 | Cloud Foundry Doppler Idle Timeout (in seconds)
-| doppler.metric-expiration<br />FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION | No | 5 minutes | How long a Cloud Foundry Container Metric is valid
-| doppler.deployments<br />FIREHOSE_EXPORTER_DOPPLER_DEPLOYMENTS | No | | Comma separated deployments to filter
-| doppler.events<br />FIREHOSE_EXPORTER_DOPPLER_EVENTS| No | | Comma separated events to filter (`ContainerMetric`, `CounterEvent`, `ValueMetric`)
+| Flag / Environment Variable | Required | Default | Description |
+| --------------------------- | -------- | ------- | ----------- |
+| uaa.url<br />FIREHOSE_EXPORTER_UAA_URL | Yes | | Cloud Foundry UAA URL |
+| uaa.client-id<br />FIREHOSE_EXPORTER_UAA_CLIENT_ID | Yes | | Cloud Foundry UAA Client ID |
+| uaa.client-secret<br />FIREHOSE_EXPORTER_UAA_CLIENT_SECRET | Yes | | Cloud Foundry UAA Client Secret |
+| doppler.url<br />FIREHOSE_EXPORTER_DOPPLER_URL | Yes | | Cloud Foundry Doppler URL |
+| doppler.subscription-id<br />FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID | No | prometheus | Cloud Foundry Doppler Subscription ID |
+| doppler.idle-timeout-seconds<br />FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT_SECONDS | No | 5 | Cloud Foundry Doppler Idle Timeout (in seconds) |
+| doppler.metric-expiration<br />FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION | No | 5 minutes | How long a Cloud Foundry Container Metric is valid |
+| doppler.deployments<br />FIREHOSE_EXPORTER_DOPPLER_DEPLOYMENTS | No | | Comma separated deployments to filter |
+| doppler.events<br />FIREHOSE_EXPORTER_DOPPLER_EVENTS| No | | Comma separated events to filter (`ContainerMetric`, `CounterEvent`, `ValueMetric`) |
 | skip-ssl-verify<br />FIREHOSE_EXPORTER_SKIP_SSL_VERIFY | No | false | Disable SSL Verify |
-| metrics.namespace<br />FIREHOSE_EXPORTER_METRICS_NAMESPACE | No | firehose_exporter | Metrics Namespace
-| metrics.cleanup-interval<br />FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL | No | 2 minutes | Metrics clean up interval
-| web.listen-address<br />FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS | No | :9186 | Address to listen on for web interface and telemetry
-| web.telemetry-path<br />FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH | No | /metrics | Path under which to expose Prometheus metrics
+| metrics.namespace<br />FIREHOSE_EXPORTER_METRICS_NAMESPACE | No | firehose_exporter | Metrics Namespace |
+| metrics.cleanup-interval<br />FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL | No | 2 minutes | Metrics clean up interval |
+| web.listen-address<br />FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS | No | :9186 | Address to listen on for web interface and telemetry |
+| web.telemetry-path<br />FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH | No | /metrics | Path under which to expose Prometheus metrics |
 
 ### Metrics
 
