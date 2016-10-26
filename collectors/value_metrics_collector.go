@@ -39,7 +39,7 @@ func (c ValueMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 		ch <- prometheus.MustNewConstMetric(
 			prometheus.NewDesc(
 				prometheus.BuildFQName(c.namespace, value_metrics_subsystem, metricName),
-				fmt.Sprintf("Cloud Foundry Firehose '%s' value metric.", valueMetric.Name),
+				fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric.Name, valueMetric.Origin),
 				[]string{"origin", "bosh_deployment", "bosh_job", "bosh_index", "bosh_ip", "unit"},
 				nil,
 			),

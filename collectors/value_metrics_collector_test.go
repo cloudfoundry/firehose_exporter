@@ -129,7 +129,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 			valueMetric1 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "value_metric", originNormalized+"_"+valueMetric1NameNormalized),
-					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric.", valueMetric1Name),
+					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric1Name, origin),
 					[]string{"origin", "bosh_deployment", "bosh_job", "bosh_index", "bosh_ip", "unit"},
 					nil,
 				),
@@ -146,7 +146,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 			valueMetric2 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "value_metric", originNormalized+"_"+valueMetric2NameNormalized),
-					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric.", valueMetric2Name),
+					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric2Name, origin),
 					[]string{"origin", "bosh_deployment", "bosh_job", "bosh_index", "bosh_ip", "unit"},
 					nil,
 				),
