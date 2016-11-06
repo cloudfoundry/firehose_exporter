@@ -2,6 +2,4 @@ language: go
 
 go_import_path: github.com/cloudfoundry-community/firehose_exporter
 
-install: make deps
-
 script: make test
