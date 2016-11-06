@@ -1,10 +1,18 @@
 # Cloud Foundry Firehose Exporter [![Build Status](https://travis-ci.org/cloudfoundry-community/firehose_exporter.png)](https://travis-ci.org/cloudfoundry-community/firehose_exporter)
 
-A [Prometheus][prometheus] exporter for [Cloud Foundry Firehose][firehose] metrics. It exports `ContainerMetric`, `CounterEvent` and `ValueMetric` events.
+A [Prometheus][prometheus] exporter for [Cloud Foundry Firehose][firehose] metrics. It exports Cloud Foundry `ContainerMetric`, `CounterEvent` and `ValueMetric` metrics.
 
 ## Installation
 
-### Locally
+### Binaries
+
+Download the already existing [binaries](https://github.com/cloudfoundry-community/firehose_exporter/releases) for your platform:
+
+```bash
+$ ./firehose_exporter <flags>
+```
+
+### From source
 
 Using the standard `go install` (you must have [Go][golang] already installed in your local machine):
 
