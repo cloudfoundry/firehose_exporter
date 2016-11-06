@@ -1,28 +1,29 @@
 verbose: false
 go:
-    cgo: false
+  cgo: false
 repository:
-    path: github.com/cloudfoundry-community/firehose_exporter
+  path: github.com/cloudfoundry-community/firehose_exporter
 build:
-    flags: -a -tags netgo
-    ldflags: |
-        -X {{repoPath}}/vendor/github.com/prometheus/common/version.Version={{.Version}}
-        -X {{repoPath}}/vendor/github.com/prometheus/common/version.Revision={{.Revision}}
-        -X {{repoPath}}/vendor/github.com/prometheus/common/version.Branch={{.Branch}}
-        -X {{repoPath}}/vendor/github.com/prometheus/common/version.BuildUser={{user}}@{{host}}
-        -X {{repoPath}}/vendor/github.com/prometheus/common/version.BuildDate={{date "20060102-15:04:05"}}
+  flags: -a -tags 'netgo static_build'
+  ldflags: |
+    -X {{repoPath}}/vendor/github.com/prometheus/common/version.Version={{.Version}}
+    -X {{repoPath}}/vendor/github.com/prometheus/common/version.Revision={{.Revision}}
+    -X {{repoPath}}/vendor/github.com/prometheus/common/version.Branch={{.Branch}}
+    -X {{repoPath}}/vendor/github.com/prometheus/common/version.BuildUser={{user}}@{{host}}
+    -X {{repoPath}}/vendor/github.com/prometheus/common/version.BuildDate={{date "20060102-15:04:05"}}
 tarball:
-    files:
-        - LICENSE
-        - NOTICE
+  files:
+    - LICENSE
+    - NOTICE
 crossbuild:
-    platforms:
-        - darwin/amd64
-        - darwin/386
-        - linux/amd64
-        - linux/arm64
-        - linux/386
-        - linux/arm
-        - linux/ppc64
-        - linux/ppc64le
-
+  platforms:
+    - darwin/386
+    - darwin/amd64
+    - linux/386
+    - linux/amd64
+    - linux/arm
+    - linux/arm64
+    - linux/ppc64
+    - linux/ppc64le
+    - windows/386
+    - windows/amd64
