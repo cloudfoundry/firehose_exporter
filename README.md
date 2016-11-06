@@ -93,6 +93,14 @@ The exporter returns the following internal metrics:
 | *namespace*_slow_consumer_alert | Nozzle could not keep up with Cloud Foundry Firehose |
 | *namespace*_last_slow_consumer_alert_timestamp | Number of seconds since 1970 since last slow consumer alert received from Cloud Foundry Firehose |
 
+## Contributing
+
+Refer to [CONTRIBUTING.md](https://github.com/cloudfoundry-community/firehose_exporter/blob/master/CONTRIBUTING.md).
+
+## License
+
+Apache License 2.0, see [LICENSE](https://github.com/cloudfoundry-community/firehose_exporter/blob/master/LICENSE).
+
 [cloudfoundry]: https://www.cloudfoundry.org/
 [cfmetrics]: https://docs.cloudfoundry.org/loggregator/all_metrics.html
 [firehose]: https://docs.cloudfoundry.org/loggregator/architecture.html#firehose
