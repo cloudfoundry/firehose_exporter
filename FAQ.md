@@ -16,7 +16,7 @@ The *filter.deployments* command flag allows you to filter metrics which origin 
 
 ### How can I get readeable names for Container Metrics labels, like the application name?
 
-You can combine this exporter with the [Cloud Foundry exporter][cf_exporter], that provides administrative information about `Applications`, `Organizations` and `Spaces`.
+You can combine this exporter with the [Cloud Foundry Prometheus Exporter][cf_exporter], that provides administrative information about `Applications`, `Organizations` and `Spaces`.
 
 For example:
 
