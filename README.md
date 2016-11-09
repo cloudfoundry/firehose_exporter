@@ -71,9 +71,9 @@ uaac client add prometheus-firehose \
 | doppler.metric-expiration<br />FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION | No | 5 minutes | How long a Cloud Foundry Container Metric is valid |
 | doppler.deployments<br />FIREHOSE_EXPORTER_DOPPLER_DEPLOYMENTS | No | | Comma separated deployments to filter |
 | doppler.events<br />FIREHOSE_EXPORTER_DOPPLER_EVENTS| No | | Comma separated events to filter (`ContainerMetric`, `CounterEvent`, `ValueMetric`) |
-| skip-ssl-verify<br />FIREHOSE_EXPORTER_SKIP_SSL_VERIFY | No | false | Disable SSL Verify |
-| metrics.namespace<br />FIREHOSE_EXPORTER_METRICS_NAMESPACE | No | firehose_exporter | Metrics Namespace |
+| metrics.namespace<br />FIREHOSE_EXPORTER_METRICS_NAMESPACE | No | firehose | Metrics Namespace |
 | metrics.cleanup-interval<br />FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL | No | 2 minutes | Metrics clean up interval |
+| skip-ssl-verify<br />FIREHOSE_EXPORTER_SKIP_SSL_VERIFY | No | false | Disable SSL Verify |
 | web.listen-address<br />FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS | No | :9186 | Address to listen on for web interface and telemetry |
 | web.telemetry-path<br />FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH | No | /metrics | Path under which to expose Prometheus metrics |
 

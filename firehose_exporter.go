@@ -66,13 +66,8 @@ var (
 		"Comma separated events to filter (ContainerMetric,CounterEvent,ValueMetric) ($FIREHOSE_EXPORTER_DOPPLER_EVENTS).",
 	)
 
-	skipSSLValidation = flag.Bool(
-		"skip-ssl-verify", false,
-		"Disable SSL Verify ($FIREHOSE_EXPORTER_SKIP_SSL_VERIFY).",
-	)
-
 	metricsNamespace = flag.String(
-		"metrics.namespace", "firehose_exporter",
+		"metrics.namespace", "firehose",
 		"Metrics Namespace ($FIREHOSE_EXPORTER_METRICS_NAMESPACE).",
 	)
 
@@ -84,6 +79,11 @@ var (
 	showVersion = flag.Bool(
 		"version", false,
 		"Print version information.",
+	)
+
+	skipSSLValidation = flag.Bool(
+		"skip-ssl-verify", false,
+		"Disable SSL Verify ($FIREHOSE_EXPORTER_SKIP_SSL_VERIFY).",
 	)
 
 	listenAddress = flag.String(
@@ -111,9 +111,9 @@ func overrideFlagsWithEnvVars() {
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION", dopplerMetricExpiration)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_DEPLOYMENTS", dopplerDeployments)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_EVENTS", dopplerEvents)
-	overrideWithEnvBool("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY", skipSSLValidation)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_METRICS_NAMESPACE", metricsNamespace)
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL", metricsCleanupInterval)
+	overrideWithEnvBool("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY", skipSSLValidation)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS", listenAddress)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH", metricsPath)
 }
