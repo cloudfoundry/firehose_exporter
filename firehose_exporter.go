@@ -56,14 +56,14 @@ var (
 		"How long a Cloud Foundry Doppler metric is valid ($FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION).",
 	)
 
-	dopplerDeployments = flag.String(
-		"doppler.deployments", "",
-		"Comma separated deployments to filter ($FIREHOSE_EXPORTER_DOPPLER_DEPLOYMENTS)",
+	filterDeployments = flag.String(
+		"filter.deployments", "",
+		"Comma separated deployments to filter ($FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS)",
 	)
 
-	dopplerEvents = flag.String(
-		"doppler.events", "",
-		"Comma separated events to filter (ContainerMetric,CounterEvent,ValueMetric) ($FIREHOSE_EXPORTER_DOPPLER_EVENTS).",
+	filterEvents = flag.String(
+		"filter.events", "",
+		"Comma separated events to filter (ContainerMetric,CounterEvent,ValueMetric) ($FIREHOSE_EXPORTER_FILTER_EVENTS).",
 	)
 
 	metricsNamespace = flag.String(
@@ -109,8 +109,8 @@ func overrideFlagsWithEnvVars() {
 	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID", dopplerSubscriptionID)
 	overrideWithEnvUint("FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT_SECONDS", dopplerIdleTimeoutSeconds)
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION", dopplerMetricExpiration)
-	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_DEPLOYMENTS", dopplerDeployments)
-	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_EVENTS", dopplerEvents)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS", filterDeployments)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_FILTER_EVENTS", filterEvents)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_METRICS_NAMESPACE", metricsNamespace)
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL", metricsCleanupInterval)
 	overrideWithEnvBool("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY", skipSSLValidation)
@@ -182,14 +182,14 @@ func main() {
 	}
 
 	var deployments []string
-	if *dopplerDeployments != "" {
-		deployments = strings.Split(*dopplerDeployments, ",")
+	if *filterDeployments != "" {
+		deployments = strings.Split(*filterDeployments, ",")
 	}
 	deploymentFilter := filters.NewDeploymentFilter(deployments)
 
 	var events []string
-	if *dopplerEvents != "" {
-		events = strings.Split(*dopplerEvents, ",")
+	if *filterEvents != "" {
+		events = strings.Split(*filterEvents, ",")
 	}
 	eventFilter, err := filters.NewEventFilter(events)
 	if err != nil {

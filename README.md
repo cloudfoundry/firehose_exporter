@@ -69,8 +69,8 @@ uaac client add prometheus-firehose \
 | doppler.subscription-id<br />FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID | No | prometheus | Cloud Foundry Doppler Subscription ID |
 | doppler.idle-timeout-seconds<br />FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT_SECONDS | No | 5 | Cloud Foundry Doppler Idle Timeout (in seconds) |
 | doppler.metric-expiration<br />FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION | No | 5 minutes | How long a Cloud Foundry Container Metric is valid |
-| doppler.deployments<br />FIREHOSE_EXPORTER_DOPPLER_DEPLOYMENTS | No | | Comma separated deployments to filter |
-| doppler.events<br />FIREHOSE_EXPORTER_DOPPLER_EVENTS| No | | Comma separated events to filter (`ContainerMetric`, `CounterEvent`, `ValueMetric`) |
+| filter.deployments<br />FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS | No | | Comma separated deployments to filter |
+| filter.events<br />FIREHOSE_EXPORTER_FILTER_EVENTS| No | | Comma separated events to filter (`ContainerMetric`, `CounterEvent`, `ValueMetric`) |
 | metrics.namespace<br />FIREHOSE_EXPORTER_METRICS_NAMESPACE | No | firehose | Metrics Namespace |
 | metrics.cleanup-interval<br />FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL | No | 2 minutes | Metrics clean up interval |
 | skip-ssl-verify<br />FIREHOSE_EXPORTER_SKIP_SSL_VERIFY | No | false | Disable SSL Verify |
