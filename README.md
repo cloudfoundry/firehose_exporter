@@ -1,6 +1,10 @@
 # Cloud Foundry Firehose Exporter [![Build Status](https://travis-ci.org/cloudfoundry-community/firehose_exporter.png)](https://travis-ci.org/cloudfoundry-community/firehose_exporter)
 
-A [Prometheus][prometheus] exporter for [Cloud Foundry Firehose][firehose] metrics. It exports Cloud Foundry `ContainerMetric`, `CounterEvent` and `ValueMetric` metrics.
+A [Prometheus][prometheus] exporter proxy for [Cloud Foundry Firehose][firehose] metrics. Please refer to the [FAQ][faq] for general questions about this exporter.
+
+## Architecture overview
+
+![](https://cdn.rawgit.com/cloudfoundry-community/firehose_exporter/master/architecture/architecture.svg)
 
 ## Installation
 
@@ -81,7 +85,7 @@ uaac client add prometheus-firehose \
 
 For a list of [Cloud Foundry Firehose][firehose] metrics check the [Cloud Foundry Component Metrics][cfmetrics] documentation.
 
-The exporter returns the following internal metrics:
+The exporter returns additionally the following internal metrics:
 
 | Metric | Description |
 | ------ | ----------- |
@@ -111,6 +115,7 @@ Apache License 2.0, see [LICENSE](https://github.com/cloudfoundry-community/fire
 
 [cloudfoundry]: https://www.cloudfoundry.org/
 [cfmetrics]: https://docs.cloudfoundry.org/loggregator/all_metrics.html
+[faq]: https://github.com/cloudfoundry-community/firehose_exporter/blob/master/FAQ.md
 [firehose]: https://docs.cloudfoundry.org/loggregator/architecture.html#firehose
 [golang]: https://golang.org/
 [manifest]: https://github.com/cloudfoundry-community/firehose_exporter/blob/master/manifest.yml
