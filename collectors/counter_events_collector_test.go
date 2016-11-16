@@ -132,7 +132,7 @@ var _ = Describe("CounterEventsCollector", func() {
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_"+counterEvent1NameNormalized+"_total"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", counterEvent1Name, origin),
-					[]string{"origin", "bosh_deployment", "bosh_job", "bosh_job_id", "bosh_ip"},
+					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
 					nil,
 				),
 				prometheus.CounterValue,
@@ -148,7 +148,7 @@ var _ = Describe("CounterEventsCollector", func() {
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_"+counterEvent1NameNormalized+"_delta"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event from '%s'.", counterEvent1Name, origin),
-					[]string{"origin", "bosh_deployment", "bosh_job", "bosh_job_id", "bosh_ip"},
+					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
 					nil,
 				),
 				prometheus.GaugeValue,
@@ -164,7 +164,7 @@ var _ = Describe("CounterEventsCollector", func() {
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_"+counterEvent2NameNormalized+"_total"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", counterEvent2Name, origin),
-					[]string{"origin", "bosh_deployment", "bosh_job", "bosh_job_id", "bosh_ip"},
+					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
 					nil,
 				),
 				prometheus.CounterValue,
@@ -180,7 +180,7 @@ var _ = Describe("CounterEventsCollector", func() {
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_"+counterEvent2NameNormalized+"_delta"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event from '%s'.", counterEvent2Name, origin),
-					[]string{"origin", "bosh_deployment", "bosh_job", "bosh_job_id", "bosh_ip"},
+					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
 					nil,
 				),
 				prometheus.GaugeValue,
