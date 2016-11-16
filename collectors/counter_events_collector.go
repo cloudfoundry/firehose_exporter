@@ -40,7 +40,7 @@ func (c CounterEventsCollector) Collect(ch chan<- prometheus.Metric) {
 			prometheus.NewDesc(
 				prometheus.BuildFQName(c.namespace, counter_events_subsystem, metricName),
 				fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", counterEvent.Name, counterEvent.Origin),
-				[]string{"origin", "bosh_deployment", "bosh_job", "bosh_index", "bosh_ip"},
+				[]string{"origin", "bosh_deployment", "bosh_job", "bosh_job_id", "bosh_ip"},
 				nil,
 			),
 			prometheus.CounterValue,
@@ -57,7 +57,7 @@ func (c CounterEventsCollector) Collect(ch chan<- prometheus.Metric) {
 			prometheus.NewDesc(
 				prometheus.BuildFQName(c.namespace, counter_events_subsystem, metricName),
 				fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event from '%s'.", counterEvent.Name, counterEvent.Origin),
-				[]string{"origin", "bosh_deployment", "bosh_job", "bosh_index", "bosh_ip"},
+				[]string{"origin", "bosh_deployment", "bosh_job", "bosh_job_id", "bosh_ip"},
 				nil,
 			),
 			prometheus.GaugeValue,
