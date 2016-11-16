@@ -130,7 +130,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "value_metric", originNormalized+"_"+valueMetric1NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric1Name, origin),
-					[]string{"origin", "bosh_deployment", "bosh_job", "bosh_index", "bosh_ip", "unit"},
+					[]string{"origin", "bosh_deployment", "bosh_job", "bosh_job_id", "bosh_ip", "unit"},
 					nil,
 				),
 				prometheus.GaugeValue,
@@ -147,7 +147,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "value_metric", originNormalized+"_"+valueMetric2NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric2Name, origin),
-					[]string{"origin", "bosh_deployment", "bosh_job", "bosh_index", "bosh_ip", "unit"},
+					[]string{"origin", "bosh_deployment", "bosh_job", "bosh_job_id", "bosh_ip", "unit"},
 					nil,
 				),
 				prometheus.GaugeValue,
