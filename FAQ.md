@@ -14,6 +14,10 @@ The *filter.events* command flag allows you to filter what event metrics will be
 
 The *filter.deployments* command flag allows you to filter metrics which origin is a particular BOSH deployment.
 
+### Can I target multiple Cloud Foundry Firehose endpoints with a single exporter instance?
+
+No, this exporter only supports targetting a single [Cloud Foundry Firehose][firehose] endpoint. If you want to get metrics from several endpoints, you will need to use one exporter per endpoint.
+
 ### How can I get readeable names for Container Metrics labels, like the application name?
 
 You can combine this exporter with the [Cloud Foundry Prometheus Exporter][cf_exporter], that provides administrative information about `Applications`, `Organizations` and `Spaces`.
