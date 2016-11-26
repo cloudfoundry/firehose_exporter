@@ -40,7 +40,16 @@ func (f *EventFilter) Enabled(envelope *events.Envelope) bool {
 
 func parseEventName(name string) (events.Envelope_EventType, error) {
 	if eventType, ok := events.Envelope_EventType_value[name]; ok {
+		switch events.Envelope_EventType(eventType) {
+		case events.Envelope_ContainerMetric:
+		case events.Envelope_CounterEvent:
+		case events.Envelope_HttpStartStop:
+		case events.Envelope_ValueMetric:
+		default:
+			return events.Envelope_Error, errors.New(fmt.Sprintf("Event filter `%s` is not supported", name))
+		}
 		return events.Envelope_EventType(eventType), nil
 	}
+
 	return events.Envelope_Error, errors.New(fmt.Sprintf("Event filter `%s` is not supported", name))
 }

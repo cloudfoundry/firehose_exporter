@@ -24,7 +24,7 @@ var _ = Describe("EventFilter", func() {
 	Describe("New", func() {
 		Context("when filters are supported", func() {
 			BeforeEach(func() {
-				filter = []string{"ContainerMetric", "CounterEvent", "ValueMetric"}
+				filter = []string{"ContainerMetric", "CounterEvent", "HttpStartStop", "ValueMetric"}
 			})
 
 			It("does not return an error", func() {
@@ -34,12 +34,12 @@ var _ = Describe("EventFilter", func() {
 
 		Context("when filters are not supported", func() {
 			BeforeEach(func() {
-				filter = []string{"ContainerMetric", "CounterEvent", "Unknown"}
+				filter = []string{"ContainerMetric", "CounterEvent", "LogMessage"}
 			})
 
 			It("returns an error", func() {
 				Expect(err).To(HaveOccurred())
-				Expect(err.Error()).To(Equal("Event filter `Unknown` is not supported"))
+				Expect(err.Error()).To(Equal("Event filter `LogMessage` is not supported"))
 			})
 		})
 	})
