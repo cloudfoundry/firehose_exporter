@@ -19,6 +19,9 @@ type InternalMetricsCollector struct {
 	totalCounterEventsReceivedDesc           *prometheus.Desc
 	totalCounterEventsProcessedDesc          *prometheus.Desc
 	lastCounterEventReceivedTimestampDesc    *prometheus.Desc
+	totalHttpStartStopReceivedDesc           *prometheus.Desc
+	totalHttpStartStopProcessedDesc          *prometheus.Desc
+	lastHttpStartStopReceivedTimestampDesc   *prometheus.Desc
 	totalValueMetricsReceivedDesc            *prometheus.Desc
 	totalValueMetricsProcessedDesc           *prometheus.Desc
 	lastValueMetricReceivedTimestampDesc     *prometheus.Desc
@@ -121,6 +124,27 @@ func NewInternalMetricsCollector(
 		nil,
 	)
 
+	totalHttpStartStopReceivedDesc := prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "total_http_start_stop_received"),
+		"Total number of http start stop received from Cloud Foundry Firehose.",
+		[]string{},
+		nil,
+	)
+
+	totalHttpStartStopProcessedDesc := prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "total_http_start_stop_processed"),
+		"Total number of http start stop processed from Cloud Foundry Firehose.",
+		[]string{},
+		nil,
+	)
+
+	lastHttpStartStopReceivedTimestampDesc := prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "last_http_start_stop_received_timestamp"),
+		"Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose.",
+		[]string{},
+		nil,
+	)
+
 	slowConsumerAlertDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "slow_consumer_alert"),
 		"Nozzle could not keep up with Cloud Foundry Firehose.",
@@ -148,6 +172,9 @@ func NewInternalMetricsCollector(
 		totalCounterEventsReceivedDesc:           totalCounterEventsReceivedDesc,
 		totalCounterEventsProcessedDesc:          totalCounterEventsProcessedDesc,
 		lastCounterEventReceivedTimestampDesc:    lastCounterEventReceivedTimestampDesc,
+		totalHttpStartStopReceivedDesc:           totalHttpStartStopReceivedDesc,
+		totalHttpStartStopProcessedDesc:          totalHttpStartStopProcessedDesc,
+		lastHttpStartStopReceivedTimestampDesc:   lastHttpStartStopReceivedTimestampDesc,
 		totalValueMetricsReceivedDesc:            totalValueMetricsReceivedDesc,
 		totalValueMetricsProcessedDesc:           totalValueMetricsProcessedDesc,
 		lastValueMetricReceivedTimestampDesc:     lastValueMetricReceivedTimestampDesc,
@@ -238,6 +265,24 @@ func (c InternalMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 		float64(internalMetrics.LastValueMetricReceivedTimestamp),
 	)
 
+	ch <- prometheus.MustNewConstMetric(
+		c.totalHttpStartStopReceivedDesc,
+		prometheus.CounterValue,
+		float64(internalMetrics.TotalHttpStartStopReceived),
+	)
+
+	ch <- prometheus.MustNewConstMetric(
+		c.totalHttpStartStopProcessedDesc,
+		prometheus.CounterValue,
+		float64(internalMetrics.TotalHttpStartStopProcessed),
+	)
+
+	ch <- prometheus.MustNewConstMetric(
+		c.lastHttpStartStopReceivedTimestampDesc,
+		prometheus.GaugeValue,
+		float64(internalMetrics.LastHttpStartStopReceivedTimestamp),
+	)
+
 	if internalMetrics.SlowConsumerAlert {
 		ch <- prometheus.MustNewConstMetric(
 			c.slowConsumerAlertDesc,
@@ -270,6 +315,9 @@ func (c InternalMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.totalCounterEventsReceivedDesc
 	ch <- c.totalCounterEventsProcessedDesc
 	ch <- c.lastCounterEventReceivedTimestampDesc
+	ch <- c.totalHttpStartStopReceivedDesc
+	ch <- c.totalHttpStartStopProcessedDesc
+	ch <- c.lastHttpStartStopReceivedTimestampDesc
 	ch <- c.totalValueMetricsReceivedDesc
 	ch <- c.totalValueMetricsProcessedDesc
 	ch <- c.lastValueMetricReceivedTimestampDesc

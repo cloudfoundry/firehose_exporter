@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/cloudfoundry-community/firehose_exporter/filters"
+	"github.com/cloudfoundry-community/firehose_exporter/utils"
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/gogo/protobuf/proto"
 
@@ -41,17 +42,36 @@ var _ = Describe("Store", func() {
 		counterEventDelta = uint64(5)
 		counterEventTotal = uint64(1000)
 
+		httpStartStopClientStartTimestamp = int64(2)
+		httpStartStopClientStopTimestamp  = int64(20)
+		httpStartStopServerStartTimestamp = int64(1)
+		httpStartStopServerStopTimestamp  = int64(10)
+		httpStartStopRequestId            = "1beb4072-acaa-483f-5a8b-425dc080af13"
+		httpStartStopClientPeerType       = events.PeerType_Client
+		httpStartStopServerPeerType       = events.PeerType_Server
+		httpStartStopMethod               = "GET"
+		httpStartStopUri                  = "FakeURI"
+		httpStartStopRemoteAddress        = "FakeRemoteAddress"
+		httpStartStopUserAgent            = "FakeUserAgent"
+		httpStartStopStatusCode           = int32(200)
+		httpStartStopContentLength        = int64(32)
+		httpStartStopApplicationId        = "8060986d-43aa-4097-8989-1c292accbeb3"
+		httpStartStopInstanceIndex        = int32(1)
+		httpStartStopInstanceId           = "FakeInstanceId"
+
 		valueMetricName  = "FakeValueMetric1"
 		valueMetricValue = float64(2000)
 		valueMetricUnit  = "kb"
 
 		containerMetric ContainerMetric
 		counterEvent    CounterEvent
+		httpStartStop   HttpStartStop
 		valueMetric     ValueMetric
 
 		internalMetrics  InternalMetrics
 		containerMetrics ContainerMetrics
 		counterEvents    CounterEvents
+		httpStartStops   HttpStartStops
 		valueMetrics     ValueMetrics
 	)
 
@@ -106,6 +126,18 @@ var _ = Describe("Store", func() {
 			Expect(internalMetrics.LastCounterEventReceivedTimestamp).To(Equal(int64(0)))
 		})
 
+		It("returns the TotalHttpStartStopReceived", func() {
+			Expect(internalMetrics.TotalHttpStartStopReceived).To(Equal(int64(0)))
+		})
+
+		It("returns the TotalHttpStartStopProcessed", func() {
+			Expect(internalMetrics.TotalHttpStartStopProcessed).To(Equal(int64(0)))
+		})
+
+		It("returns the LastHttpStartStopReceivedTimestamp", func() {
+			Expect(internalMetrics.LastHttpStartStopReceivedTimestamp).To(Equal(int64(0)))
+		})
+
 		It("returns the TotalValueMetricsReceived", func() {
 			Expect(internalMetrics.TotalValueMetricsReceived).To(Equal(int64(0)))
 		})
@@ -139,6 +171,9 @@ var _ = Describe("Store", func() {
 			totalCounterEventsReceived           = int64(200)
 			totalCounterEventsProcessed          = int64(100)
 			lastCounterEventReceivedTimestamp    = time.Now().Unix()
+			totalHttpStartStopReceived           = int64(300)
+			totalHttpStartStopProcessed          = int64(150)
+			lastHttpStartStopReceivedTimestamp   = time.Now().Unix()
 			totalValueMetricsReceived            = int64(300)
 			totalValueMetricsProcessed           = int64(150)
 			lastValueMetricReceivedTimestamp     = time.Now().Unix()
@@ -158,6 +193,9 @@ var _ = Describe("Store", func() {
 				TotalCounterEventsReceived:           totalCounterEventsReceived,
 				TotalCounterEventsProcessed:          totalCounterEventsProcessed,
 				LastCounterEventReceivedTimestamp:    lastCounterEventReceivedTimestamp,
+				TotalHttpStartStopReceived:           totalHttpStartStopReceived,
+				TotalHttpStartStopProcessed:          totalHttpStartStopProcessed,
+				LastHttpStartStopReceivedTimestamp:   lastHttpStartStopReceivedTimestamp,
 				TotalValueMetricsReceived:            totalValueMetricsReceived,
 				TotalValueMetricsProcessed:           totalValueMetricsProcessed,
 				LastValueMetricReceivedTimestamp:     lastValueMetricReceivedTimestamp,
@@ -206,6 +244,18 @@ var _ = Describe("Store", func() {
 
 		It("sets the LastCounterEventReceivedTimestamp", func() {
 			Expect(internalMetrics.LastCounterEventReceivedTimestamp).To(Equal(lastCounterEventReceivedTimestamp))
+		})
+
+		It("sets the TotalHttpStartStopReceived", func() {
+			Expect(internalMetrics.TotalHttpStartStopReceived).To(Equal(totalHttpStartStopReceived))
+		})
+
+		It("sets the TotalHttpStartStopProcessed", func() {
+			Expect(internalMetrics.TotalHttpStartStopProcessed).To(Equal(totalHttpStartStopProcessed))
+		})
+
+		It("sets the LastHttpStartStopReceivedTimestamp", func() {
+			Expect(internalMetrics.LastHttpStartStopReceivedTimestamp).To(Equal(lastHttpStartStopReceivedTimestamp))
 		})
 
 		It("sets the TotalValueMetricsReceived", func() {
@@ -338,6 +388,81 @@ var _ = Describe("Store", func() {
 			metricsStore.AddMetric(
 				&events.Envelope{
 					Origin:     proto.String(origin),
+					EventType:  events.Envelope_HttpStartStop.Enum(),
+					Timestamp:  proto.Int64(metricTimestamp),
+					Deployment: proto.String(boshDeployment),
+					Job:        proto.String(boshJob),
+					Index:      proto.String(boshIndex0),
+					Ip:         proto.String(boshIP),
+					Tags:       map[string]string{},
+					HttpStartStop: &events.HttpStartStop{
+						StartTimestamp: proto.Int64(httpStartStopClientStartTimestamp),
+						StopTimestamp:  proto.Int64(httpStartStopClientStopTimestamp),
+						RequestId:      utils.StringToUUID(httpStartStopRequestId),
+						PeerType:       &httpStartStopClientPeerType,
+						Method:         events.Method(events.Method_value[httpStartStopMethod]).Enum(),
+						Uri:            proto.String(httpStartStopUri),
+						RemoteAddress:  proto.String(httpStartStopRemoteAddress),
+						UserAgent:      proto.String(httpStartStopUserAgent),
+						StatusCode:     proto.Int32(httpStartStopStatusCode),
+						ContentLength:  proto.Int64(httpStartStopContentLength),
+						ApplicationId:  utils.StringToUUID(httpStartStopApplicationId),
+						InstanceIndex:  proto.Int32(httpStartStopInstanceIndex),
+						InstanceId:     proto.String(httpStartStopInstanceId),
+					},
+				},
+			)
+
+			metricsStore.AddMetric(
+				&events.Envelope{
+					Origin:     proto.String(origin),
+					EventType:  events.Envelope_HttpStartStop.Enum(),
+					Timestamp:  proto.Int64(metricTimestamp),
+					Deployment: proto.String(boshDeployment),
+					Job:        proto.String(boshJob),
+					Index:      proto.String(boshIndex0),
+					Ip:         proto.String(boshIP),
+					Tags:       map[string]string{},
+					HttpStartStop: &events.HttpStartStop{
+						StartTimestamp: proto.Int64(httpStartStopServerStartTimestamp),
+						StopTimestamp:  proto.Int64(httpStartStopServerStopTimestamp),
+						RequestId:      utils.StringToUUID(httpStartStopRequestId),
+						PeerType:       &httpStartStopServerPeerType,
+						Method:         events.Method(events.Method_value[httpStartStopMethod]).Enum(),
+						Uri:            proto.String(httpStartStopUri),
+						RemoteAddress:  proto.String(httpStartStopRemoteAddress),
+						UserAgent:      proto.String(httpStartStopUserAgent),
+						StatusCode:     proto.Int32(httpStartStopStatusCode),
+						ContentLength:  proto.Int64(httpStartStopContentLength),
+					},
+				},
+			)
+
+			httpStartStop = HttpStartStop{
+				Origin:         origin,
+				Timestamp:      metricTimestamp,
+				Deployment:     boshDeployment,
+				Job:            boshJob,
+				Index:          boshIndex0,
+				IP:             boshIP,
+				Tags:           map[string]string{},
+				RequestId:      httpStartStopRequestId,
+				Method:         httpStartStopMethod,
+				Uri:            httpStartStopUri,
+				RemoteAddress:  httpStartStopRemoteAddress,
+				UserAgent:      httpStartStopUserAgent,
+				StatusCode:     httpStartStopStatusCode,
+				ContentLength:  httpStartStopContentLength,
+				ApplicationId:  httpStartStopApplicationId,
+				InstanceIndex:  httpStartStopInstanceIndex,
+				InstanceId:     httpStartStopInstanceId,
+				ClientDuration: httpStartStopClientStopTimestamp - httpStartStopClientStartTimestamp,
+				ServerDuration: httpStartStopServerStopTimestamp - httpStartStopServerStartTimestamp,
+			}
+
+			metricsStore.AddMetric(
+				&events.Envelope{
+					Origin:     proto.String(origin),
 					EventType:  events.Envelope_ValueMetric.Enum(),
 					Timestamp:  proto.Int64(metricTimestamp),
 					Deployment: proto.String(boshDeployment),
@@ -371,11 +496,12 @@ var _ = Describe("Store", func() {
 			internalMetrics = metricsStore.GetInternalMetrics()
 			containerMetrics = metricsStore.GetContainerMetrics()
 			counterEvents = metricsStore.GetCounterEvents()
+			httpStartStops = metricsStore.GetHttpStartStops()
 			valueMetrics = metricsStore.GetValueMetrics()
 		})
 
 		It("increments the TotalEnvelopesReceived", func() {
-			Expect(internalMetrics.TotalEnvelopesReceived).To(Equal(int64(4)))
+			Expect(internalMetrics.TotalEnvelopesReceived).To(Equal(int64(6)))
 		})
 
 		It("sets the LastEnvelopReceivedTimestamp", func() {
@@ -383,7 +509,7 @@ var _ = Describe("Store", func() {
 		})
 
 		It("increments the TotalMetricsReceived", func() {
-			Expect(internalMetrics.TotalMetricsReceived).To(Equal(int64(3)))
+			Expect(internalMetrics.TotalMetricsReceived).To(Equal(int64(5)))
 		})
 
 		It("sets the LastMetricReceivedTimestamp", func() {
@@ -414,6 +540,18 @@ var _ = Describe("Store", func() {
 			Expect(internalMetrics.LastCounterEventReceivedTimestamp).ToNot(Equal(int64(0)))
 		})
 
+		It("increments the TotalHttpStartStopReceived", func() {
+			Expect(internalMetrics.TotalHttpStartStopReceived).To(Equal(int64(2)))
+		})
+
+		It("increments the TotalHttpStartStopProcessed", func() {
+			Expect(internalMetrics.TotalHttpStartStopProcessed).To(Equal(int64(2)))
+		})
+
+		It("sets the LastHttpStartStopReceivedTimestamp", func() {
+			Expect(internalMetrics.LastHttpStartStopReceivedTimestamp).ToNot(Equal(int64(0)))
+		})
+
 		It("increments the TotalValueMetricsReceived", func() {
 			Expect(internalMetrics.TotalValueMetricsReceived).To(Equal(int64(1)))
 		})
@@ -434,6 +572,11 @@ var _ = Describe("Store", func() {
 		It("adds a counter event", func() {
 			Expect(len(counterEvents)).To(Equal(1))
 			Expect(counterEvents).To(ContainElement(counterEvent))
+		})
+
+		It("adds a http start stop", func() {
+			Expect(len(httpStartStops)).To(Equal(1))
+			Expect(httpStartStops).To(ContainElement(httpStartStop))
 		})
 
 		It("adds a value metric", func() {
@@ -486,6 +629,59 @@ var _ = Describe("Store", func() {
 				metricsStore.AddMetric(
 					&events.Envelope{
 						Origin:     proto.String(origin),
+						EventType:  events.Envelope_HttpStartStop.Enum(),
+						Timestamp:  proto.Int64(metricTimestamp),
+						Deployment: proto.String(boshDeployment),
+						Job:        proto.String(boshJob),
+						Index:      proto.String(boshIndex0),
+						Ip:         proto.String(boshIP),
+						Tags:       map[string]string{},
+						HttpStartStop: &events.HttpStartStop{
+							StartTimestamp: proto.Int64(httpStartStopClientStartTimestamp),
+							StopTimestamp:  proto.Int64(httpStartStopClientStopTimestamp),
+							RequestId:      utils.StringToUUID(httpStartStopRequestId),
+							PeerType:       &httpStartStopClientPeerType,
+							Method:         events.Method(events.Method_value[httpStartStopMethod]).Enum(),
+							Uri:            proto.String(httpStartStopUri),
+							RemoteAddress:  proto.String(httpStartStopRemoteAddress),
+							UserAgent:      proto.String(httpStartStopUserAgent),
+							StatusCode:     proto.Int32(httpStartStopStatusCode),
+							ContentLength:  proto.Int64(httpStartStopContentLength),
+							ApplicationId:  utils.StringToUUID(httpStartStopApplicationId),
+							InstanceIndex:  proto.Int32(httpStartStopInstanceIndex),
+							InstanceId:     proto.String(httpStartStopInstanceId),
+						},
+					},
+				)
+
+				metricsStore.AddMetric(
+					&events.Envelope{
+						Origin:     proto.String(origin),
+						EventType:  events.Envelope_HttpStartStop.Enum(),
+						Timestamp:  proto.Int64(metricTimestamp),
+						Deployment: proto.String(boshDeployment),
+						Job:        proto.String(boshJob),
+						Index:      proto.String(boshIndex0),
+						Ip:         proto.String(boshIP),
+						Tags:       map[string]string{},
+						HttpStartStop: &events.HttpStartStop{
+							StartTimestamp: proto.Int64(httpStartStopServerStartTimestamp),
+							StopTimestamp:  proto.Int64(httpStartStopServerStopTimestamp),
+							RequestId:      utils.StringToUUID(httpStartStopRequestId),
+							PeerType:       &httpStartStopServerPeerType,
+							Method:         events.Method(events.Method_value[httpStartStopMethod]).Enum(),
+							Uri:            proto.String(httpStartStopUri),
+							RemoteAddress:  proto.String(httpStartStopRemoteAddress),
+							UserAgent:      proto.String(httpStartStopUserAgent),
+							StatusCode:     proto.Int32(httpStartStopStatusCode),
+							ContentLength:  proto.Int64(httpStartStopContentLength),
+						},
+					},
+				)
+
+				metricsStore.AddMetric(
+					&events.Envelope{
+						Origin:     proto.String(origin),
 						EventType:  events.Envelope_ValueMetric.Enum(),
 						Timestamp:  proto.Int64(metricTimestamp),
 						Deployment: proto.String(boshDeployment),
@@ -503,11 +699,11 @@ var _ = Describe("Store", func() {
 			})
 
 			It("increments the TotalEnvelopesReceived", func() {
-				Expect(internalMetrics.TotalEnvelopesReceived).To(Equal(int64(7)))
+				Expect(internalMetrics.TotalEnvelopesReceived).To(Equal(int64(11)))
 			})
 
 			It("increments the TotalMetricsReceived", func() {
-				Expect(internalMetrics.TotalMetricsReceived).To(Equal(int64(6)))
+				Expect(internalMetrics.TotalMetricsReceived).To(Equal(int64(10)))
 			})
 
 			It("increments the TotalContainerMetricsReceived", func() {
@@ -526,6 +722,14 @@ var _ = Describe("Store", func() {
 				Expect(internalMetrics.TotalCounterEventsProcessed).To(Equal(int64(2)))
 			})
 
+			It("increments the TotalHttpStartStopReceived", func() {
+				Expect(internalMetrics.TotalHttpStartStopReceived).To(Equal(int64(4)))
+			})
+
+			It("increments the TotalHttpStartStopProcessed", func() {
+				Expect(internalMetrics.TotalHttpStartStopProcessed).To(Equal(int64(4)))
+			})
+
 			It("increments the TotalValueMetricsReceived", func() {
 				Expect(internalMetrics.TotalValueMetricsReceived).To(Equal(int64(2)))
 			})
@@ -542,6 +746,11 @@ var _ = Describe("Store", func() {
 			It("does not add the duplicate counter event", func() {
 				Expect(len(counterEvents)).To(Equal(1))
 				Expect(counterEvents).To(ContainElement(counterEvent))
+			})
+
+			It("does not add the duplicate http start stop", func() {
+				Expect(len(httpStartStops)).To(Equal(1))
+				Expect(httpStartStops).To(ContainElement(httpStartStop))
 			})
 
 			It("does not add the duplicate value metric", func() {
@@ -595,6 +804,59 @@ var _ = Describe("Store", func() {
 				metricsStore.AddMetric(
 					&events.Envelope{
 						Origin:     proto.String(origin),
+						EventType:  events.Envelope_HttpStartStop.Enum(),
+						Timestamp:  proto.Int64(metricTimestamp),
+						Deployment: proto.String(boshDeployment),
+						Job:        proto.String(boshJob),
+						Index:      proto.String(boshIndex1),
+						Ip:         proto.String(boshIP),
+						Tags:       map[string]string{},
+						HttpStartStop: &events.HttpStartStop{
+							StartTimestamp: proto.Int64(httpStartStopClientStartTimestamp),
+							StopTimestamp:  proto.Int64(httpStartStopClientStopTimestamp),
+							RequestId:      utils.StringToUUID(httpStartStopRequestId),
+							PeerType:       &httpStartStopClientPeerType,
+							Method:         events.Method(events.Method_value[httpStartStopMethod]).Enum(),
+							Uri:            proto.String(httpStartStopUri),
+							RemoteAddress:  proto.String(httpStartStopRemoteAddress),
+							UserAgent:      proto.String(httpStartStopUserAgent),
+							StatusCode:     proto.Int32(httpStartStopStatusCode),
+							ContentLength:  proto.Int64(httpStartStopContentLength),
+							ApplicationId:  utils.StringToUUID(httpStartStopApplicationId),
+							InstanceIndex:  proto.Int32(httpStartStopInstanceIndex),
+							InstanceId:     proto.String(httpStartStopInstanceId),
+						},
+					},
+				)
+
+				metricsStore.AddMetric(
+					&events.Envelope{
+						Origin:     proto.String(origin),
+						EventType:  events.Envelope_HttpStartStop.Enum(),
+						Timestamp:  proto.Int64(metricTimestamp),
+						Deployment: proto.String(boshDeployment),
+						Job:        proto.String(boshJob),
+						Index:      proto.String(boshIndex1),
+						Ip:         proto.String(boshIP),
+						Tags:       map[string]string{},
+						HttpStartStop: &events.HttpStartStop{
+							StartTimestamp: proto.Int64(httpStartStopServerStartTimestamp),
+							StopTimestamp:  proto.Int64(httpStartStopServerStopTimestamp),
+							RequestId:      utils.StringToUUID(httpStartStopRequestId),
+							PeerType:       &httpStartStopServerPeerType,
+							Method:         events.Method(events.Method_value[httpStartStopMethod]).Enum(),
+							Uri:            proto.String(httpStartStopUri),
+							RemoteAddress:  proto.String(httpStartStopRemoteAddress),
+							UserAgent:      proto.String(httpStartStopUserAgent),
+							StatusCode:     proto.Int32(httpStartStopStatusCode),
+							ContentLength:  proto.Int64(httpStartStopContentLength),
+						},
+					},
+				)
+
+				metricsStore.AddMetric(
+					&events.Envelope{
+						Origin:     proto.String(origin),
 						EventType:  events.Envelope_ValueMetric.Enum(),
 						Timestamp:  proto.Int64(metricTimestamp),
 						Deployment: proto.String(boshDeployment),
@@ -612,11 +874,11 @@ var _ = Describe("Store", func() {
 			})
 
 			It("increments the TotalEnvelopesReceived", func() {
-				Expect(internalMetrics.TotalEnvelopesReceived).To(Equal(int64(7)))
+				Expect(internalMetrics.TotalEnvelopesReceived).To(Equal(int64(11)))
 			})
 
 			It("increments the TotalMetricsReceived", func() {
-				Expect(internalMetrics.TotalMetricsReceived).To(Equal(int64(6)))
+				Expect(internalMetrics.TotalMetricsReceived).To(Equal(int64(10)))
 			})
 
 			It("increments the TotalContainerMetricsReceived", func() {
@@ -635,6 +897,14 @@ var _ = Describe("Store", func() {
 				Expect(internalMetrics.TotalCounterEventsProcessed).To(Equal(int64(2)))
 			})
 
+			It("increments the TotalHttpStartStopReceived", func() {
+				Expect(internalMetrics.TotalHttpStartStopReceived).To(Equal(int64(4)))
+			})
+
+			It("increments the TotalHttpStartStopProcessed", func() {
+				Expect(internalMetrics.TotalHttpStartStopProcessed).To(Equal(int64(4)))
+			})
+
 			It("increments the TotalValueMetricsReceived", func() {
 				Expect(internalMetrics.TotalValueMetricsReceived).To(Equal(int64(2)))
 			})
@@ -651,6 +921,11 @@ var _ = Describe("Store", func() {
 			It("adds the counter event", func() {
 				Expect(len(counterEvents)).To(Equal(2))
 				Expect(counterEvents).To(ContainElement(counterEvent))
+			})
+
+			It("adds the http start stop", func() {
+				Expect(len(httpStartStops)).To(Equal(2))
+				Expect(httpStartStops).To(ContainElement(httpStartStop))
 			})
 
 			It("adds the value metric", func() {
@@ -778,6 +1053,107 @@ var _ = Describe("Store", func() {
 
 			It("returns empty counter events", func() {
 				Expect(len(counterEvents)).To(Equal(0))
+			})
+		})
+	})
+
+	Context("HttpStartStops", func() {
+		BeforeEach(func() {
+			metricsStore.AddMetric(
+				&events.Envelope{
+					Origin:     proto.String(origin),
+					EventType:  events.Envelope_HttpStartStop.Enum(),
+					Timestamp:  proto.Int64(metricTimestamp),
+					Deployment: proto.String(boshDeployment),
+					Job:        proto.String(boshJob),
+					Index:      proto.String(boshIndex0),
+					Ip:         proto.String(boshIP),
+					Tags:       map[string]string{},
+					HttpStartStop: &events.HttpStartStop{
+						StartTimestamp: proto.Int64(httpStartStopClientStartTimestamp),
+						StopTimestamp:  proto.Int64(httpStartStopClientStopTimestamp),
+						RequestId:      utils.StringToUUID(httpStartStopRequestId),
+						PeerType:       &httpStartStopClientPeerType,
+						Method:         events.Method(events.Method_value[httpStartStopMethod]).Enum(),
+						Uri:            proto.String(httpStartStopUri),
+						RemoteAddress:  proto.String(httpStartStopRemoteAddress),
+						UserAgent:      proto.String(httpStartStopUserAgent),
+						StatusCode:     proto.Int32(httpStartStopStatusCode),
+						ContentLength:  proto.Int64(httpStartStopContentLength),
+						ApplicationId:  utils.StringToUUID(httpStartStopApplicationId),
+						InstanceIndex:  proto.Int32(httpStartStopInstanceIndex),
+						InstanceId:     proto.String(httpStartStopInstanceId),
+					},
+				},
+			)
+
+			metricsStore.AddMetric(
+				&events.Envelope{
+					Origin:     proto.String(origin),
+					EventType:  events.Envelope_HttpStartStop.Enum(),
+					Timestamp:  proto.Int64(metricTimestamp),
+					Deployment: proto.String(boshDeployment),
+					Job:        proto.String(boshJob),
+					Index:      proto.String(boshIndex0),
+					Ip:         proto.String(boshIP),
+					Tags:       map[string]string{},
+					HttpStartStop: &events.HttpStartStop{
+						StartTimestamp: proto.Int64(httpStartStopServerStartTimestamp),
+						StopTimestamp:  proto.Int64(httpStartStopServerStopTimestamp),
+						RequestId:      utils.StringToUUID(httpStartStopRequestId),
+						PeerType:       &httpStartStopServerPeerType,
+						Method:         events.Method(events.Method_value[httpStartStopMethod]).Enum(),
+						Uri:            proto.String(httpStartStopUri),
+						RemoteAddress:  proto.String(httpStartStopRemoteAddress),
+						UserAgent:      proto.String(httpStartStopUserAgent),
+						StatusCode:     proto.Int32(httpStartStopStatusCode),
+						ContentLength:  proto.Int64(httpStartStopContentLength),
+					},
+				},
+			)
+
+			httpStartStop = HttpStartStop{
+				Origin:         origin,
+				Timestamp:      metricTimestamp,
+				Deployment:     boshDeployment,
+				Job:            boshJob,
+				Index:          boshIndex0,
+				IP:             boshIP,
+				Tags:           map[string]string{},
+				RequestId:      httpStartStopRequestId,
+				Method:         httpStartStopMethod,
+				Uri:            httpStartStopUri,
+				RemoteAddress:  httpStartStopRemoteAddress,
+				UserAgent:      httpStartStopUserAgent,
+				StatusCode:     httpStartStopStatusCode,
+				ContentLength:  httpStartStopContentLength,
+				ApplicationId:  httpStartStopApplicationId,
+				InstanceIndex:  httpStartStopInstanceIndex,
+				InstanceId:     httpStartStopInstanceId,
+				ClientDuration: httpStartStopClientStopTimestamp - httpStartStopClientStartTimestamp,
+				ServerDuration: httpStartStopServerStopTimestamp - httpStartStopServerStartTimestamp,
+			}
+		})
+
+		Describe("GetHttpStartStops", func() {
+			BeforeEach(func() {
+				httpStartStops = metricsStore.GetHttpStartStops()
+			})
+
+			It("returns the value metrics", func() {
+				Expect(len(httpStartStops)).To(Equal(1))
+				Expect(httpStartStops).To(ContainElement(httpStartStop))
+			})
+		})
+
+		Describe("FlushHttpStartStops", func() {
+			BeforeEach(func() {
+				metricsStore.FlushHttpStartStops()
+				httpStartStops = metricsStore.GetHttpStartStops()
+			})
+
+			It("returns empty value metrics", func() {
+				Expect(len(httpStartStops)).To(Equal(0))
 			})
 		})
 	})

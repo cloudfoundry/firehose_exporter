@@ -11,6 +11,9 @@ const (
 	TotalCounterEventsReceivedKey           = "TotalCounterEventsReceived"
 	TotalCounterEventsProcessedKey          = "TotalCounterEventsProcessed"
 	LastCounterEventReceivedTimestampKey    = "LastCounterEventReceivedTimestamp"
+	TotalHttpStartStopReceivedKey           = "TotalHttpStartStopReceived"
+	TotalHttpStartStopProcessedKey          = "TotalHttpStartStopProcessed"
+	LastHttpStartStopReceivedTimestampKey   = "LastHttpStartStopReceivedTimestamp"
 	TotalValueMetricsReceivedKey            = "TotalValueMetricsReceived"
 	TotalValueMetricsProcessedKey           = "TotalValueMetricsProcessed"
 	LastValueMetricReceivedTimestampKey     = "LastValueMetricReceivedTimestamp"
@@ -29,6 +32,9 @@ type InternalMetrics struct {
 	TotalCounterEventsReceived           int64
 	TotalCounterEventsProcessed          int64
 	LastCounterEventReceivedTimestamp    int64
+	TotalHttpStartStopReceived           int64
+	TotalHttpStartStopProcessed          int64
+	LastHttpStartStopReceivedTimestamp   int64
 	TotalValueMetricsReceived            int64
 	TotalValueMetricsProcessed           int64
 	LastValueMetricReceivedTimestamp     int64
@@ -68,6 +74,30 @@ type CounterEvent struct {
 	Name       string
 	Delta      uint64
 	Total      uint64
+}
+
+type HttpStartStops []HttpStartStop
+
+type HttpStartStop struct {
+	Origin         string
+	Timestamp      int64
+	Deployment     string
+	Job            string
+	Index          string
+	IP             string
+	Tags           map[string]string
+	RequestId      string
+	Method         string
+	Uri            string
+	RemoteAddress  string
+	UserAgent      string
+	StatusCode     int32
+	ContentLength  int64
+	ApplicationId  string
+	InstanceIndex  int32
+	InstanceId     string
+	ClientDuration int64
+	ServerDuration int64
 }
 
 type ValueMetrics []ValueMetric

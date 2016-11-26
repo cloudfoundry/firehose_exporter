@@ -5,9 +5,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cloudfoundry-community/firehose_exporter/filters"
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/patrickmn/go-cache"
+
+	"github.com/cloudfoundry-community/firehose_exporter/filters"
+	"github.com/cloudfoundry-community/firehose_exporter/utils"
 )
 
 type Store struct {
@@ -18,6 +20,7 @@ type Store struct {
 	internalMetrics        *cache.Cache
 	containerMetrics       *cache.Cache
 	counterEvents          *cache.Cache
+	httpStartStops         *cache.Cache
 	valueMetrics           *cache.Cache
 }
 
@@ -30,6 +33,7 @@ func NewStore(
 	internalMetrics := cache.New(metricsExpiration, metricsCleanupInterval)
 	containerMetrics := cache.New(metricsExpiration, metricsCleanupInterval)
 	counterEvents := cache.New(metricsExpiration, metricsCleanupInterval)
+	httpStartStops := cache.New(metricsExpiration, metricsCleanupInterval)
 	valueMetrics := cache.New(metricsExpiration, metricsCleanupInterval)
 
 	store := &Store{
@@ -40,6 +44,7 @@ func NewStore(
 		internalMetrics:        internalMetrics,
 		containerMetrics:       containerMetrics,
 		counterEvents:          counterEvents,
+		httpStartStops:         httpStartStops,
 		valueMetrics:           valueMetrics,
 	}
 	store.SetInternalMetrics(InternalMetrics{})
@@ -84,6 +89,16 @@ func (s *Store) GetInternalMetrics() InternalMetrics {
 		internalMetrics.LastCounterEventReceivedTimestamp = lastCounterEventReceivedTimestamp.(int64)
 	}
 
+	if totalHttpStartStopReceived, ok := s.internalMetrics.Get(TotalHttpStartStopReceivedKey); ok {
+		internalMetrics.TotalHttpStartStopReceived = totalHttpStartStopReceived.(int64)
+	}
+	if totalHttpStartStopProcessed, ok := s.internalMetrics.Get(TotalHttpStartStopProcessedKey); ok {
+		internalMetrics.TotalHttpStartStopProcessed = totalHttpStartStopProcessed.(int64)
+	}
+	if lastHttpStartStopReceivedTimestamp, ok := s.internalMetrics.Get(LastHttpStartStopReceivedTimestampKey); ok {
+		internalMetrics.LastHttpStartStopReceivedTimestamp = lastHttpStartStopReceivedTimestamp.(int64)
+	}
+
 	if totalValueMetricsReceived, ok := s.internalMetrics.Get(TotalValueMetricsReceivedKey); ok {
 		internalMetrics.TotalValueMetricsReceived = totalValueMetricsReceived.(int64)
 	}
@@ -117,6 +132,9 @@ func (s *Store) SetInternalMetrics(internalMetrics InternalMetrics) {
 	s.internalMetrics.Set(TotalCounterEventsReceivedKey, int64(internalMetrics.TotalCounterEventsReceived), cache.NoExpiration)
 	s.internalMetrics.Set(TotalCounterEventsProcessedKey, int64(internalMetrics.TotalCounterEventsProcessed), cache.NoExpiration)
 	s.internalMetrics.Set(LastCounterEventReceivedTimestampKey, int64(internalMetrics.LastCounterEventReceivedTimestamp), cache.NoExpiration)
+	s.internalMetrics.Set(TotalHttpStartStopReceivedKey, int64(internalMetrics.TotalHttpStartStopReceived), cache.NoExpiration)
+	s.internalMetrics.Set(TotalHttpStartStopProcessedKey, int64(internalMetrics.TotalHttpStartStopProcessed), cache.NoExpiration)
+	s.internalMetrics.Set(LastHttpStartStopReceivedTimestampKey, int64(internalMetrics.LastHttpStartStopReceivedTimestamp), cache.NoExpiration)
 	s.internalMetrics.Set(TotalValueMetricsReceivedKey, int64(internalMetrics.TotalValueMetricsReceived), cache.NoExpiration)
 	s.internalMetrics.Set(TotalValueMetricsProcessedKey, int64(internalMetrics.TotalValueMetricsProcessed), cache.NoExpiration)
 	s.internalMetrics.Set(LastValueMetricReceivedTimestampKey, int64(internalMetrics.LastValueMetricReceivedTimestamp), cache.NoExpiration)
@@ -138,6 +156,8 @@ func (s *Store) AddMetric(envelope *events.Envelope) {
 		s.addContainerMetric(envelope)
 	case events.Envelope_CounterEvent:
 		s.addCounterEvent(envelope)
+	case events.Envelope_HttpStartStop:
+		s.addHttpStartStop(envelope)
 	case events.Envelope_ValueMetric:
 		s.addValueMetric(envelope)
 	}
@@ -169,6 +189,20 @@ func (s *Store) GetCounterEvents() CounterEvents {
 
 func (s *Store) FlushCounterEvents() {
 	s.counterEvents.Flush()
+}
+
+func (s *Store) GetHttpStartStops() HttpStartStops {
+	httpStartStops := HttpStartStops{}
+	for _, httpStartStop := range s.httpStartStops.Items() {
+		if !httpStartStop.Expired() {
+			httpStartStops = append(httpStartStops, httpStartStop.Object.(HttpStartStop))
+		}
+	}
+	return httpStartStops
+}
+
+func (s *Store) FlushHttpStartStops() {
+	s.httpStartStops.Flush()
 }
 
 func (s *Store) GetValueMetrics() ValueMetrics {
@@ -239,6 +273,55 @@ func (s *Store) addCounterEvent(envelope *events.Envelope) {
 	}
 }
 
+func (s *Store) addHttpStartStop(envelope *events.Envelope) {
+	s.internalMetrics.IncrementInt64(TotalMetricsReceivedKey, 1)
+	s.internalMetrics.Set(LastMetricReceivedTimestampKey, time.Now().Unix(), cache.NoExpiration)
+	s.internalMetrics.IncrementInt64(TotalHttpStartStopReceivedKey, 1)
+	s.internalMetrics.Set(LastHttpStartStopReceivedTimestampKey, time.Now().Unix(), cache.NoExpiration)
+
+	if s.deploymentFilter.Enabled(envelope.GetDeployment()) && s.eventFilter.Enabled(envelope) {
+		s.internalMetrics.IncrementInt64(TotalHttpStartStopProcessedKey, 1)
+
+		var httpStartStop HttpStartStop
+		storeHttpStartStop, ok := s.httpStartStops.Get(s.metricKey(envelope))
+		if ok {
+			httpStartStop = storeHttpStartStop.(HttpStartStop)
+		} else {
+			httpStartStop = HttpStartStop{
+				Origin:        envelope.GetOrigin(),
+				Timestamp:     envelope.GetTimestamp(),
+				Deployment:    envelope.GetDeployment(),
+				Job:           envelope.GetJob(),
+				Index:         envelope.GetIndex(),
+				IP:            envelope.GetIp(),
+				Tags:          envelope.GetTags(),
+				RequestId:     utils.UUIDToString(envelope.GetHttpStartStop().GetRequestId()),
+				Method:        envelope.GetHttpStartStop().GetMethod().String(),
+				Uri:           envelope.GetHttpStartStop().GetUri(),
+				RemoteAddress: envelope.GetHttpStartStop().GetRemoteAddress(),
+				UserAgent:     envelope.GetHttpStartStop().GetUserAgent(),
+				StatusCode:    envelope.GetHttpStartStop().GetStatusCode(),
+				ContentLength: envelope.GetHttpStartStop().GetContentLength(),
+			}
+		}
+
+		httpDuration := envelope.GetHttpStartStop().GetStopTimestamp() - envelope.GetHttpStartStop().GetStartTimestamp()
+		switch envelope.GetHttpStartStop().GetPeerType() {
+		case events.PeerType_Client:
+			httpStartStop.ApplicationId = utils.UUIDToString(envelope.GetHttpStartStop().GetApplicationId())
+			httpStartStop.InstanceIndex = envelope.GetHttpStartStop().GetInstanceIndex()
+			httpStartStop.InstanceId = envelope.GetHttpStartStop().GetInstanceId()
+			httpStartStop.ClientDuration = httpDuration
+		case events.PeerType_Server:
+			httpStartStop.ServerDuration = httpDuration
+		default:
+			return
+		}
+
+		s.httpStartStops.Set(s.metricKey(envelope), httpStartStop, cache.NoExpiration)
+	}
+}
+
 func (s *Store) addValueMetric(envelope *events.Envelope) {
 	s.internalMetrics.IncrementInt64(TotalMetricsReceivedKey, 1)
 	s.internalMetrics.Set(LastMetricReceivedTimestampKey, time.Now().Unix(), cache.NoExpiration)
@@ -279,6 +362,8 @@ func (s *Store) metricKey(envelope *events.Envelope) string {
 		buffer.WriteString(strconv.Itoa(int(envelope.GetContainerMetric().GetInstanceIndex())))
 	case events.Envelope_CounterEvent:
 		buffer.WriteString(envelope.GetCounterEvent().GetName())
+	case events.Envelope_HttpStartStop:
+		buffer.WriteString(envelope.GetHttpStartStop().GetRequestId().String())
 	case events.Envelope_ValueMetric:
 		buffer.WriteString(envelope.GetValueMetric().GetName())
 	}

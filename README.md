@@ -74,7 +74,7 @@ uaac client add prometheus-firehose \
 | doppler.idle-timeout-seconds<br />FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT_SECONDS | No | 5 | Cloud Foundry Doppler Idle Timeout (in seconds) |
 | doppler.metric-expiration<br />FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION | No | 5 minutes | How long a Cloud Foundry Container Metric is valid |
 | filter.deployments<br />FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS | No | | Comma separated deployments to filter |
-| filter.events<br />FIREHOSE_EXPORTER_FILTER_EVENTS| No | | Comma separated events to filter (`ContainerMetric`, `CounterEvent`, `ValueMetric`) |
+| filter.events<br />FIREHOSE_EXPORTER_FILTER_EVENTS| No | | Comma separated events to filter (`ContainerMetric`, `CounterEvent`, `HttpStartStop`, `ValueMetric`) |
 | metrics.namespace<br />FIREHOSE_EXPORTER_METRICS_NAMESPACE | No | firehose | Metrics Namespace |
 | metrics.cleanup-interval<br />FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL | No | 2 minutes | Metrics clean up interval |
 | skip-ssl-verify<br />FIREHOSE_EXPORTER_SKIP_SSL_VERIFY | No | false | Disable SSL Verify |
@@ -99,6 +99,9 @@ The exporter returns additionally the following internal metrics:
 | *namespace*_total_counter_events_received | Total number of counter events received from Cloud Foundry Firehose |
 | *namespace*_total_counter_events_processed | Total number of counter events processed from Cloud Foundry Firehose |
 | *namespace*_last_counter_event_received_timestamp | Number of seconds since 1970 since last counter event received from Cloud Foundry Firehose |
+| *namespace*_total_http_start_stop_received | Total number of http start stop received from Cloud Foundry Firehose |
+| *namespace*_total_http_start_stop_processed | Total number of http start stop processed from Cloud Foundry Firehose |
+| *namespace*_last_http_start_stop_received_timestamp | Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose |
 | *namespace*_total_value_metrics_received | Total number of value metrics received from Cloud Foundry Firehose |
 | *namespace*_total_value_metrics_processed | Total number of value metrics processed from Cloud Foundry Firehose |
 | *namespace*_last_value_metric_received_timestamp | Number of seconds since 1970 since last value metric received from Cloud Foundry Firehose |
