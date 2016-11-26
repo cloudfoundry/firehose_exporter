@@ -2,13 +2,13 @@
 
 ### What metrics does this exporter report?
 
-The Cloud Foundry Firehose Prometheus Exporter is a proxy for [Cloud Foundry Firehose][firehose] metrics. It exports Cloud Foundry `ContainerMetric`, `CounterEvent` and `ValueMetric` metrics.
+The Cloud Foundry Firehose Prometheus Exporter is a proxy for [Cloud Foundry Firehose][firehose] metrics. It exports Cloud Foundry `ContainerMetric`, `CounterEvent`, `HttpStartStop` and `ValueMetric` metrics.
 
 For a list of all [Cloud Foundry Firehose][firehose] metrics check the [Cloud Foundry Component Metrics][cfmetrics] documentation.
 
 ### How can I filter by a particular Firehose event?
 
-The *filter.events* command flag allows you to filter what event metrics will be reported. Possible values are `ContainerMetric`, `CounterEvent`, `ValueMetric` (or a combination of them).
+The *filter.events* command flag allows you to filter what event metrics will be reported. Possible values are `ContainerMetric`, `CounterEvent`, `HttpStartStop`, `ValueMetric` (or a combination of them).
 
 ### How can I filter metrics coming from a particular BOSH deployment?
 

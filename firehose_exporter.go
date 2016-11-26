@@ -220,6 +220,9 @@ func main() {
 	counterEventsCollector := collectors.NewCounterEventsCollector(*metricsNamespace, metricsStore)
 	prometheus.MustRegister(counterEventsCollector)
 
+	httpStartStopCollector := collectors.NewHttpStartStopCollector(*metricsNamespace, metricsStore)
+	prometheus.MustRegister(httpStartStopCollector)
+
 	valueMetricsCollector := collectors.NewValueMetricsCollector(*metricsNamespace, metricsStore)
 	prometheus.MustRegister(valueMetricsCollector)
 
