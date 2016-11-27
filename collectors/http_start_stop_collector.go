@@ -2,6 +2,7 @@ package collectors
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/bmizerany/perks/quantile"
 	"github.com/prometheus/client_golang/prometheus"
@@ -31,12 +32,12 @@ type Method struct {
 }
 
 type HttpStartStopCollector struct {
-	namespace                            string
-	metricsStore                         *metrics.Store
-	requestTotalDesc                     *prometheus.Desc
-	responseSizeBytesDesc                *prometheus.Desc
-	clientRequestDurationNanosecondsDesc *prometheus.Desc
-	serverRequestDurationNanosecondsDesc *prometheus.Desc
+	namespace                        string
+	metricsStore                     *metrics.Store
+	requestTotalDesc                 *prometheus.Desc
+	responseSizeBytesDesc            *prometheus.Desc
+	clientRequestDurationSecondsDesc *prometheus.Desc
+	serverRequestDurationSecondsDesc *prometheus.Desc
 }
 
 func NewHttpStartStopCollector(
@@ -57,27 +58,27 @@ func NewHttpStartStopCollector(
 		nil,
 	)
 
-	clientRequestDurationNanosecondsDesc := prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, http_start_stop_subsystem, "client_request_duration_nanoseconds"),
-		"Cloud Foundry Firehose http start stop client request duration in nanoseconds.",
+	clientRequestDurationSecondsDesc := prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, http_start_stop_subsystem, "client_request_duration_seconds"),
+		"Cloud Foundry Firehose http start stop client request duration in seconds.",
 		[]string{"application_id", "instance_id", "uri", "method"},
 		nil,
 	)
 
-	serverRequestDurationNanosecondsDesc := prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, http_start_stop_subsystem, "server_request_duration_nanoseconds"),
-		"Cloud Foundry Firehose http start stop server request duration in nanoseconds.",
+	serverRequestDurationSecondsDesc := prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, http_start_stop_subsystem, "server_request_duration_seconds"),
+		"Cloud Foundry Firehose http start stop server request duration in seconds.",
 		[]string{"application_id", "instance_id", "uri", "method"},
 		nil,
 	)
 
 	return &HttpStartStopCollector{
-		namespace:                            namespace,
-		metricsStore:                         metricsStore,
-		requestTotalDesc:                     requestTotalDesc,
-		responseSizeBytesDesc:                responseSizeBytesDesc,
-		clientRequestDurationNanosecondsDesc: clientRequestDurationNanosecondsDesc,
-		serverRequestDurationNanosecondsDesc: serverRequestDurationNanosecondsDesc,
+		namespace:                        namespace,
+		metricsStore:                     metricsStore,
+		requestTotalDesc:                 requestTotalDesc,
+		responseSizeBytesDesc:            responseSizeBytesDesc,
+		clientRequestDurationSecondsDesc: clientRequestDurationSecondsDesc,
+		serverRequestDurationSecondsDesc: serverRequestDurationSecondsDesc,
 	}
 }
 
@@ -135,8 +136,8 @@ func (c HttpStartStopCollector) calculateMetrics(httpStartStops metrics.HttpStar
 
 		method.StatusCodes[httpStartStop.StatusCode]++
 		method.ContentLength.Insert(float64(httpStartStop.ContentLength))
-		method.ClientDuration.Insert(float64(httpStartStop.ClientDuration))
-		method.ServerDuration.Insert(float64(httpStartStop.ServerDuration))
+		method.ClientDuration.Insert(float64(httpStartStop.ClientDuration) / float64(time.Second))
+		method.ServerDuration.Insert(float64(httpStartStop.ServerDuration) / float64(time.Second))
 	}
 
 	return &applications
@@ -171,8 +172,8 @@ func (c HttpStartStopCollector) reportMetrics(applications *Applications, ch cha
 func (c HttpStartStopCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.requestTotalDesc
 	ch <- c.responseSizeBytesDesc
-	ch <- c.clientRequestDurationNanosecondsDesc
-	ch <- c.serverRequestDurationNanosecondsDesc
+	ch <- c.clientRequestDurationSecondsDesc
+	ch <- c.serverRequestDurationSecondsDesc
 }
 
 func (c HttpStartStopCollector) reportRequestTotal(
@@ -247,7 +248,7 @@ func (c HttpStartStopCollector) reportClientRequestDuration(
 	}
 
 	ch <- prometheus.MustNewConstSummary(
-		c.clientRequestDurationNanosecondsDesc,
+		c.clientRequestDurationSecondsDesc,
 		uint64(clientRequestDuration.Count()),
 		clientRequestDurationSum,
 		clientRequestDurationQuantiles,
@@ -278,7 +279,7 @@ func (c HttpStartStopCollector) reportServerRequestDuration(
 	}
 
 	ch <- prometheus.MustNewConstSummary(
-		c.serverRequestDurationNanosecondsDesc,
+		c.serverRequestDurationSecondsDesc,
 		uint64(serverRequestDuration.Count()),
 		serverRequestDurationSum,
 		serverRequestDurationQuantiles,
