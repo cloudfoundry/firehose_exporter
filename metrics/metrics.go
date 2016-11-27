@@ -42,7 +42,7 @@ type InternalMetrics struct {
 	LastSlowConsumerAlertTimestamp       int64
 }
 
-type ContainerMetrics []ContainerMetric
+type ContainerMetrics []*ContainerMetric
 
 type ContainerMetric struct {
 	Origin           string
@@ -61,7 +61,7 @@ type ContainerMetric struct {
 	DiskBytesQuota   uint64
 }
 
-type CounterEvents []CounterEvent
+type CounterEvents []*CounterEvent
 
 type CounterEvent struct {
 	Origin     string
@@ -76,7 +76,7 @@ type CounterEvent struct {
 	Total      uint64
 }
 
-type HttpStartStops []HttpStartStop
+type HttpStartStops []*HttpStartStop
 
 type HttpStartStop struct {
 	Origin         string
@@ -100,7 +100,7 @@ type HttpStartStop struct {
 	ServerDuration int64
 }
 
-type ValueMetrics []ValueMetric
+type ValueMetrics []*ValueMetric
 
 type ValueMetric struct {
 	Origin     string

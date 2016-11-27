@@ -63,10 +63,10 @@ var _ = Describe("Store", func() {
 		valueMetricValue = float64(2000)
 		valueMetricUnit  = "kb"
 
-		containerMetric ContainerMetric
-		counterEvent    CounterEvent
-		httpStartStop   HttpStartStop
-		valueMetric     ValueMetric
+		containerMetric *ContainerMetric
+		counterEvent    *CounterEvent
+		httpStartStop   *HttpStartStop
+		valueMetric     *ValueMetric
 
 		internalMetrics  InternalMetrics
 		containerMetrics ContainerMetrics
@@ -337,7 +337,7 @@ var _ = Describe("Store", func() {
 				},
 			)
 
-			containerMetric = ContainerMetric{
+			containerMetric = &ContainerMetric{
 				Origin:           origin,
 				Timestamp:        metricTimestamp,
 				Deployment:       boshDeployment,
@@ -372,7 +372,7 @@ var _ = Describe("Store", func() {
 				},
 			)
 
-			counterEvent = CounterEvent{
+			counterEvent = &CounterEvent{
 				Origin:     origin,
 				Timestamp:  metricTimestamp,
 				Deployment: boshDeployment,
@@ -438,7 +438,7 @@ var _ = Describe("Store", func() {
 				},
 			)
 
-			httpStartStop = HttpStartStop{
+			httpStartStop = &HttpStartStop{
 				Origin:         origin,
 				Timestamp:      metricTimestamp,
 				Deployment:     boshDeployment,
@@ -478,7 +478,7 @@ var _ = Describe("Store", func() {
 				},
 			)
 
-			valueMetric = ValueMetric{
+			valueMetric = &ValueMetric{
 				Origin:     origin,
 				Timestamp:  metricTimestamp,
 				Deployment: boshDeployment,
@@ -959,7 +959,7 @@ var _ = Describe("Store", func() {
 				},
 			)
 
-			containerMetric = ContainerMetric{
+			containerMetric = &ContainerMetric{
 				Origin:           origin,
 				Timestamp:        metricTimestamp,
 				Deployment:       boshDeployment,
@@ -1020,7 +1020,7 @@ var _ = Describe("Store", func() {
 				},
 			)
 
-			counterEvent = CounterEvent{
+			counterEvent = &CounterEvent{
 				Origin:     origin,
 				Timestamp:  metricTimestamp,
 				Deployment: boshDeployment,
@@ -1112,7 +1112,7 @@ var _ = Describe("Store", func() {
 				},
 			)
 
-			httpStartStop = HttpStartStop{
+			httpStartStop = &HttpStartStop{
 				Origin:         origin,
 				Timestamp:      metricTimestamp,
 				Deployment:     boshDeployment,
@@ -1178,7 +1178,7 @@ var _ = Describe("Store", func() {
 				},
 			)
 
-			valueMetric = ValueMetric{
+			valueMetric = &ValueMetric{
 				Origin:     origin,
 				Timestamp:  metricTimestamp,
 				Deployment: boshDeployment,

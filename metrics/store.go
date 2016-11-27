@@ -167,7 +167,7 @@ func (s *Store) GetContainerMetrics() ContainerMetrics {
 	containerMetrics := ContainerMetrics{}
 	for _, containerMetric := range s.containerMetrics.Items() {
 		if !containerMetric.Expired() {
-			containerMetrics = append(containerMetrics, containerMetric.Object.(ContainerMetric))
+			containerMetrics = append(containerMetrics, containerMetric.Object.(*ContainerMetric))
 		}
 	}
 	return containerMetrics
@@ -181,7 +181,7 @@ func (s *Store) GetCounterEvents() CounterEvents {
 	counterEvents := CounterEvents{}
 	for _, counterEvent := range s.counterEvents.Items() {
 		if !counterEvent.Expired() {
-			counterEvents = append(counterEvents, counterEvent.Object.(CounterEvent))
+			counterEvents = append(counterEvents, counterEvent.Object.(*CounterEvent))
 		}
 	}
 	return counterEvents
@@ -195,7 +195,7 @@ func (s *Store) GetHttpStartStops() HttpStartStops {
 	httpStartStops := HttpStartStops{}
 	for _, httpStartStop := range s.httpStartStops.Items() {
 		if !httpStartStop.Expired() {
-			httpStartStops = append(httpStartStops, httpStartStop.Object.(HttpStartStop))
+			httpStartStops = append(httpStartStops, httpStartStop.Object.(*HttpStartStop))
 		}
 	}
 	return httpStartStops
@@ -209,7 +209,7 @@ func (s *Store) GetValueMetrics() ValueMetrics {
 	valueMetrics := ValueMetrics{}
 	for _, valueMetric := range s.valueMetrics.Items() {
 		if !valueMetric.Expired() {
-			valueMetrics = append(valueMetrics, valueMetric.Object.(ValueMetric))
+			valueMetrics = append(valueMetrics, valueMetric.Object.(*ValueMetric))
 		}
 	}
 	return valueMetrics
@@ -228,7 +228,7 @@ func (s *Store) addContainerMetric(envelope *events.Envelope) {
 	if s.deploymentFilter.Enabled(envelope.GetDeployment()) && s.eventFilter.Enabled(envelope) {
 		s.internalMetrics.IncrementInt64(TotalContainerMetricsProcessedKey, 1)
 
-		containerMetric := ContainerMetric{
+		containerMetric := &ContainerMetric{
 			Origin:           envelope.GetOrigin(),
 			Timestamp:        envelope.GetTimestamp(),
 			Deployment:       envelope.GetDeployment(),
@@ -257,7 +257,7 @@ func (s *Store) addCounterEvent(envelope *events.Envelope) {
 	if s.deploymentFilter.Enabled(envelope.GetDeployment()) && s.eventFilter.Enabled(envelope) {
 		s.internalMetrics.IncrementInt64(TotalCounterEventsProcessedKey, 1)
 
-		counterEvent := CounterEvent{
+		counterEvent := &CounterEvent{
 			Origin:     envelope.GetOrigin(),
 			Timestamp:  envelope.GetTimestamp(),
 			Deployment: envelope.GetDeployment(),
@@ -282,12 +282,12 @@ func (s *Store) addHttpStartStop(envelope *events.Envelope) {
 	if s.deploymentFilter.Enabled(envelope.GetDeployment()) && s.eventFilter.Enabled(envelope) {
 		s.internalMetrics.IncrementInt64(TotalHttpStartStopProcessedKey, 1)
 
-		var httpStartStop HttpStartStop
+		var httpStartStop *HttpStartStop
 		storeHttpStartStop, ok := s.httpStartStops.Get(s.metricKey(envelope))
 		if ok {
-			httpStartStop = storeHttpStartStop.(HttpStartStop)
+			httpStartStop = storeHttpStartStop.(*HttpStartStop)
 		} else {
-			httpStartStop = HttpStartStop{
+			httpStartStop = &HttpStartStop{
 				Origin:        envelope.GetOrigin(),
 				Timestamp:     envelope.GetTimestamp(),
 				Deployment:    envelope.GetDeployment(),
@@ -331,7 +331,7 @@ func (s *Store) addValueMetric(envelope *events.Envelope) {
 	if s.deploymentFilter.Enabled(envelope.GetDeployment()) && s.eventFilter.Enabled(envelope) {
 		s.internalMetrics.IncrementInt64(TotalValueMetricsProcessedKey, 1)
 
-		valueMetric := ValueMetric{
+		valueMetric := &ValueMetric{
 			Origin:     envelope.GetOrigin(),
 			Timestamp:  envelope.GetTimestamp(),
 			Deployment: envelope.GetDeployment(),
