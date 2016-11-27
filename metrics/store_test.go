@@ -110,6 +110,10 @@ var _ = Describe("Store", func() {
 			Expect(internalMetrics.TotalContainerMetricsProcessed).To(Equal(int64(0)))
 		})
 
+		It("returns the TotalContainerMetricsCached", func() {
+			Expect(internalMetrics.TotalContainerMetricsCached).To(Equal(int64(0)))
+		})
+
 		It("returns the LastContainerMetricReceivedTimestamp", func() {
 			Expect(internalMetrics.LastContainerMetricReceivedTimestamp).To(Equal(int64(0)))
 		})
@@ -120,6 +124,10 @@ var _ = Describe("Store", func() {
 
 		It("returns the TotalCounterEventsProcessed", func() {
 			Expect(internalMetrics.TotalCounterEventsProcessed).To(Equal(int64(0)))
+		})
+
+		It("returns the TotalCounterEventsCached", func() {
+			Expect(internalMetrics.TotalCounterEventsCached).To(Equal(int64(0)))
 		})
 
 		It("returns the LastCounterEventReceivedTimestamp", func() {
@@ -134,6 +142,10 @@ var _ = Describe("Store", func() {
 			Expect(internalMetrics.TotalHttpStartStopProcessed).To(Equal(int64(0)))
 		})
 
+		It("returns the TotalHttpStartStopCached", func() {
+			Expect(internalMetrics.TotalHttpStartStopCached).To(Equal(int64(0)))
+		})
+
 		It("returns the LastHttpStartStopReceivedTimestamp", func() {
 			Expect(internalMetrics.LastHttpStartStopReceivedTimestamp).To(Equal(int64(0)))
 		})
@@ -144,6 +156,10 @@ var _ = Describe("Store", func() {
 
 		It("returns the TotalValueMetricsProcessed", func() {
 			Expect(internalMetrics.TotalValueMetricsProcessed).To(Equal(int64(0)))
+		})
+
+		It("returns the TotalValueMetricsCached", func() {
+			Expect(internalMetrics.TotalValueMetricsCached).To(Equal(int64(0)))
 		})
 
 		It("returns the LastValueMetricReceivedTimestamp", func() {
@@ -524,6 +540,10 @@ var _ = Describe("Store", func() {
 			Expect(internalMetrics.TotalContainerMetricsProcessed).To(Equal(int64(1)))
 		})
 
+		It("increments the TotalContainerMetricsCached", func() {
+			Expect(internalMetrics.TotalContainerMetricsCached).To(Equal(int64(1)))
+		})
+
 		It("sets the LastContainerMetricReceivedTimestamp", func() {
 			Expect(internalMetrics.LastContainerMetricReceivedTimestamp).ToNot(Equal(int64(0)))
 		})
@@ -534,6 +554,10 @@ var _ = Describe("Store", func() {
 
 		It("increments the TotalCounterEventsProcessed", func() {
 			Expect(internalMetrics.TotalCounterEventsProcessed).To(Equal(int64(1)))
+		})
+
+		It("increments the TotalCounterEventsCached", func() {
+			Expect(internalMetrics.TotalCounterEventsCached).To(Equal(int64(1)))
 		})
 
 		It("sets the LastCounterEventReceivedTimestamp", func() {
@@ -548,6 +572,10 @@ var _ = Describe("Store", func() {
 			Expect(internalMetrics.TotalHttpStartStopProcessed).To(Equal(int64(2)))
 		})
 
+		It("increments the TotalHttpStartStopCached", func() {
+			Expect(internalMetrics.TotalHttpStartStopCached).To(Equal(int64(1)))
+		})
+
 		It("sets the LastHttpStartStopReceivedTimestamp", func() {
 			Expect(internalMetrics.LastHttpStartStopReceivedTimestamp).ToNot(Equal(int64(0)))
 		})
@@ -558,6 +586,10 @@ var _ = Describe("Store", func() {
 
 		It("increments the TotalValueMetricsProcessed", func() {
 			Expect(internalMetrics.TotalValueMetricsProcessed).To(Equal(int64(1)))
+		})
+
+		It("increments the TotalValueMetricsCached", func() {
+			Expect(internalMetrics.TotalValueMetricsCached).To(Equal(int64(1)))
 		})
 
 		It("sets the LastValueMetricReceivedTimestamp", func() {
@@ -714,12 +746,20 @@ var _ = Describe("Store", func() {
 				Expect(internalMetrics.TotalContainerMetricsProcessed).To(Equal(int64(2)))
 			})
 
+			It("does not increments the TotalContainerMetricsCached", func() {
+				Expect(internalMetrics.TotalContainerMetricsCached).To(Equal(int64(1)))
+			})
+
 			It("increments the TotalCounterEventsReceived", func() {
 				Expect(internalMetrics.TotalCounterEventsReceived).To(Equal(int64(2)))
 			})
 
 			It("increments the TotalCounterEventsProcessed", func() {
 				Expect(internalMetrics.TotalCounterEventsProcessed).To(Equal(int64(2)))
+			})
+
+			It("does not increments the TotalCounterEventsCached", func() {
+				Expect(internalMetrics.TotalCounterEventsCached).To(Equal(int64(1)))
 			})
 
 			It("increments the TotalHttpStartStopReceived", func() {
@@ -730,12 +770,20 @@ var _ = Describe("Store", func() {
 				Expect(internalMetrics.TotalHttpStartStopProcessed).To(Equal(int64(4)))
 			})
 
+			It("does not increments the TotalHttpStartStopCached", func() {
+				Expect(internalMetrics.TotalHttpStartStopCached).To(Equal(int64(1)))
+			})
+
 			It("increments the TotalValueMetricsReceived", func() {
 				Expect(internalMetrics.TotalValueMetricsReceived).To(Equal(int64(2)))
 			})
 
 			It("increments the TotalValueMetricsProcessed", func() {
 				Expect(internalMetrics.TotalValueMetricsProcessed).To(Equal(int64(2)))
+			})
+
+			It("does not increments the TotalValueMetricsCached", func() {
+				Expect(internalMetrics.TotalValueMetricsCached).To(Equal(int64(1)))
 			})
 
 			It("does not add the duplicate container metric", func() {
@@ -889,12 +937,20 @@ var _ = Describe("Store", func() {
 				Expect(internalMetrics.TotalContainerMetricsProcessed).To(Equal(int64(2)))
 			})
 
+			It("increments the TotalContainerMetricsCached", func() {
+				Expect(internalMetrics.TotalContainerMetricsCached).To(Equal(int64(2)))
+			})
+
 			It("increments the TotalCounterEventsReceived", func() {
 				Expect(internalMetrics.TotalCounterEventsReceived).To(Equal(int64(2)))
 			})
 
 			It("increments the TotalCounterEventsProcessed", func() {
 				Expect(internalMetrics.TotalCounterEventsProcessed).To(Equal(int64(2)))
+			})
+
+			It("increments the TotalCounterEventsCached", func() {
+				Expect(internalMetrics.TotalCounterEventsCached).To(Equal(int64(2)))
 			})
 
 			It("increments the TotalHttpStartStopReceived", func() {
@@ -905,12 +961,20 @@ var _ = Describe("Store", func() {
 				Expect(internalMetrics.TotalHttpStartStopProcessed).To(Equal(int64(4)))
 			})
 
+			It("increments the TotalHttpStartStopCached", func() {
+				Expect(internalMetrics.TotalHttpStartStopCached).To(Equal(int64(2)))
+			})
+
 			It("increments the TotalValueMetricsReceived", func() {
 				Expect(internalMetrics.TotalValueMetricsReceived).To(Equal(int64(2)))
 			})
 
 			It("increments the TotalValueMetricsProcessed", func() {
 				Expect(internalMetrics.TotalValueMetricsProcessed).To(Equal(int64(2)))
+			})
+
+			It("increments the TotalValueMetricsCached", func() {
+				Expect(internalMetrics.TotalValueMetricsCached).To(Equal(int64(2)))
 			})
 
 			It("adds the container metric", func() {
@@ -977,6 +1041,10 @@ var _ = Describe("Store", func() {
 			}
 		})
 
+		JustBeforeEach(func() {
+			internalMetrics = metricsStore.GetInternalMetrics()
+		})
+
 		Describe("GetContainerMetrics", func() {
 			BeforeEach(func() {
 				containerMetrics = metricsStore.GetContainerMetrics()
@@ -996,6 +1064,10 @@ var _ = Describe("Store", func() {
 
 			It("returns empty container metrics", func() {
 				Expect(len(containerMetrics)).To(Equal(0))
+			})
+
+			It("empties the TotalContainerMetricsCached", func() {
+				Expect(internalMetrics.TotalContainerMetricsCached).To(Equal(int64(0)))
 			})
 		})
 	})
@@ -1034,6 +1106,10 @@ var _ = Describe("Store", func() {
 			}
 		})
 
+		JustBeforeEach(func() {
+			internalMetrics = metricsStore.GetInternalMetrics()
+		})
+
 		Describe("GetCounterEvents", func() {
 			BeforeEach(func() {
 				counterEvents = metricsStore.GetCounterEvents()
@@ -1053,6 +1129,10 @@ var _ = Describe("Store", func() {
 
 			It("returns empty counter events", func() {
 				Expect(len(counterEvents)).To(Equal(0))
+			})
+
+			It("empties the TotalCounterEventsCached", func() {
+				Expect(internalMetrics.TotalCounterEventsCached).To(Equal(int64(0)))
 			})
 		})
 	})
@@ -1135,6 +1215,10 @@ var _ = Describe("Store", func() {
 			}
 		})
 
+		JustBeforeEach(func() {
+			internalMetrics = metricsStore.GetInternalMetrics()
+		})
+
 		Describe("GetHttpStartStops", func() {
 			BeforeEach(func() {
 				httpStartStops = metricsStore.GetHttpStartStops()
@@ -1154,6 +1238,10 @@ var _ = Describe("Store", func() {
 
 			It("returns empty value metrics", func() {
 				Expect(len(httpStartStops)).To(Equal(0))
+			})
+
+			It("empties the TotalHttpStartStopCached", func() {
+				Expect(internalMetrics.TotalHttpStartStopCached).To(Equal(int64(0)))
 			})
 		})
 	})
@@ -1192,6 +1280,10 @@ var _ = Describe("Store", func() {
 			}
 		})
 
+		JustBeforeEach(func() {
+			internalMetrics = metricsStore.GetInternalMetrics()
+		})
+
 		Describe("GetValueMetrics", func() {
 			BeforeEach(func() {
 				valueMetrics = metricsStore.GetValueMetrics()
@@ -1211,6 +1303,10 @@ var _ = Describe("Store", func() {
 
 			It("returns empty value metrics", func() {
 				Expect(len(valueMetrics)).To(Equal(0))
+			})
+
+			It("empties the TotalValueMetricsCached", func() {
+				Expect(internalMetrics.TotalValueMetricsCached).To(Equal(int64(0)))
 			})
 		})
 	})

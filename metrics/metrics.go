@@ -28,15 +28,19 @@ type InternalMetrics struct {
 	LastMetricReceivedTimestamp          int64
 	TotalContainerMetricsReceived        int64
 	TotalContainerMetricsProcessed       int64
+	TotalContainerMetricsCached          int64
 	LastContainerMetricReceivedTimestamp int64
 	TotalCounterEventsReceived           int64
 	TotalCounterEventsProcessed          int64
+	TotalCounterEventsCached             int64
 	LastCounterEventReceivedTimestamp    int64
 	TotalHttpStartStopReceived           int64
 	TotalHttpStartStopProcessed          int64
+	TotalHttpStartStopCached             int64
 	LastHttpStartStopReceivedTimestamp   int64
 	TotalValueMetricsReceived            int64
 	TotalValueMetricsProcessed           int64
+	TotalValueMetricsCached              int64
 	LastValueMetricReceivedTimestamp     int64
 	SlowConsumerAlert                    bool
 	LastSlowConsumerAlertTimestamp       int64

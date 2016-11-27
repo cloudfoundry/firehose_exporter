@@ -75,6 +75,7 @@ func (s *Store) GetInternalMetrics() InternalMetrics {
 	if totalContainerMetricsProcessed, ok := s.internalMetrics.Get(TotalContainerMetricsProcessedKey); ok {
 		internalMetrics.TotalContainerMetricsProcessed = totalContainerMetricsProcessed.(int64)
 	}
+	internalMetrics.TotalContainerMetricsCached = int64(s.containerMetrics.ItemCount())
 	if lastContainerMetricReceivedTimestamp, ok := s.internalMetrics.Get(LastContainerMetricReceivedTimestampKey); ok {
 		internalMetrics.LastContainerMetricReceivedTimestamp = lastContainerMetricReceivedTimestamp.(int64)
 	}
@@ -85,6 +86,7 @@ func (s *Store) GetInternalMetrics() InternalMetrics {
 	if totalCounterEventsProcessed, ok := s.internalMetrics.Get(TotalCounterEventsProcessedKey); ok {
 		internalMetrics.TotalCounterEventsProcessed = totalCounterEventsProcessed.(int64)
 	}
+	internalMetrics.TotalCounterEventsCached = int64(s.counterEvents.ItemCount())
 	if lastCounterEventReceivedTimestamp, ok := s.internalMetrics.Get(LastCounterEventReceivedTimestampKey); ok {
 		internalMetrics.LastCounterEventReceivedTimestamp = lastCounterEventReceivedTimestamp.(int64)
 	}
@@ -95,6 +97,7 @@ func (s *Store) GetInternalMetrics() InternalMetrics {
 	if totalHttpStartStopProcessed, ok := s.internalMetrics.Get(TotalHttpStartStopProcessedKey); ok {
 		internalMetrics.TotalHttpStartStopProcessed = totalHttpStartStopProcessed.(int64)
 	}
+	internalMetrics.TotalHttpStartStopCached = int64(s.httpStartStops.ItemCount())
 	if lastHttpStartStopReceivedTimestamp, ok := s.internalMetrics.Get(LastHttpStartStopReceivedTimestampKey); ok {
 		internalMetrics.LastHttpStartStopReceivedTimestamp = lastHttpStartStopReceivedTimestamp.(int64)
 	}
@@ -105,6 +108,7 @@ func (s *Store) GetInternalMetrics() InternalMetrics {
 	if totalValueMetricsProcessed, ok := s.internalMetrics.Get(TotalValueMetricsProcessedKey); ok {
 		internalMetrics.TotalValueMetricsProcessed = totalValueMetricsProcessed.(int64)
 	}
+	internalMetrics.TotalValueMetricsCached = int64(s.valueMetrics.ItemCount())
 	if lastValueMetricReceivedTimestamp, ok := s.internalMetrics.Get(LastValueMetricReceivedTimestampKey); ok {
 		internalMetrics.LastValueMetricReceivedTimestamp = lastValueMetricReceivedTimestamp.(int64)
 	}
