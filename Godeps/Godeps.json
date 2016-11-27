@@ -16,6 +16,10 @@
 			"Rev": "4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9"
 		},
 		{
+			"ImportPath": "github.com/bmizerany/perks/quantile",
+			"Rev": "d9a9656a3a4b1c2864fdb44db2ef8619772d92aa"
+		},
+		{
 			"ImportPath": "github.com/cloudfoundry-incubator/uaago",
 			"Rev": "1db9cfd27865007e07ffd5914c0fdf5fb7fc09ba"
 		},
@@ -71,6 +75,10 @@
 			"ImportPath": "github.com/matttproud/golang_protobuf_extensions/pbutil",
 			"Comment": "v1.0.0-2-gc12348c",
 			"Rev": "c12348ce28de40eed0136aa2b644d0ee0650e56c"
+		},
+		{
+			"ImportPath": "github.com/nu7hatch/gouuid",
+			"Rev": "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
