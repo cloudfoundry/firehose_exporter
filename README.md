@@ -95,19 +95,19 @@ The exporter returns additionally the following internal metrics:
 | *namespace*_last_metric_received_timestamp | Number of seconds since 1970 since last metric received from Cloud Foundry Firehose |
 | *namespace*_total_container_metrics_received | Total number of container metrics received from Cloud Foundry Firehose |
 | *namespace*_total_container_metrics_processed | Total number of container metrics processed from Cloud Foundry Firehose |
-| *namespace*_total_container_metrics_cached | Total number of container metrics cached from Cloud Foundry Firehose |
+| *namespace*_container_metrics_cached | Number of container metrics cached from Cloud Foundry Firehose |
 | *namespace*_last_container_metric_received_timestamp | Number of seconds since 1970 since last container metric received from Cloud Foundry Firehose |
 | *namespace*_total_counter_events_received | Total number of counter events received from Cloud Foundry Firehose |
 | *namespace*_total_counter_events_processed | Total number of counter events processed from Cloud Foundry Firehose |
-| *namespace*_total_counter_events_cached | Total number of counter events cached from Cloud Foundry Firehose |_
+| *namespace*_counter_events_cached | Number of counter events cached from Cloud Foundry Firehose |
 | *namespace*_last_counter_event_received_timestamp | Number of seconds since 1970 since last counter event received from Cloud Foundry Firehose |
 | *namespace*_total_http_start_stop_received | Total number of http start stop received from Cloud Foundry Firehose |
 | *namespace*_total_http_start_stop_processed | Total number of http start stop processed from Cloud Foundry Firehose |
-| *namespace*_total_http_start_stop_cached | Total number of http start stop cached from Cloud Foundry Firehose |_
+| *namespace*_http_start_stop_cached | Number of http start stop cached from Cloud Foundry Firehose |
 | *namespace*_last_http_start_stop_received_timestamp | Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose |
 | *namespace*_total_value_metrics_received | Total number of value metrics received from Cloud Foundry Firehose |
 | *namespace*_total_value_metrics_processed | Total number of value metrics processed from Cloud Foundry Firehose |
-| *namespace*_total_value_metrics_cached | Total number of value metrics cached from Cloud Foundry Firehose |_
+| *namespace*_value_metrics_cached | Number of value metrics cached from Cloud Foundry Firehose |
 | *namespace*_last_value_metric_received_timestamp | Number of seconds since 1970 since last value metric received from Cloud Foundry Firehose |
 | *namespace*_slow_consumer_alert | Nozzle could not keep up with Cloud Foundry Firehose |
 | *namespace*_last_slow_consumer_alert_timestamp | Number of seconds since 1970 since last slow consumer alert received from Cloud Foundry Firehose |

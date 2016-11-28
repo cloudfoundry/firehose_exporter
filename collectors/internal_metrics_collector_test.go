@@ -29,19 +29,19 @@ var _ = Describe("InternalMetricsCollector", func() {
 		lastMetricReceivedTimestampDesc          *prometheus.Desc
 		totalContainerMetricsReceivedDesc        *prometheus.Desc
 		totalContainerMetricsProcessedDesc       *prometheus.Desc
-		totalContainerMetricsCachedDesc          *prometheus.Desc
+		containerMetricsCachedDesc               *prometheus.Desc
 		lastContainerMetricReceivedTimestampDesc *prometheus.Desc
 		totalCounterEventsReceivedDesc           *prometheus.Desc
 		totalCounterEventsProcessedDesc          *prometheus.Desc
-		totalCounterEventsCachedDesc             *prometheus.Desc
+		counterEventsCachedDesc                  *prometheus.Desc
 		lastCounterEventReceivedTimestampDesc    *prometheus.Desc
 		totalHttpStartStopReceivedDesc           *prometheus.Desc
 		totalHttpStartStopProcessedDesc          *prometheus.Desc
-		totalHttpStartStopCachedDesc             *prometheus.Desc
+		httpStartStopCachedDesc                  *prometheus.Desc
 		lastHttpStartStopReceivedTimestampDesc   *prometheus.Desc
 		totalValueMetricsReceivedDesc            *prometheus.Desc
 		totalValueMetricsProcessedDesc           *prometheus.Desc
-		totalValueMetricsCachedDesc              *prometheus.Desc
+		valueMetricsCachedDesc                   *prometheus.Desc
 		lastValueMetricReceivedTimestampDesc     *prometheus.Desc
 		slowConsumerAlertDesc                    *prometheus.Desc
 		lastSlowConsumerAlertTimestampDesc       *prometheus.Desc
@@ -95,9 +95,9 @@ var _ = Describe("InternalMetricsCollector", func() {
 			nil,
 		)
 
-		totalContainerMetricsCachedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "total_container_metrics_cached"),
-			"Total number of container metrics cached from Cloud Foundry Firehose.",
+		containerMetricsCachedDesc = prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "", "container_metrics_cached"),
+			"Number of container metrics cached from Cloud Foundry Firehose.",
 			[]string{},
 			nil,
 		)
@@ -123,9 +123,9 @@ var _ = Describe("InternalMetricsCollector", func() {
 			nil,
 		)
 
-		totalCounterEventsCachedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "total_counter_events_cached"),
-			"Total number of counter events cached from Cloud Foundry Firehose.",
+		counterEventsCachedDesc = prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "", "counter_events_cached"),
+			"Number of counter events cached from Cloud Foundry Firehose.",
 			[]string{},
 			nil,
 		)
@@ -151,9 +151,9 @@ var _ = Describe("InternalMetricsCollector", func() {
 			nil,
 		)
 
-		totalHttpStartStopCachedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "total_http_start_stop_cached"),
-			"Total number of http start stop cached from Cloud Foundry Firehose.",
+		httpStartStopCachedDesc = prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "", "http_start_stop_cached"),
+			"Number of http start stop cached from Cloud Foundry Firehose.",
 			[]string{},
 			nil,
 		)
@@ -179,9 +179,9 @@ var _ = Describe("InternalMetricsCollector", func() {
 			nil,
 		)
 
-		totalValueMetricsCachedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "total_value_metrics_cached"),
-			"Total number of value metrics cached from Cloud Foundry Firehose.",
+		valueMetricsCachedDesc = prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "", "value_metrics_cached"),
+			"Number of value metrics cached from Cloud Foundry Firehose.",
 			[]string{},
 			nil,
 		)
@@ -249,8 +249,8 @@ var _ = Describe("InternalMetricsCollector", func() {
 			Eventually(descriptions).Should(Receive(Equal(totalContainerMetricsProcessedDesc)))
 		})
 
-		It("returns a total_container_metrics_cached metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(totalContainerMetricsCachedDesc)))
+		It("returns a container_metrics_cached metric description", func() {
+			Eventually(descriptions).Should(Receive(Equal(containerMetricsCachedDesc)))
 		})
 
 		It("returns a last_container_metric_received_timestamp metric description", func() {
@@ -265,8 +265,8 @@ var _ = Describe("InternalMetricsCollector", func() {
 			Eventually(descriptions).Should(Receive(Equal(totalCounterEventsProcessedDesc)))
 		})
 
-		It("returns a total_counter_events_cached metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(totalCounterEventsCachedDesc)))
+		It("returns a counter_events_cached metric description", func() {
+			Eventually(descriptions).Should(Receive(Equal(counterEventsCachedDesc)))
 		})
 
 		It("returns a last_counter_event_received_timestamp metric description", func() {
@@ -281,8 +281,8 @@ var _ = Describe("InternalMetricsCollector", func() {
 			Eventually(descriptions).Should(Receive(Equal(totalHttpStartStopProcessedDesc)))
 		})
 
-		It("returns a total_http_start_stop_cached metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(totalHttpStartStopCachedDesc)))
+		It("returns a http_start_stop_cached metric description", func() {
+			Eventually(descriptions).Should(Receive(Equal(httpStartStopCachedDesc)))
 		})
 
 		It("returns a last_http_start_stop_received_timestamp metric description", func() {
@@ -297,8 +297,8 @@ var _ = Describe("InternalMetricsCollector", func() {
 			Eventually(descriptions).Should(Receive(Equal(totalValueMetricsProcessedDesc)))
 		})
 
-		It("returns a total_value_metrics_cached metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(totalValueMetricsCachedDesc)))
+		It("returns a value_metrics_cached metric description", func() {
+			Eventually(descriptions).Should(Receive(Equal(valueMetricsCachedDesc)))
 		})
 
 		It("returns a last_value_metric_received_timestamp metric description", func() {
@@ -343,19 +343,19 @@ var _ = Describe("InternalMetricsCollector", func() {
 			lastMetricReceivedTimestampMetric          prometheus.Metric
 			totalContainerMetricsReceivedMetric        prometheus.Metric
 			totalContainerMetricsProcessedMetric       prometheus.Metric
-			totalContainerMetricsCachedMetric          prometheus.Metric
+			containerMetricsCachedMetric               prometheus.Metric
 			lastContainerMetricReceivedTimestampMetric prometheus.Metric
 			totalCounterEventsReceivedMetric           prometheus.Metric
 			totalCounterEventsProcessedMetric          prometheus.Metric
-			totalCounterEventsCachedMetric             prometheus.Metric
+			counterEventsCachedMetric                  prometheus.Metric
 			lastCounterEventReceivedTimestampMetric    prometheus.Metric
 			totalHttpStartStopReceivedMetric           prometheus.Metric
 			totalHttpStartStopProcessedMetric          prometheus.Metric
-			totalHttpStartStopCachedMetric             prometheus.Metric
+			httpStartStopCachedMetric                  prometheus.Metric
 			lastHttpStartStopReceivedTimestampMetric   prometheus.Metric
 			totalValueMetricsReceivedMetric            prometheus.Metric
 			totalValueMetricsProcessedMetric           prometheus.Metric
-			totalValueMetricsCachedMetric              prometheus.Metric
+			valueMetricsCachedMetric                   prometheus.Metric
 			lastValueMetricReceivedTimestampMetric     prometheus.Metric
 			slowConsumerAlertMetric                    prometheus.Metric
 			lastSlowConsumerAlertTimestampMetric       prometheus.Metric
@@ -421,9 +421,9 @@ var _ = Describe("InternalMetricsCollector", func() {
 				float64(totalContainerMetricsProcessed),
 			)
 
-			totalContainerMetricsCachedMetric = prometheus.MustNewConstMetric(
-				totalContainerMetricsCachedDesc,
-				prometheus.CounterValue,
+			containerMetricsCachedMetric = prometheus.MustNewConstMetric(
+				containerMetricsCachedDesc,
+				prometheus.GaugeValue,
 				float64(0),
 			)
 
@@ -445,9 +445,9 @@ var _ = Describe("InternalMetricsCollector", func() {
 				float64(totalCounterEventsProcessed),
 			)
 
-			totalCounterEventsCachedMetric = prometheus.MustNewConstMetric(
-				totalCounterEventsCachedDesc,
-				prometheus.CounterValue,
+			counterEventsCachedMetric = prometheus.MustNewConstMetric(
+				counterEventsCachedDesc,
+				prometheus.GaugeValue,
 				float64(0),
 			)
 
@@ -469,9 +469,9 @@ var _ = Describe("InternalMetricsCollector", func() {
 				float64(totalHttpStartStopProcessed),
 			)
 
-			totalHttpStartStopCachedMetric = prometheus.MustNewConstMetric(
-				totalHttpStartStopCachedDesc,
-				prometheus.CounterValue,
+			httpStartStopCachedMetric = prometheus.MustNewConstMetric(
+				httpStartStopCachedDesc,
+				prometheus.GaugeValue,
 				float64(0),
 			)
 
@@ -493,9 +493,9 @@ var _ = Describe("InternalMetricsCollector", func() {
 				float64(totalValueMetricsProcessed),
 			)
 
-			totalValueMetricsCachedMetric = prometheus.MustNewConstMetric(
-				totalValueMetricsCachedDesc,
-				prometheus.CounterValue,
+			valueMetricsCachedMetric = prometheus.MustNewConstMetric(
+				valueMetricsCachedDesc,
+				prometheus.GaugeValue,
 				float64(0),
 			)
 
@@ -547,8 +547,8 @@ var _ = Describe("InternalMetricsCollector", func() {
 			Eventually(internalMetricsChan).Should(Receive(Equal(totalContainerMetricsProcessedMetric)))
 		})
 
-		It("returns a total_container_metrics_cached metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(totalContainerMetricsCachedMetric)))
+		It("returns a container_metrics_cached metric", func() {
+			Eventually(internalMetricsChan).Should(Receive(Equal(containerMetricsCachedMetric)))
 		})
 
 		It("returns a last_container_metric_received_timestamp", func() {
@@ -563,8 +563,8 @@ var _ = Describe("InternalMetricsCollector", func() {
 			Eventually(internalMetricsChan).Should(Receive(Equal(totalCounterEventsProcessedMetric)))
 		})
 
-		It("returns a total_counter_events_cached metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(totalCounterEventsCachedMetric)))
+		It("returns a counter_events_cached metric", func() {
+			Eventually(internalMetricsChan).Should(Receive(Equal(counterEventsCachedMetric)))
 		})
 
 		It("returns a last_counter_event_received_timestamp metric", func() {
@@ -579,8 +579,8 @@ var _ = Describe("InternalMetricsCollector", func() {
 			Eventually(internalMetricsChan).Should(Receive(Equal(totalHttpStartStopProcessedMetric)))
 		})
 
-		It("returns a total_http_start_stop_cached metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(totalHttpStartStopCachedMetric)))
+		It("returns a http_start_stop_cached metric", func() {
+			Eventually(internalMetricsChan).Should(Receive(Equal(httpStartStopCachedMetric)))
 		})
 
 		It("returns a last_http_start_stop_received_timestamp metric", func() {
@@ -595,8 +595,8 @@ var _ = Describe("InternalMetricsCollector", func() {
 			Eventually(internalMetricsChan).Should(Receive(Equal(totalValueMetricsProcessedMetric)))
 		})
 
-		It("returns a total_value_metrics_cached metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(totalValueMetricsCachedMetric)))
+		It("returns a value_metrics_cached metric", func() {
+			Eventually(internalMetricsChan).Should(Receive(Equal(valueMetricsCachedMetric)))
 		})
 
 		It("returns a last_value_metric_received_timestamp metric", func() {
