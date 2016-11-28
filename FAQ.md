@@ -6,6 +6,43 @@ The Cloud Foundry Firehose Prometheus Exporter is a proxy for [Cloud Foundry Fir
 
 For a list of all [Cloud Foundry Firehose][firehose] metrics check the [Cloud Foundry Component Metrics][cfmetrics] documentation.
 
+#### ContainerMetric metrics
+
+`ContainerMetric` metrics reports resource usage of an application in a container. The exporter emits:
+
+| Metric | Description | Labels |
+| ------ | ----------- | ------ |
+| *namespace*_container_metric_cpu_percentage | Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100 | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_id`|
+| *namespace*_container_metric_memory_bytes | Cloud Foundry Firehose container metric: bytes of memory used | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_id`|
+| *namespace*_container_metric_disk_bytes | Cloud Foundry Firehose container metric: bytes of disk used | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_id`|
+| *namespace*_container_metric_memory_bytes_quota | Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_id`|
+| *namespace*_container_metric_disk_bytes_quota | Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_id`|
+
+Metrics are cached (with a expirity defined at the *doppler.metric-expiration* command flag). The exporter always emits the last `ContainerMetric` metric received if it has not expired.
+
+#### CounterEvent metrics
+
+`CounterEvent` metrics represents a metric counter (`delta` and `total`). The exporter normalizes each *counter_event_name* received from a [Cloud Foundry Firehose][firehose] *origin* and emits:
+
+| Metric | Description | Labels |
+| ------ | ----------- | ------ |
+| *namespace*_counter_event_*origin*_*counter_event_name*_total | Cloud Foundry Firehose '*counter_event_name*' total counter event from '*origin*' | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip` |
+| *namespace*_counter_event_*origin*_*counter_event_name*_delta | Cloud Foundry Firehose '*counter_event_name*' delta counter event from '*origin*' | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip` |
+
+Metrics are cached (with *no* expiration). The exporter always emits the last `CounterEvent` metric received.
+
+#### HttpStartStop metrics
+
+#### ValueMetric metrics
+
+`ValueMetric` metrics represents the value of a metric at an instant in time. The exporter normalizes each *value_metric_name* received from a [Cloud Foundry Firehose][firehose] *origin* and emits:
+
+| Metric | Description | Labels |
+| ------ | ----------- | ------ |
+| *namespace*_value_metric_*origin*_*value_metric_name* | Cloud Foundry Firehose '*value_metric_name*' value metric from '*origin*' | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `unit` |
+
+Metrics are cached (with *no* expiration). The exporter always emits the last `ValueMetric` metric received.
+
 ### How can I filter by a particular Firehose event?
 
 The *filter.events* command flag allows you to filter what event metrics will be reported. Possible values are `ContainerMetric`, `CounterEvent`, `HttpStartStop`, `ValueMetric` (or a combination of them).
