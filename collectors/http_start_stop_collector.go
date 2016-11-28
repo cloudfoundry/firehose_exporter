@@ -2,12 +2,12 @@ package collectors
 
 import (
 	"strconv"
-	"time"
 
 	"github.com/bmizerany/perks/quantile"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/cloudfoundry-community/firehose_exporter/metrics"
+	"github.com/cloudfoundry-community/firehose_exporter/utils"
 )
 
 type Applications map[string]*Application
@@ -25,10 +25,11 @@ type Uri struct {
 }
 
 type Method struct {
-	StatusCodes    map[int32]int64
-	ContentLength  *quantile.Stream
-	ClientDuration *quantile.Stream
-	ServerDuration *quantile.Stream
+	StatusCodes          map[int32]int64
+	ContentLength        *quantile.Stream
+	LastRequestTimestamp float64
+	ClientDuration       *quantile.Stream
+	ServerDuration       *quantile.Stream
 }
 
 type HttpStartStopCollector struct {
@@ -36,6 +37,7 @@ type HttpStartStopCollector struct {
 	metricsStore                     *metrics.Store
 	requestTotalDesc                 *prometheus.Desc
 	responseSizeBytesDesc            *prometheus.Desc
+	lastRequestTimestampDesc         *prometheus.Desc
 	clientRequestDurationSecondsDesc *prometheus.Desc
 	serverRequestDurationSecondsDesc *prometheus.Desc
 }
@@ -54,6 +56,13 @@ func NewHttpStartStopCollector(
 	responseSizeBytesDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, http_start_stop_subsystem, "response_size_bytes"),
 		"Summary of Cloud Foundry Firehose http start stop request size in bytes.",
+		[]string{"application_id", "instance_id", "uri", "method"},
+		nil,
+	)
+
+	lastRequestTimestampDesc := prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, http_start_stop_subsystem, "last_request_timestamp"),
+		"Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose.",
 		[]string{"application_id", "instance_id", "uri", "method"},
 		nil,
 	)
@@ -77,6 +86,7 @@ func NewHttpStartStopCollector(
 		metricsStore:                     metricsStore,
 		requestTotalDesc:                 requestTotalDesc,
 		responseSizeBytesDesc:            responseSizeBytesDesc,
+		lastRequestTimestampDesc:         lastRequestTimestampDesc,
 		clientRequestDurationSecondsDesc: clientRequestDurationSecondsDesc,
 		serverRequestDurationSecondsDesc: serverRequestDurationSecondsDesc,
 	}
@@ -85,6 +95,14 @@ func NewHttpStartStopCollector(
 func (c HttpStartStopCollector) Collect(ch chan<- prometheus.Metric) {
 	applications := c.calculateMetrics(c.metricsStore.GetHttpStartStops())
 	c.reportMetrics(applications, ch)
+}
+
+func (c HttpStartStopCollector) Describe(ch chan<- *prometheus.Desc) {
+	ch <- c.requestTotalDesc
+	ch <- c.responseSizeBytesDesc
+	ch <- c.lastRequestTimestampDesc
+	ch <- c.clientRequestDurationSecondsDesc
+	ch <- c.serverRequestDurationSecondsDesc
 }
 
 func (c HttpStartStopCollector) calculateMetrics(httpStartStops metrics.HttpStartStops) *Applications {
@@ -136,8 +154,19 @@ func (c HttpStartStopCollector) calculateMetrics(httpStartStops metrics.HttpStar
 
 		method.StatusCodes[httpStartStop.StatusCode]++
 		method.ContentLength.Insert(float64(httpStartStop.ContentLength))
-		method.ClientDuration.Insert(float64(httpStartStop.ClientDuration) / float64(time.Second))
-		method.ServerDuration.Insert(float64(httpStartStop.ServerDuration) / float64(time.Second))
+		if httpStartStop.ClientStartTimestamp > 0 {
+			method.LastRequestTimestamp = utils.NanosecondsToSeconds(httpStartStop.ClientStartTimestamp)
+		} else {
+			method.LastRequestTimestamp = utils.NanosecondsToSeconds(httpStartStop.ServerStartTimestamp)
+		}
+		clientDuration := httpStartStop.ClientStopTimestamp - httpStartStop.ClientStartTimestamp
+		if clientDuration > 0 {
+			method.ClientDuration.Insert(utils.NanosecondsToSeconds(clientDuration))
+		}
+		serverDuration := httpStartStop.ServerStopTimestamp - httpStartStop.ServerStartTimestamp
+		if serverDuration > 0 {
+			method.ServerDuration.Insert(utils.NanosecondsToSeconds(serverDuration))
+		}
 	}
 
 	return &applications
@@ -149,6 +178,7 @@ func (c HttpStartStopCollector) reportMetrics(applications *Applications, ch cha
 			for uriKey, uri := range instance.Uris {
 				for methodKey, method := range uri.Methods {
 					c.reportResponseSize(method.ContentLength, applicationID, instanceID, uriKey, methodKey, ch)
+					c.reportLastRequestTimestamp(method.LastRequestTimestamp, applicationID, instanceID, uriKey, methodKey, ch)
 					c.reportClientRequestDuration(method.ClientDuration, applicationID, instanceID, uriKey, methodKey, ch)
 					c.reportServerRequestDuration(method.ServerDuration, applicationID, instanceID, uriKey, methodKey, ch)
 
@@ -167,13 +197,6 @@ func (c HttpStartStopCollector) reportMetrics(applications *Applications, ch cha
 			}
 		}
 	}
-}
-
-func (c HttpStartStopCollector) Describe(ch chan<- *prometheus.Desc) {
-	ch <- c.requestTotalDesc
-	ch <- c.responseSizeBytesDesc
-	ch <- c.clientRequestDurationSecondsDesc
-	ch <- c.serverRequestDurationSecondsDesc
 }
 
 func (c HttpStartStopCollector) reportRequestTotal(
@@ -221,6 +244,25 @@ func (c HttpStartStopCollector) reportResponseSize(
 		uint64(responseSize.Count()),
 		responseSizeSum,
 		responseSizeQuantiles,
+		applicationID,
+		instanceID,
+		uri,
+		method,
+	)
+}
+
+func (c HttpStartStopCollector) reportLastRequestTimestamp(
+	lastRequestTimestamp float64,
+	applicationID string,
+	instanceID string,
+	uri string,
+	method string,
+	ch chan<- prometheus.Metric,
+) {
+	ch <- prometheus.MustNewConstMetric(
+		c.lastRequestTimestampDesc,
+		prometheus.GaugeValue,
+		lastRequestTimestamp,
 		applicationID,
 		instanceID,
 		uri,

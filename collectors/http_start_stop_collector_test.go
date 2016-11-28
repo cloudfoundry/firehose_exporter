@@ -29,6 +29,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 
 		requestTotalDesc                 *prometheus.Desc
 		responseSizeBytesDesc            *prometheus.Desc
+		lastRequestTimestampDesc         *prometheus.Desc
 		clientRequestDurationSecondsDesc *prometheus.Desc
 		serverRequestDurationSecondsDesc *prometheus.Desc
 	)
@@ -49,6 +50,13 @@ var _ = Describe("HttpStartStopCollector", func() {
 		responseSizeBytesDesc = prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "http_start_stop", "response_size_bytes"),
 			"Summary of Cloud Foundry Firehose http start stop request size in bytes.",
+			[]string{"application_id", "instance_id", "uri", "method"},
+			nil,
+		)
+
+		lastRequestTimestampDesc = prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "http_start_stop", "last_request_timestamp"),
+			"Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose.",
 			[]string{"application_id", "instance_id", "uri", "method"},
 			nil,
 		)
@@ -93,6 +101,10 @@ var _ = Describe("HttpStartStopCollector", func() {
 			Eventually(descriptions).Should(Receive(Equal(responseSizeBytesDesc)))
 		})
 
+		It("returns a last_request_timestamp metric description", func() {
+			Eventually(descriptions).Should(Receive(Equal(lastRequestTimestampDesc)))
+		})
+
 		It("returns a client_request_duration_seconds metric description", func() {
 			Eventually(descriptions).Should(Receive(Equal(clientRequestDurationSecondsDesc)))
 		})
@@ -114,8 +126,8 @@ var _ = Describe("HttpStartStopCollector", func() {
 			httpStartStopClientStopTimestamp  = int64(20)
 			httpStartStopServerStartTimestamp = int64(1)
 			httpStartStopServerStopTimestamp  = int64(10)
-			httpStartStopClientDuration       = float64(httpStartStopClientStopTimestamp-httpStartStopClientStartTimestamp) / float64(time.Second)
-			httpStartStopServerDuration       = float64(httpStartStopServerStopTimestamp-httpStartStopServerStartTimestamp) / float64(time.Second)
+			httpStartStopClientDuration       = utils.NanosecondsToSeconds(httpStartStopClientStopTimestamp - httpStartStopClientStartTimestamp)
+			httpStartStopServerDuration       = utils.NanosecondsToSeconds(httpStartStopServerStopTimestamp - httpStartStopServerStartTimestamp)
 			httpStartStopRequestId            = "1beb4072-acaa-483f-5a8b-425dc080af13"
 			httpStartStopClientPeerType       = events.PeerType_Client
 			httpStartStopServerPeerType       = events.PeerType_Server
@@ -132,6 +144,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 			httpStartStopMetricsChan           chan prometheus.Metric
 			requestTotalMetric                 prometheus.Metric
 			responseSizeBytesMetric            prometheus.Metric
+			lastRequestTimestampMetric         prometheus.Metric
 			clientRequestDurationSecondsMetric prometheus.Metric
 			serverRequestDurationSecondsMetric prometheus.Metric
 		)
@@ -218,6 +231,16 @@ var _ = Describe("HttpStartStopCollector", func() {
 				httpStartStopMethod,
 			)
 
+			lastRequestTimestampMetric = prometheus.MustNewConstMetric(
+				lastRequestTimestampDesc,
+				prometheus.GaugeValue,
+				utils.NanosecondsToSeconds(httpStartStopClientStartTimestamp),
+				httpStartStopApplicationId,
+				httpStartStopInstanceId,
+				httpStartStopUri,
+				httpStartStopMethod,
+			)
+
 			clientRequestDurationSecondsMetric = prometheus.MustNewConstSummary(
 				clientRequestDurationSecondsDesc,
 				uint64(1),
@@ -259,6 +282,10 @@ var _ = Describe("HttpStartStopCollector", func() {
 
 		It("returns a response_size_bytes metric", func() {
 			Eventually(httpStartStopMetricsChan).Should(Receive(Equal(responseSizeBytesMetric)))
+		})
+
+		It("returns a last_request_timestamp metric", func() {
+			Eventually(httpStartStopMetricsChan).Should(Receive(Equal(lastRequestTimestampMetric)))
 		})
 
 		It("returns a client_request_duration_seconds metric", func() {

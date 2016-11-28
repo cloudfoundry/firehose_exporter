@@ -83,25 +83,27 @@ type CounterEvent struct {
 type HttpStartStops []*HttpStartStop
 
 type HttpStartStop struct {
-	Origin         string
-	Timestamp      int64
-	Deployment     string
-	Job            string
-	Index          string
-	IP             string
-	Tags           map[string]string
-	RequestId      string
-	Method         string
-	Uri            string
-	RemoteAddress  string
-	UserAgent      string
-	StatusCode     int32
-	ContentLength  int64
-	ApplicationId  string
-	InstanceIndex  int32
-	InstanceId     string
-	ClientDuration int64
-	ServerDuration int64
+	Origin               string
+	Timestamp            int64
+	Deployment           string
+	Job                  string
+	Index                string
+	IP                   string
+	Tags                 map[string]string
+	RequestId            string
+	Method               string
+	Uri                  string
+	RemoteAddress        string
+	UserAgent            string
+	StatusCode           int32
+	ContentLength        int64
+	ApplicationId        string
+	InstanceIndex        int32
+	InstanceId           string
+	ClientStartTimestamp int64
+	ClientStopTimestamp  int64
+	ServerStartTimestamp int64
+	ServerStopTimestamp  int64
 }
 
 type ValueMetrics []*ValueMetric

@@ -41,6 +41,7 @@ An `HttpStartStop` event represents the whole lifecycle of an HTTP request. The 
 | ------ | ----------- | ------ |
 | *namespace*_http_start_stop_request_total | Cloud Foundry Firehose http start stop total requests | `application_id`, `instance_id`, `uri`, `method`, `status_code` |
 | *namespace*_http_start_stop_response_size_bytes | Summary of Cloud Foundry Firehose http start stop request size in bytes | `application_id`, `instance_id`, `uri`, `method` |
+| *namespace*_http_start_stop_last_request_timestamp | Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose | `application_id`, `instance_id`, `uri`, `method` |
 | *namespace*_http_start_stop_client_request_duration_seconds | Summary of Cloud Foundry Firehose http start stop client request duration in seconds | `application_id`, `instance_id`, `uri`, `method` |
 | *namespace*_http_start_stop_server_request_duration_seconds | Summary of Cloud Foundry Firehose http start stop server request duration in seconds | `application_id`, `instance_id`, `uri`, `method` |
 

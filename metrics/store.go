@@ -309,15 +309,16 @@ func (s *Store) addHttpStartStop(envelope *events.Envelope) {
 			}
 		}
 
-		httpDuration := envelope.GetHttpStartStop().GetStopTimestamp() - envelope.GetHttpStartStop().GetStartTimestamp()
 		switch envelope.GetHttpStartStop().GetPeerType() {
 		case events.PeerType_Client:
 			httpStartStop.ApplicationId = utils.UUIDToString(envelope.GetHttpStartStop().GetApplicationId())
 			httpStartStop.InstanceIndex = envelope.GetHttpStartStop().GetInstanceIndex()
 			httpStartStop.InstanceId = envelope.GetHttpStartStop().GetInstanceId()
-			httpStartStop.ClientDuration = httpDuration
+			httpStartStop.ClientStartTimestamp = envelope.GetHttpStartStop().GetStartTimestamp()
+			httpStartStop.ClientStopTimestamp = envelope.GetHttpStartStop().GetStopTimestamp()
 		case events.PeerType_Server:
-			httpStartStop.ServerDuration = httpDuration
+			httpStartStop.ServerStartTimestamp = envelope.GetHttpStartStop().GetStartTimestamp()
+			httpStartStop.ServerStopTimestamp = envelope.GetHttpStartStop().GetStopTimestamp()
 		default:
 			return
 		}
