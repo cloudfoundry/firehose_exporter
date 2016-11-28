@@ -33,7 +33,7 @@ Metrics are cached (with *no* expiration). The exporter always emits the last `C
 
 #### HttpStartStop metrics
 
-*The HttpStartStop Collector is a work in progress. It is suitable for **experimentation** and may not become supported in the future*
+*The HttpStartStop Collector is a work in progress. It is suitable for experimentation and may not become supported in the future*
 
 An `HttpStartStop` event represents the whole lifecycle of an HTTP request. The exporter summarizes all HTTP requests related to **applications** from the [Cloud Foundry Firehose][firehose] and emits:
 
