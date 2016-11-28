@@ -53,21 +53,21 @@ func NewHttpStartStopCollector(
 
 	responseSizeBytesDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, http_start_stop_subsystem, "response_size_bytes"),
-		"Cloud Foundry Firehose http start stop request size in bytes.",
+		"Summary of Cloud Foundry Firehose http start stop request size in bytes.",
 		[]string{"application_id", "instance_id", "uri", "method"},
 		nil,
 	)
 
 	clientRequestDurationSecondsDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, http_start_stop_subsystem, "client_request_duration_seconds"),
-		"Cloud Foundry Firehose http start stop client request duration in seconds.",
+		"Summary of Cloud Foundry Firehose http start stop client request duration in seconds.",
 		[]string{"application_id", "instance_id", "uri", "method"},
 		nil,
 	)
 
 	serverRequestDurationSecondsDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, http_start_stop_subsystem, "server_request_duration_seconds"),
-		"Cloud Foundry Firehose http start stop server request duration in seconds.",
+		"Summary of Cloud Foundry Firehose http start stop server request duration in seconds.",
 		[]string{"application_id", "instance_id", "uri", "method"},
 		nil,
 	)
