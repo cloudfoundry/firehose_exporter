@@ -322,7 +322,7 @@ func (s *Store) addHttpStartStop(envelope *events.Envelope) {
 			return
 		}
 
-		s.httpStartStops.Set(s.metricKey(envelope), httpStartStop, cache.NoExpiration)
+		s.httpStartStops.Set(s.metricKey(envelope), httpStartStop, cache.DefaultExpiration)
 	}
 }
 
