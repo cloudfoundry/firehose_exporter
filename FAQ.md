@@ -33,6 +33,17 @@ Metrics are cached (with *no* expiration). The exporter always emits the last `C
 
 #### HttpStartStop metrics
 
+An `HttpStartStop` event represents the whole lifecycle of an HTTP request. The exporter summarizes all HTTP requests from the [Cloud Foundry Firehose][firehose] and emits:
+
+| Metric | Description | Labels |
+| ------ | ----------- | ------ |
+| *namespace*_http_start_stop_request_total | Cloud Foundry Firehose http start stop total requests | `application_id`, `instance_id`, `uri`, `method`, `status_code` |
+| *namespace*_http_start_stop_response_size_bytes | Summary of Cloud Foundry Firehose http start stop request size in bytes | `application_id`, `instance_id`, `uri`, `method` |
+| *namespace*_http_start_stop_client_request_duration_seconds | Summary of Cloud Foundry Firehose http start stop client request duration in seconds | `application_id`, `instance_id`, `uri`, `method` |
+| *namespace*_http_start_stop_server_request_duration_seconds | Summary of Cloud Foundry Firehose http start stop server request duration in seconds | `application_id`, `instance_id`, `uri`, `method` |
+
+Metrics are cached (with a expirity defined at the *doppler.metric-expiration* command flag). The exporter emits a summary of the `HttpStartStop` requests not expired using [quantiles][quantile] (`0.5`, `0.9`, `0.99`).
+
 #### ValueMetric metrics
 
 `ValueMetric` metrics represents the value of a metric at an instant in time. The exporter normalizes each *value_metric_name* received from a [Cloud Foundry Firehose][firehose] *origin* and emits:
@@ -78,3 +89,4 @@ We will be glad to address any questions not answered here. Please, just open a 
 [cfmetrics]: https://docs.cloudfoundry.org/loggregator/all_metrics.html
 [firehose]: https://docs.cloudfoundry.org/loggregator/architecture.html#firehose
 [issues]: https://github.com/cloudfoundry-community/firehose_exporter/issues
+[quantile]: https://en.wikipedia.org/wiki/Quantile
