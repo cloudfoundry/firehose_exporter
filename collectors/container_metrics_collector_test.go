@@ -42,35 +42,35 @@ var _ = Describe("ContainerMetricsCollector", func() {
 		cpuPercentageMetricDesc = prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "container_metric", "cpu_percentage"),
 			"Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100.",
-			[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_id"},
+			[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
 			nil,
 		)
 
 		memoryBytesMetricDesc = prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "container_metric", "memory_bytes"),
 			"Cloud Foundry Firehose container metric: bytes of memory used.",
-			[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_id"},
+			[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
 			nil,
 		)
 
 		diskBytesMetricDesc = prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "container_metric", "disk_bytes"),
 			"Cloud Foundry Firehose container metric: bytes of disk used.",
-			[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_id"},
+			[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
 			nil,
 		)
 
 		memoryBytesQuotaMetricDesc = prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "container_metric", "memory_bytes_quota"),
 			"Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container.",
-			[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_id"},
+			[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
 			nil,
 		)
 
 		diskBytesQuotaMetricDesc = prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, "container_metric", "disk_bytes_quota"),
 			"Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container.",
-			[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_id"},
+			[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
 			nil,
 		)
 	})

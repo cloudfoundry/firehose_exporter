@@ -12,11 +12,11 @@ For a list of all [Cloud Foundry Firehose][firehose] metrics check the [Cloud Fo
 
 | Metric | Description | Labels |
 | ------ | ----------- | ------ |
-| *namespace*_container_metric_cpu_percentage | Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100 | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_id`|
-| *namespace*_container_metric_memory_bytes | Cloud Foundry Firehose container metric: bytes of memory used | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_id`|
-| *namespace*_container_metric_disk_bytes | Cloud Foundry Firehose container metric: bytes of disk used | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_id`|
-| *namespace*_container_metric_memory_bytes_quota | Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_id`|
-| *namespace*_container_metric_disk_bytes_quota | Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_id`|
+| *namespace*_container_metric_cpu_percentage | Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100 | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
+| *namespace*_container_metric_memory_bytes | Cloud Foundry Firehose container metric: bytes of memory used | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
+| *namespace*_container_metric_disk_bytes | Cloud Foundry Firehose container metric: bytes of disk used | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
+| *namespace*_container_metric_memory_bytes_quota | Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
+| *namespace*_container_metric_disk_bytes_quota | Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
 
 Metrics are cached (with a expirity defined at the *doppler.metric-expiration* command flag). The exporter always emits the last `ContainerMetric` metric received if it has not expired.
 
