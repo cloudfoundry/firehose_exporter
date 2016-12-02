@@ -25,23 +25,23 @@
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/noaa",
-			"Rev": "80008a261d9c412c51e2637f8af4883105e6a1a5"
+			"Rev": "1939b6e4d6d76b2ee8541befd6a8fb8aa076933e"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/noaa/consumer",
-			"Rev": "80008a261d9c412c51e2637f8af4883105e6a1a5"
+			"Rev": "1939b6e4d6d76b2ee8541befd6a8fb8aa076933e"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/noaa/consumer/internal",
-			"Rev": "80008a261d9c412c51e2637f8af4883105e6a1a5"
+			"Rev": "1939b6e4d6d76b2ee8541befd6a8fb8aa076933e"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/noaa/errors",
-			"Rev": "80008a261d9c412c51e2637f8af4883105e6a1a5"
+			"Rev": "1939b6e4d6d76b2ee8541befd6a8fb8aa076933e"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/sonde-go/events",
-			"Rev": "1e05e0f44d5618f7a13662cf609f0f8bbbf770ea"
+			"Rev": "04fbe57ef6878d0050682b5b0697091003ebf960"
 		},
 		{
 			"ImportPath": "github.com/fatih/camelcase",
@@ -68,8 +68,8 @@
 		},
 		{
 			"ImportPath": "github.com/gorilla/websocket",
-			"Comment": "v1.0.0-21-g2d1e454",
-			"Rev": "2d1e4548da234d9cb742cc3628556fef86aafbac"
+			"Comment": "v1.0.0-39-ge8f0f8a",
+			"Rev": "e8f0f8aaa98dfb6586cbdf2978d511e3199a960a"
 		},
 		{
 			"ImportPath": "github.com/matttproud/golang_protobuf_extensions/pbutil",
