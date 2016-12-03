@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/noaa/consumer"
+	noaerrors "github.com/cloudfoundry/noaa/errors"
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/gorilla/websocket"
 	"github.com/prometheus/common/log"
@@ -84,15 +85,20 @@ func (n *FirehoseNozzle) handleMessage(envelope *events.Envelope) {
 }
 
 func (n *FirehoseNozzle) handleError(err error) {
-	switch closeErr := err.(type) {
-	case *websocket.CloseError:
-		switch closeErr.Code {
-		case websocket.CloseNormalClosure:
-		// no op
-		case websocket.ClosePolicyViolation:
-			log.Errorf("Error while reading from the Firehose: %v", err)
-			log.Errorf("Disconnected because Nozzle couldn't keep up. Please try scaling up the Nozzle.")
-			n.metricsStore.AlertSlowConsumerError()
+	switch err.(type) {
+	case noaerrors.RetryError:
+		switch noaErr := err.(noaerrors.RetryError).Err.(type) {
+		case *websocket.CloseError:
+			switch noaErr.Code {
+			case websocket.CloseNormalClosure:
+			// no op
+			case websocket.ClosePolicyViolation:
+				log.Errorf("Error while reading from the Firehose: %v", err)
+				log.Errorf("Disconnected because Nozzle couldn't keep up. Please try scaling up the Nozzle.")
+				n.metricsStore.AlertSlowConsumerError()
+			default:
+				log.Errorf("Error while reading from the Firehose: %v", err)
+			}
 		default:
 			log.Errorf("Error while reading from the Firehose: %v", err)
 		}
