@@ -27,9 +27,11 @@ func init() {
 
 var _ = Describe("FirehoseNozzle", func() {
 	var (
-		skipSSLValidation  bool
-		subscriptionID     string
-		idleTimeoutSeconds uint32
+		skipSSLValidation bool
+		subscriptionID    string
+		idleTimeout       time.Duration
+		minRetryDelay     time.Duration
+		maxRetryDelay     time.Duration
 
 		fakeUAA   *fakes.FakeUAA
 		fakeToken string
@@ -53,7 +55,9 @@ var _ = Describe("FirehoseNozzle", func() {
 	BeforeEach(func() {
 		skipSSLValidation = true
 		subscriptionID = "fake-subscription-id"
-		idleTimeoutSeconds = 5
+		idleTimeout = 0
+		minRetryDelay = 0
+		maxRetryDelay = 0
 
 		fakeUAA = fakes.NewFakeUAA("bearer", "123456789")
 		fakeToken = fakeUAA.AuthToken()
@@ -94,7 +98,9 @@ var _ = Describe("FirehoseNozzle", func() {
 			strings.Replace(fakeFirehose.URL(), "http:", "ws:", 1),
 			skipSSLValidation,
 			subscriptionID,
-			idleTimeoutSeconds,
+			idleTimeout,
+			minRetryDelay,
+			maxRetryDelay,
 			authTokenRefresher,
 			metricsStore,
 		)

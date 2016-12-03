@@ -46,9 +46,19 @@ var (
 		"Cloud Foundry Doppler Subscription ID ($FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID).",
 	)
 
-	dopplerIdleTimeoutSeconds = flag.Uint(
-		"doppler.idle-timeout-seconds", 5,
-		"Cloud Foundry Doppler Idle Timeout in seconds ($FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT_SECONDS).",
+	dopplerIdleTimeout = flag.Duration(
+		"doppler.idle-timeout", 0,
+		"Cloud Foundry Doppler Idle Timeout duration ($FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT).",
+	)
+
+	dopplerMinRetryDelay = flag.Duration(
+		"doppler.min-retry-delay", 0,
+		"Cloud Foundry Doppler min retry delay duration ($FIREHOSE_EXPORTER_DOPPLER_MIN_RETRY_DELAY).",
+	)
+
+	dopplerMaxRetryDelay = flag.Duration(
+		"doppler.max-retry-delay", 0,
+		"Cloud Foundry Doppler max retry delay duration ($FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_DELAY).",
 	)
 
 	dopplerMetricExpiration = flag.Duration(
@@ -107,7 +117,9 @@ func overrideFlagsWithEnvVars() {
 	overrideWithEnvVar("FIREHOSE_EXPORTER_UAA_CLIENT_SECRET", uaaClientSecret)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_URL", dopplerUrl)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID", dopplerSubscriptionID)
-	overrideWithEnvUint("FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT_SECONDS", dopplerIdleTimeoutSeconds)
+	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT", dopplerIdleTimeout)
+	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_MIN_RETRY_DELAY", dopplerMinRetryDelay)
+	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_DELAY", dopplerMaxRetryDelay)
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION", dopplerMetricExpiration)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS", filterDeployments)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_FILTER_EVENTS", filterEvents)
@@ -203,7 +215,9 @@ func main() {
 		*dopplerUrl,
 		*skipSSLValidation,
 		*dopplerSubscriptionID,
-		uint32(*dopplerIdleTimeoutSeconds),
+		*dopplerIdleTimeout,
+		*dopplerMinRetryDelay,
+		*dopplerMaxRetryDelay,
 		authTokenRefresher,
 		metricsStore,
 	)

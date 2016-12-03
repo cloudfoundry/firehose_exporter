@@ -17,7 +17,9 @@ type FirehoseNozzle struct {
 	url                string
 	skipSSLValidation  bool
 	subscriptionID     string
-	idleTimeoutSeconds uint32
+	idleTimeout        time.Duration
+	minRetryDelay      time.Duration
+	maxRetryDelay      time.Duration
 	authTokenRefresher consumer.TokenRefresher
 	metricsStore       *metrics.Store
 	errs               <-chan error
@@ -29,7 +31,9 @@ func New(
 	url string,
 	skipSSLValidation bool,
 	subscriptionID string,
-	idleTimeoutSeconds uint32,
+	idleTimeout time.Duration,
+	minRetryDelay time.Duration,
+	maxRetryDelay time.Duration,
 	authTokenRefresher consumer.TokenRefresher,
 	metricsStore *metrics.Store,
 ) *FirehoseNozzle {
@@ -37,7 +41,9 @@ func New(
 		url:                url,
 		skipSSLValidation:  skipSSLValidation,
 		subscriptionID:     subscriptionID,
-		idleTimeoutSeconds: idleTimeoutSeconds,
+		idleTimeout:        idleTimeout,
+		minRetryDelay:      minRetryDelay,
+		maxRetryDelay:      maxRetryDelay,
 		authTokenRefresher: authTokenRefresher,
 		metricsStore:       metricsStore,
 		errs:               make(<-chan error),
@@ -60,7 +66,15 @@ func (n *FirehoseNozzle) consumeFirehose() {
 		nil,
 	)
 	n.consumer.RefreshTokenFrom(n.authTokenRefresher)
-	n.consumer.SetIdleTimeout(time.Duration(n.idleTimeoutSeconds) * time.Second)
+	if n.idleTimeout > 0 {
+		n.consumer.SetIdleTimeout(n.idleTimeout)
+	}
+	if n.minRetryDelay > 0 {
+		n.consumer.SetMinRetryDelay(n.minRetryDelay)
+	}
+	if n.maxRetryDelay > 0 {
+		n.consumer.SetMaxRetryDelay(n.maxRetryDelay)
+	}
 	n.messages, n.errs = n.consumer.Firehose(n.subscriptionID, "")
 }
 
