@@ -273,7 +273,7 @@ func (s *Store) addCounterEvent(envelope *events.Envelope) {
 			Delta:      envelope.GetCounterEvent().GetDelta(),
 			Total:      envelope.GetCounterEvent().GetTotal(),
 		}
-		s.counterEvents.Set(s.metricKey(envelope), counterEvent, cache.NoExpiration)
+		s.counterEvents.Set(s.metricKey(envelope), counterEvent, cache.DefaultExpiration)
 	}
 }
 
@@ -348,7 +348,7 @@ func (s *Store) addValueMetric(envelope *events.Envelope) {
 			Value:      envelope.GetValueMetric().GetValue(),
 			Unit:       envelope.GetValueMetric().GetUnit(),
 		}
-		s.valueMetrics.Set(s.metricKey(envelope), valueMetric, cache.NoExpiration)
+		s.valueMetrics.Set(s.metricKey(envelope), valueMetric, cache.DefaultExpiration)
 	}
 }
 
