@@ -85,8 +85,10 @@ func (n *FirehoseNozzle) parseEnvelopes() error {
 			n.handleMessage(envelope)
 			n.metricsStore.AddMetric(envelope)
 		case err := <-n.errs:
-			n.handleError(err)
-			return err
+			retryError := n.handleError(err)
+			if !retryError {
+				return err
+			}
 		}
 	}
 }
@@ -98,28 +100,26 @@ func (n *FirehoseNozzle) handleMessage(envelope *events.Envelope) {
 	}
 }
 
-func (n *FirehoseNozzle) handleError(err error) {
+func (n *FirehoseNozzle) handleError(err error) bool {
+	log.Errorf("Error while reading from the Firehose: %v", err)
+
 	switch err.(type) {
 	case noaerrors.RetryError:
-		switch noaErr := err.(noaerrors.RetryError).Err.(type) {
+		switch noaRetryError := err.(noaerrors.RetryError).Err.(type) {
 		case *websocket.CloseError:
-			switch noaErr.Code {
+			switch noaRetryError.Code {
 			case websocket.CloseNormalClosure:
 			// no op
 			case websocket.ClosePolicyViolation:
-				log.Errorf("Error while reading from the Firehose: %v", err)
-				log.Errorf("Disconnected because Nozzle couldn't keep up. Please try scaling up the Nozzle.")
+				log.Errorf("Nozzle couldn't keep up. Please try scaling up the Nozzle.")
 				n.metricsStore.AlertSlowConsumerError()
-			default:
-				log.Errorf("Error while reading from the Firehose: %v", err)
 			}
-		default:
-			log.Errorf("Error while reading from the Firehose: %v", err)
 		}
-	default:
-		log.Errorf("Error while reading from the Firehose: %v", err)
+		return true
 	}
 
 	log.Info("Closing connection with Firehose...")
 	n.consumer.Close()
+
+	return false
 }
