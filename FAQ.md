@@ -4,6 +4,8 @@
 
 The Cloud Foundry Firehose Prometheus Exporter is a proxy for [Cloud Foundry Firehose][firehose] metrics. It exports Cloud Foundry `ContainerMetric`, `CounterEvent`, `HttpStartStop` and `ValueMetric` metrics.
 
+Metrics are cached (with a expirity defined at the `doppler.metric-expiration` command flag). The exporter always emits the last metric received if it has not been expired.
+
 For a list of all [Cloud Foundry Firehose][firehose] metrics check the [Cloud Foundry Component Metrics][cfmetrics] documentation.
 
 #### ContainerMetric metrics
@@ -12,13 +14,11 @@ For a list of all [Cloud Foundry Firehose][firehose] metrics check the [Cloud Fo
 
 | Metric | Description | Labels |
 | ------ | ----------- | ------ |
-| *namespace*_container_metric_cpu_percentage | Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100 | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
-| *namespace*_container_metric_memory_bytes | Cloud Foundry Firehose container metric: bytes of memory used | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
-| *namespace*_container_metric_disk_bytes | Cloud Foundry Firehose container metric: bytes of disk used | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
-| *namespace*_container_metric_memory_bytes_quota | Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
-| *namespace*_container_metric_disk_bytes_quota | Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
-
-Metrics are cached (with a expirity defined at the *doppler.metric-expiration* command flag). The exporter always emits the last `ContainerMetric` metric received if it has not expired.
+| *metrics.namespace*_container_metric_cpu_percentage | Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100 | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
+| *metrics.namespace*_container_metric_memory_bytes | Cloud Foundry Firehose container metric: bytes of memory used | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
+| *metrics.namespace*_container_metric_disk_bytes | Cloud Foundry Firehose container metric: bytes of disk used | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
+| *metrics.namespace*_container_metric_memory_bytes_quota | Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
+| *metrics.namespace*_container_metric_disk_bytes_quota | Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
 
 #### CounterEvent metrics
 
@@ -26,10 +26,8 @@ Metrics are cached (with a expirity defined at the *doppler.metric-expiration* c
 
 | Metric | Description | Labels |
 | ------ | ----------- | ------ |
-| *namespace*_counter_event_*origin*_*counter_event_name*_total | Cloud Foundry Firehose '*counter_event_name*' total counter event from '*origin*' | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip` |
-| *namespace*_counter_event_*origin*_*counter_event_name*_delta | Cloud Foundry Firehose '*counter_event_name*' delta counter event from '*origin*' | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip` |
-
-Metrics are cached (with *no* expiration). The exporter always emits the last `CounterEvent` metric received.
+| *metrics.namespace*_counter_event_*origin*_*counter_event_name*_total | Cloud Foundry Firehose '*counter_event_name*' total counter event from '*origin*' | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip` |
+| *metrics.namespace*_counter_event_*origin*_*counter_event_name*_delta | Cloud Foundry Firehose '*counter_event_name*' delta counter event from '*origin*' | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip` |
 
 #### HttpStartStop metrics
 
@@ -39,13 +37,19 @@ An `HttpStartStop` event represents the whole lifecycle of an HTTP request. The 
 
 | Metric | Description | Labels |
 | ------ | ----------- | ------ |
-| *namespace*_http_start_stop_request_total | Cloud Foundry Firehose http start stop total requests | `application_id`, `instance_id`, `uri`, `method`, `status_code` |
-| *namespace*_http_start_stop_response_size_bytes | Summary of Cloud Foundry Firehose http start stop request size in bytes | `application_id`, `instance_id`, `uri`, `method` |
-| *namespace*_http_start_stop_last_request_timestamp | Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose | `application_id`, `instance_id`, `uri`, `method` |
-| *namespace*_http_start_stop_client_request_duration_seconds | Summary of Cloud Foundry Firehose http start stop client request duration in seconds | `application_id`, `instance_id`, `uri`, `method` |
-| *namespace*_http_start_stop_server_request_duration_seconds | Summary of Cloud Foundry Firehose http start stop server request duration in seconds | `application_id`, `instance_id`, `uri`, `method` |
+| *metrics.namespace*_http_start_stop_request_total | Cloud Foundry Firehose http start stop total requests | `application_id`, `instance_id`, `uri`, `method`, `status_code` |
+| *metrics.namespace*_http_start_stop_response_size_bytes | Summary of Cloud Foundry Firehose http start stop request size in bytes | `application_id`, `instance_id`, `uri`, `method`, `quantile` *[1]* |
+| *metrics.namespace*_http_start_stop_response_size_bytes_count | Summary of Cloud Foundry Firehose http start stop request size in bytes (number of observations) | `application_id`, `instance_id`, `uri`, `method` |
+| *metrics.namespace*_http_start_stop_response_size_bytes_sum | Summary of Cloud Foundry Firehose http start stop request size in bytes (sum of observations) | `application_id`, `instance_id`, `uri`, `method` |
+| *metrics.namespace*_http_start_stop_last_request_timestamp | Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose | `application_id`, `instance_id`, `uri`, `method` |
+| *metrics.namespace*_http_start_stop_client_request_duration_seconds | Summary of Cloud Foundry Firehose http start stop client request duration in seconds | `application_id`, `instance_id`, `uri`, `method`, `quantile` *[1]* |
+| *metrics.namespace*_http_start_stop_client_request_duration_seconds_count | Summary of Cloud Foundry Firehose http start stop client request duration in seconds (number of observations) | `application_id`, `instance_id`, `uri`, `method` |
+| *metrics.namespace*_http_start_stop_client_request_duration_seconds_sum | Summary of Cloud Foundry Firehose http start stop client request duration in seconds (sum of observations) | `application_id`, `instance_id`, `uri`, `method` |
+| *metrics.namespace*_http_start_stop_server_request_duration_seconds | Summary of Cloud Foundry Firehose http start stop server request duration in seconds | `application_id`, `instance_id`, `uri`, `method`, `quantile` *[1]* |
+| *metrics.namespace*_http_start_stop_server_request_duration_seconds_count | Summary of Cloud Foundry Firehose http start stop server request duration in seconds (number of observations) | `application_id`, `instance_id`, `uri`, `method` |
+| *metrics.namespace*_http_start_stop_server_request_duration_seconds_sum | Summary of Cloud Foundry Firehose http start stop server request duration in seconds (sum of observations) | `application_id`, `instance_id`, `uri`, `method` |
 
-Metrics are cached (with a expirity defined at the *doppler.metric-expiration* command flag). The exporter emits a summary of the `HttpStartStop` requests not expired using [quantiles][quantile] (`0.5`, `0.9`, `0.99`).
+*[1]* Summaries reports [quantiles][quantile] (`0.5`, `0.9`, `0.99`) calculated from a slidding window (`doppler.metric-expiration` command flag).
 
 #### ValueMetric metrics
 
@@ -53,17 +57,15 @@ Metrics are cached (with a expirity defined at the *doppler.metric-expiration* c
 
 | Metric | Description | Labels |
 | ------ | ----------- | ------ |
-| *namespace*_value_metric_*origin*_*value_metric_name* | Cloud Foundry Firehose '*value_metric_name*' value metric from '*origin*' | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `unit` |
-
-Metrics are cached (with *no* expiration). The exporter always emits the last `ValueMetric` metric received.
+| *metrics.namespace*_value_metric_*origin*_*value_metric_name* | Cloud Foundry Firehose '*value_metric_name*' value metric from '*origin*' | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `unit` |
 
 ### How can I filter by a particular Firehose event?
 
-The *filter.events* command flag allows you to filter what event metrics will be reported. Possible values are `ContainerMetric`, `CounterEvent`, `HttpStartStop`, `ValueMetric` (or a combination of them).
+The `filter.events` command flag allows you to filter what event metrics will be reported. Possible values are `ContainerMetric`, `CounterEvent`, `HttpStartStop`, `ValueMetric` (or a combination of them).
 
 ### How can I filter metrics coming from a particular BOSH deployment?
 
-The *filter.deployments* command flag allows you to filter metrics which origin is a particular BOSH deployment.
+The `filter.deployments` command flag allows you to filter metrics which origin is a particular BOSH deployment.
 
 ### Can I target multiple Cloud Foundry Firehose endpoints with a single exporter instance?
 
@@ -71,7 +73,7 @@ No, this exporter only supports targetting a single [Cloud Foundry Firehose][fir
 
 ### How can I get readeable names for Container Metrics labels, like the application name?
 
-You can combine this exporter with the [Cloud Foundry Prometheus Exporter][cf_exporter], that provides administrative information about `Applications`, `Organizations` and `Spaces`.
+You can combine this exporter with the [Cloud Foundry Prometheus Exporter][cf_exporter], that provides administrative information about `Applications`, `Organizations`, `Services` and `Spaces`.
 
 For example:
 
