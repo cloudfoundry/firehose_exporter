@@ -6,7 +6,7 @@ import (
 
 	"github.com/cloudfoundry/sonde-go/events"
 
-	. "github.com/cloudfoundry-community/firehose_exporter/filters"
+	. "github.com/mjseid/firehose_exporter/filters"
 )
 
 var _ = Describe("EventFilter", func() {

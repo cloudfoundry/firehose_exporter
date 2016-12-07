@@ -6,8 +6,8 @@ import (
 	"github.com/bmizerany/perks/quantile"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/cloudfoundry-community/firehose_exporter/metrics"
-	"github.com/cloudfoundry-community/firehose_exporter/utils"
+	"github.com/mjseid/firehose_exporter/metrics"
+	"github.com/mjseid/firehose_exporter/utils"
 )
 
 type Applications map[string]*Application

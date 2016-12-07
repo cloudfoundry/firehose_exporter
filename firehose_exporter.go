@@ -13,11 +13,12 @@ import (
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
 
-	"github.com/cloudfoundry-community/firehose_exporter/collectors"
-	"github.com/cloudfoundry-community/firehose_exporter/filters"
-	"github.com/cloudfoundry-community/firehose_exporter/firehosenozzle"
-	"github.com/cloudfoundry-community/firehose_exporter/metrics"
-	"github.com/cloudfoundry-community/firehose_exporter/uaatokenrefresher"
+	"github.com/mjseid/firehose_exporter/cfinstanceinfoapi"
+        "github.com/mjseid/firehose_exporter/collectors"
+        "github.com/mjseid/firehose_exporter/filters"
+        "github.com/mjseid/firehose_exporter/firehosenozzle"
+        "github.com/mjseid/firehose_exporter/metrics"
+        "github.com/mjseid/firehose_exporter/uaatokenrefresher"
 )
 
 var (
@@ -105,6 +106,11 @@ var (
 		"web.telemetry-path", "/metrics",
 		"Path under which to expose Prometheus metrics ($FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH).",
 	)
+
+	appInfoApiUrl = flag.String(
+                "appinfoapi.url", "",
+                "URL for api service for application info lookup ($CF_APP_API_URL).",
+        )
 )
 
 func init() {
@@ -128,6 +134,7 @@ func overrideFlagsWithEnvVars() {
 	overrideWithEnvBool("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY", skipSSLValidation)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS", listenAddress)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH", metricsPath)
+	overrideWithEnvVar("CF_APP_API_URL", appInfoApiUrl)
 }
 
 func overrideWithEnvVar(name string, value *string) {
@@ -225,10 +232,16 @@ func main() {
 		log.Fatal(nozzle.Start())
 	}()
 
+	appmap := make(map[string]cfinstanceinfoapi.AppInfo)
+        log.Infoln("generating first app map")
+        cfinstanceinfoapi.GenAppMap(*appInfoApiUrl, appmap)
+
+        go cfinstanceinfoapi.UpdateAppMap(*appInfoApiUrl, appmap)
+
 	internalMetricsCollector := collectors.NewInternalMetricsCollector(*metricsNamespace, metricsStore)
 	prometheus.MustRegister(internalMetricsCollector)
 
-	containerMetricsCollector := collectors.NewContainerMetricsCollector(*metricsNamespace, metricsStore)
+	containerMetricsCollector := collectors.NewContainerMetricsCollector(*metricsNamespace, metricsStore, appmap)
 	prometheus.MustRegister(containerMetricsCollector)
 
 	counterEventsCollector := collectors.NewCounterEventsCollector(*metricsNamespace, metricsStore)

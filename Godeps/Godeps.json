@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/cloudfoundry-community/firehose_exporter",
+	"ImportPath": "github.com/mjseid/firehose_exporter",
 	"GoVersion": "go1.7",
 	"GodepVersion": "v74",
 	"Packages": [
