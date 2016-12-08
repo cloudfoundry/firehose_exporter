@@ -28,35 +28,35 @@ func NewContainerMetricsCollector(
 	cpuPercentageMetricDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, container_metrics_subsystem, "cpu_percentage"),
 		"Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100.",
-		[]string{"application_id", "instance_id", "app_name", "space", "org"},
+		[]string{"bosh_job_ip", "application_id", "instance_id", "app_name", "space", "org"},
 		nil,
 	)
 
 	memoryBytesMetricDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, container_metrics_subsystem, "memory_bytes"),
 		"Cloud Foundry Firehose container metric: bytes of memory used.",
-		[]string{"application_id", "instance_id", "app_name", "space", "org"},
+		[]string{"bosh_job_ip", "application_id", "instance_id", "app_name", "space", "org"},
 		nil,
 	)
 
 	diskBytesMetricDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, container_metrics_subsystem, "disk_bytes"),
 		"Cloud Foundry Firehose container metric: bytes of disk used.",
-		[]string{"application_id", "instance_id", "app_name", "space", "org"},
+		[]string{"bosh_job_ip", "application_id", "instance_id", "app_name", "space", "org"},
 		nil,
 	)
 
 	memoryBytesQuotaMetricDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, container_metrics_subsystem, "memory_bytes_quota"),
 		"Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container.",
-		[]string{"application_id", "instance_id", "app_name", "space", "org"},
+		[]string{"bosh_job_ip", "application_id", "instance_id", "app_name", "space", "org"},
 		nil,
 	)
 
 	diskBytesQuotaMetricDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, container_metrics_subsystem, "disk_bytes_quota"),
 		"Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container.",
-		[]string{"application_id", "instance_id", "app_name", "space", "org"},
+		[]string{"bosh_job_ip", "application_id", "instance_id", "app_name", "space", "org"},
 		nil,
 	)
 
@@ -78,6 +78,7 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			c.cpuPercentageMetricDesc,
 			prometheus.GaugeValue,
 			containerMetric.CpuPercentage,
+			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
 			c.appinfo[containerMetric.ApplicationId].Name,
@@ -88,6 +89,7 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			c.memoryBytesMetricDesc,
 			prometheus.GaugeValue,
 			float64(containerMetric.MemoryBytes),
+			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
 			c.appinfo[containerMetric.ApplicationId].Name,
@@ -98,6 +100,7 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			c.diskBytesMetricDesc,
 			prometheus.GaugeValue,
 			float64(containerMetric.DiskBytes),
+			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
 			c.appinfo[containerMetric.ApplicationId].Name,
@@ -108,6 +111,7 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			c.memoryBytesQuotaMetricDesc,
 			prometheus.GaugeValue,
 			float64(containerMetric.MemoryBytesQuota),
+			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
 			c.appinfo[containerMetric.ApplicationId].Name,
@@ -118,6 +122,7 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			c.diskBytesQuotaMetricDesc,
 			prometheus.GaugeValue,
 			float64(containerMetric.DiskBytesQuota),
+			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
 			c.appinfo[containerMetric.ApplicationId].Name,
