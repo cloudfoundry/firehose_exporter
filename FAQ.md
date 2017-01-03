@@ -61,7 +61,7 @@ An `HttpStartStop` event represents the whole lifecycle of an HTTP request. The 
 
 ### How can I filter by a particular Firehose event?
 
-The `filter.events` command flag allows you to filter what event metrics will be reported. Possible values are `ContainerMetric`, `CounterEvent`, `HttpStartStop`, `ValueMetric` (or a combination of them).
+The `filter.events` command flag allows you to filter what event metrics will be reported (if not set, all events will be enabled by default). Possible values are `ContainerMetric`, `CounterEvent`, `HttpStartStop`, `ValueMetric` (or a combination of them).
 
 ### How can I filter metrics coming from a particular BOSH deployment?
 
