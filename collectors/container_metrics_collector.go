@@ -9,71 +9,89 @@ import (
 )
 
 type ContainerMetricsCollector struct {
-	namespace                  string
-	metricsStore               *metrics.Store
-	cpuPercentageMetricDesc    *prometheus.Desc
-	memoryBytesMetricDesc      *prometheus.Desc
-	diskBytesMetricDesc        *prometheus.Desc
-	memoryBytesQuotaMetricDesc *prometheus.Desc
-	diskBytesQuotaMetricDesc   *prometheus.Desc
+	namespace              string
+	metricsStore           *metrics.Store
+	cpuPercentageMetric    *prometheus.GaugeVec
+	memoryBytesMetric      *prometheus.GaugeVec
+	diskBytesMetric        *prometheus.GaugeVec
+	memoryBytesQuotaMetric *prometheus.GaugeVec
+	diskBytesQuotaMetric   *prometheus.GaugeVec
 }
 
 func NewContainerMetricsCollector(
 	namespace string,
 	metricsStore *metrics.Store,
 ) *ContainerMetricsCollector {
-	cpuPercentageMetricDesc := prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, container_metrics_subsystem, "cpu_percentage"),
-		"Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100.",
+	cpuPercentageMetric := prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: namespace,
+			Subsystem: container_metrics_subsystem,
+			Name:      "cpu_percentage",
+			Help:      "Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100.",
+		},
 		[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
-		nil,
 	)
 
-	memoryBytesMetricDesc := prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, container_metrics_subsystem, "memory_bytes"),
-		"Cloud Foundry Firehose container metric: bytes of memory used.",
+	memoryBytesMetric := prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: namespace,
+			Subsystem: container_metrics_subsystem,
+			Name:      "memory_bytes",
+			Help:      "Cloud Foundry Firehose container metric: bytes of memory used.",
+		},
 		[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
-		nil,
 	)
 
-	diskBytesMetricDesc := prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, container_metrics_subsystem, "disk_bytes"),
-		"Cloud Foundry Firehose container metric: bytes of disk used.",
+	diskBytesMetric := prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: namespace,
+			Subsystem: container_metrics_subsystem,
+			Name:      "disk_bytes",
+			Help:      "Cloud Foundry Firehose container metric: bytes of disk used.",
+		},
 		[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
-		nil,
 	)
 
-	memoryBytesQuotaMetricDesc := prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, container_metrics_subsystem, "memory_bytes_quota"),
-		"Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container.",
+	memoryBytesQuotaMetric := prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: namespace,
+			Subsystem: container_metrics_subsystem,
+			Name:      "memory_bytes_quota",
+			Help:      "Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container.",
+		},
 		[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
-		nil,
 	)
 
-	diskBytesQuotaMetricDesc := prometheus.NewDesc(
-		prometheus.BuildFQName(namespace, container_metrics_subsystem, "disk_bytes_quota"),
-		"Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container.",
+	diskBytesQuotaMetric := prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Namespace: namespace,
+			Subsystem: container_metrics_subsystem,
+			Name:      "disk_bytes_quota",
+			Help:      "Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container.",
+		},
 		[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
-		nil,
 	)
 
 	return &ContainerMetricsCollector{
-		namespace:                  namespace,
-		metricsStore:               metricsStore,
-		cpuPercentageMetricDesc:    cpuPercentageMetricDesc,
-		memoryBytesMetricDesc:      memoryBytesMetricDesc,
-		diskBytesMetricDesc:        diskBytesMetricDesc,
-		memoryBytesQuotaMetricDesc: memoryBytesQuotaMetricDesc,
-		diskBytesQuotaMetricDesc:   diskBytesQuotaMetricDesc,
+		namespace:              namespace,
+		metricsStore:           metricsStore,
+		cpuPercentageMetric:    cpuPercentageMetric,
+		memoryBytesMetric:      memoryBytesMetric,
+		diskBytesMetric:        diskBytesMetric,
+		memoryBytesQuotaMetric: memoryBytesQuotaMetric,
+		diskBytesQuotaMetric:   diskBytesQuotaMetric,
 	}
 }
 
 func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
+	c.cpuPercentageMetric.Reset()
+	c.memoryBytesMetric.Reset()
+	c.diskBytesMetric.Reset()
+	c.memoryBytesQuotaMetric.Reset()
+	c.diskBytesQuotaMetric.Reset()
+
 	for _, containerMetric := range c.metricsStore.GetContainerMetrics() {
-		ch <- prometheus.MustNewConstMetric(
-			c.cpuPercentageMetricDesc,
-			prometheus.GaugeValue,
-			containerMetric.CpuPercentage,
+		c.cpuPercentageMetric.WithLabelValues(
 			containerMetric.Origin,
 			containerMetric.Deployment,
 			containerMetric.Job,
@@ -81,11 +99,9 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
-		)
-		ch <- prometheus.MustNewConstMetric(
-			c.memoryBytesMetricDesc,
-			prometheus.GaugeValue,
-			float64(containerMetric.MemoryBytes),
+		).Set(containerMetric.CpuPercentage)
+
+		c.memoryBytesMetric.WithLabelValues(
 			containerMetric.Origin,
 			containerMetric.Deployment,
 			containerMetric.Job,
@@ -93,11 +109,9 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
-		)
-		ch <- prometheus.MustNewConstMetric(
-			c.diskBytesMetricDesc,
-			prometheus.GaugeValue,
-			float64(containerMetric.DiskBytes),
+		).Set(float64(containerMetric.MemoryBytes))
+
+		c.diskBytesMetric.WithLabelValues(
 			containerMetric.Origin,
 			containerMetric.Deployment,
 			containerMetric.Job,
@@ -105,11 +119,9 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
-		)
-		ch <- prometheus.MustNewConstMetric(
-			c.memoryBytesQuotaMetricDesc,
-			prometheus.GaugeValue,
-			float64(containerMetric.MemoryBytesQuota),
+		).Set(float64(containerMetric.DiskBytes))
+
+		c.memoryBytesQuotaMetric.WithLabelValues(
 			containerMetric.Origin,
 			containerMetric.Deployment,
 			containerMetric.Job,
@@ -117,11 +129,9 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
-		)
-		ch <- prometheus.MustNewConstMetric(
-			c.diskBytesQuotaMetricDesc,
-			prometheus.GaugeValue,
-			float64(containerMetric.DiskBytesQuota),
+		).Set(float64(containerMetric.MemoryBytesQuota))
+
+		c.diskBytesQuotaMetric.WithLabelValues(
 			containerMetric.Origin,
 			containerMetric.Deployment,
 			containerMetric.Job,
@@ -129,14 +139,20 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
-		)
+		).Set(float64(containerMetric.DiskBytesQuota))
 	}
+
+	c.cpuPercentageMetric.Collect(ch)
+	c.memoryBytesMetric.Collect(ch)
+	c.diskBytesMetric.Collect(ch)
+	c.memoryBytesQuotaMetric.Collect(ch)
+	c.diskBytesQuotaMetric.Collect(ch)
 }
 
 func (c ContainerMetricsCollector) Describe(ch chan<- *prometheus.Desc) {
-	ch <- c.cpuPercentageMetricDesc
-	ch <- c.memoryBytesMetricDesc
-	ch <- c.diskBytesMetricDesc
-	ch <- c.memoryBytesQuotaMetricDesc
-	ch <- c.diskBytesQuotaMetricDesc
+	c.cpuPercentageMetric.Describe(ch)
+	c.memoryBytesMetric.Describe(ch)
+	c.diskBytesMetric.Describe(ch)
+	c.memoryBytesQuotaMetric.Describe(ch)
+	c.diskBytesQuotaMetric.Describe(ch)
 }
