@@ -105,6 +105,26 @@ var (
 		"web.telemetry-path", "/metrics",
 		"Path under which to expose Prometheus metrics ($FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH).",
 	)
+
+	authUsername = flag.String(
+		"web.auth.username", "",
+		"Username for web interface basic auth ($FIREHOSE_EXPORTER_WEB_AUTH_USERNAME).",
+	)
+
+	authPassword = flag.String(
+		"web.auth.password", "",
+		"Password for web interface basic auth ($FIREHOSE_EXPORTER_WEB_AUTH_PASSWORD).",
+	)
+
+	tlsCertFile = flag.String(
+		"web.tls.cert_file", "",
+		"Path to a file that contains the TLS certificate (PEM format). If the certificate is signed by a certificate authority, the file should be the concatenation of the server's certificate, any intermediates, and the CA's certificate ($FIREHOSE_EXPORTER_WEB_TLS_CERTFILE).",
+	)
+
+	tlsKeyFile = flag.String(
+		"web.tls.key_file", "",
+		"Path to a file that contains the TLS private key (PEM format) ($FIREHOSE_EXPORTER_WEB_TLS_KEYFILE).",
+	)
 )
 
 func init() {
@@ -128,6 +148,10 @@ func overrideFlagsWithEnvVars() {
 	overrideWithEnvBool("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY", skipSSLValidation)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS", listenAddress)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH", metricsPath)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_AUTH_USERNAME", authUsername)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_AUTH_PASSWORD", authPassword)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_TLS_CERTFILE", tlsCertFile)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_TLS_KEYFILE", tlsKeyFile)
 }
 
 func overrideWithEnvVar(name string, value *string) {
@@ -168,6 +192,38 @@ func overrideWithEnvBool(name string, value *bool) {
 			log.Fatalf("Invalid `%s`: %s", name, err)
 		}
 	}
+}
+
+type basicAuthHandler struct {
+	handler  http.HandlerFunc
+	username string
+	password string
+}
+
+func (h *basicAuthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	username, password, ok := r.BasicAuth()
+	if !ok || username != h.username || password != h.password {
+		log.Errorf("Invalid HTTP auth from `%s`", r.RemoteAddr)
+		w.Header().Set("WWW-Authenticate", "Basic realm=\"metrics\"")
+		http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+		return
+	}
+	h.handler(w, r)
+	return
+}
+
+func prometheusHandler() http.Handler {
+	handler := prometheus.Handler()
+
+	if *authUsername != "" && *authPassword != "" {
+		handler = &basicAuthHandler{
+			handler:  prometheus.Handler().ServeHTTP,
+			username: *authUsername,
+			password: *authPassword,
+		}
+	}
+
+	return handler
 }
 
 func main() {
@@ -251,6 +307,11 @@ func main() {
              </html>`))
 	})
 
-	log.Infoln("Listening on", *listenAddress)
-	log.Fatal(http.ListenAndServe(*listenAddress, nil))
+	if *tlsCertFile != "" && *tlsKeyFile != "" {
+		log.Infoln("Listening TLS on", *listenAddress)
+		log.Fatal(http.ListenAndServeTLS(*listenAddress, *tlsCertFile, *tlsKeyFile, nil))
+	} else {
+		log.Infoln("Listening on", *listenAddress)
+		log.Fatal(http.ListenAndServe(*listenAddress, nil))
+	}
 }
