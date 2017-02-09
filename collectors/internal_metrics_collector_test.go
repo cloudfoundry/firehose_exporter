@@ -11,6 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	. "github.com/cloudfoundry-community/firehose_exporter/collectors"
+	. "github.com/cloudfoundry-community/firehose_exporter/utils/test_matchers"
 )
 
 var _ = Describe("InternalMetricsCollector", func() {
@@ -23,28 +24,28 @@ var _ = Describe("InternalMetricsCollector", func() {
 		eventFilter              *filters.EventFilter
 		internalMetricsCollector *InternalMetricsCollector
 
-		totalEnvelopesReceivedDesc               *prometheus.Desc
-		lastEnvelopeReceivedTimestampDesc        *prometheus.Desc
-		totalMetricsReceivedDesc                 *prometheus.Desc
-		lastMetricReceivedTimestampDesc          *prometheus.Desc
-		totalContainerMetricsReceivedDesc        *prometheus.Desc
-		totalContainerMetricsProcessedDesc       *prometheus.Desc
-		containerMetricsCachedDesc               *prometheus.Desc
-		lastContainerMetricReceivedTimestampDesc *prometheus.Desc
-		totalCounterEventsReceivedDesc           *prometheus.Desc
-		totalCounterEventsProcessedDesc          *prometheus.Desc
-		counterEventsCachedDesc                  *prometheus.Desc
-		lastCounterEventReceivedTimestampDesc    *prometheus.Desc
-		totalHttpStartStopReceivedDesc           *prometheus.Desc
-		totalHttpStartStopProcessedDesc          *prometheus.Desc
-		httpStartStopCachedDesc                  *prometheus.Desc
-		lastHttpStartStopReceivedTimestampDesc   *prometheus.Desc
-		totalValueMetricsReceivedDesc            *prometheus.Desc
-		totalValueMetricsProcessedDesc           *prometheus.Desc
-		valueMetricsCachedDesc                   *prometheus.Desc
-		lastValueMetricReceivedTimestampDesc     *prometheus.Desc
-		slowConsumerAlertDesc                    *prometheus.Desc
-		lastSlowConsumerAlertTimestampDesc       *prometheus.Desc
+		totalEnvelopesReceivedMetric               prometheus.Gauge
+		lastEnvelopeReceivedTimestampMetric        prometheus.Gauge
+		totalMetricsReceivedMetric                 prometheus.Gauge
+		lastMetricReceivedTimestampMetric          prometheus.Gauge
+		totalContainerMetricsReceivedMetric        prometheus.Gauge
+		totalContainerMetricsProcessedMetric       prometheus.Gauge
+		containerMetricsCachedMetric               prometheus.Gauge
+		lastContainerMetricReceivedTimestampMetric prometheus.Gauge
+		totalCounterEventsReceivedMetric           prometheus.Gauge
+		totalCounterEventsProcessedMetric          prometheus.Gauge
+		counterEventsCachedMetric                  prometheus.Gauge
+		lastCounterEventReceivedTimestampMetric    prometheus.Gauge
+		totalHttpStartStopReceivedMetric           prometheus.Gauge
+		totalHttpStartStopProcessedMetric          prometheus.Gauge
+		httpStartStopCachedMetric                  prometheus.Gauge
+		lastHttpStartStopReceivedTimestampMetric   prometheus.Gauge
+		totalValueMetricsReceivedMetric            prometheus.Gauge
+		totalValueMetricsProcessedMetric           prometheus.Gauge
+		valueMetricsCachedMetric                   prometheus.Gauge
+		lastValueMetricReceivedTimestampMetric     prometheus.Gauge
+		slowConsumerAlertMetric                    prometheus.Gauge
+		lastSlowConsumerAlertTimestampMetric       prometheus.Gauge
 	)
 
 	BeforeEach(func() {
@@ -53,158 +54,202 @@ var _ = Describe("InternalMetricsCollector", func() {
 		eventFilter, _ = filters.NewEventFilter([]string{})
 		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval, deploymentFilter, eventFilter)
 
-		totalEnvelopesReceivedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "total_envelopes_received"),
-			"Total number of envelopes received from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		totalEnvelopesReceivedMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "total_envelopes_received",
+				Help:      "Total number of envelopes received from Cloud Foundry Firehose.",
+			},
 		)
 
-		lastEnvelopeReceivedTimestampDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "last_envelope_received_timestamp"),
-			"Number of seconds since 1970 since last envelope received from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		lastEnvelopeReceivedTimestampMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "last_envelope_received_timestamp",
+				Help:      "Number of seconds since 1970 since last envelope received from Cloud Foundry Firehose.",
+			},
 		)
 
-		totalMetricsReceivedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "total_metrics_received"),
-			"Total number of metrics received from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		totalMetricsReceivedMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "total_metrics_received",
+				Help:      "Total number of metrics received from Cloud Foundry Firehose.",
+			},
 		)
 
-		lastMetricReceivedTimestampDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "last_metric_received_timestamp"),
-			"Number of seconds since 1970 since last metric received from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		lastMetricReceivedTimestampMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "last_metric_received_timestamp",
+				Help:      "Number of seconds since 1970 since last metric received from Cloud Foundry Firehose.",
+			},
 		)
 
-		totalContainerMetricsReceivedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "total_container_metrics_received"),
-			"Total number of container metrics received from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		totalContainerMetricsReceivedMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "total_container_metrics_received",
+				Help:      "Total number of container metrics received from Cloud Foundry Firehose.",
+			},
 		)
 
-		totalContainerMetricsProcessedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "total_container_metrics_processed"),
-			"Total number of container metrics processed from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		totalContainerMetricsProcessedMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "total_container_metrics_processed",
+				Help:      "Total number of container metrics processed from Cloud Foundry Firehose.",
+			},
 		)
 
-		containerMetricsCachedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "container_metrics_cached"),
-			"Number of container metrics cached from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		containerMetricsCachedMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "container_metrics_cached",
+				Help:      "Number of container metrics cached from Cloud Foundry Firehose.",
+			},
 		)
 
-		lastContainerMetricReceivedTimestampDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "last_container_metric_received_timestamp"),
-			"Number of seconds since 1970 since last container metric received from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		lastContainerMetricReceivedTimestampMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "last_container_metric_received_timestamp",
+				Help:      "Number of seconds since 1970 since last container metric received from Cloud Foundry Firehose.",
+			},
 		)
 
-		totalCounterEventsReceivedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "total_counter_events_received"),
-			"Total number of counter events received from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		totalCounterEventsReceivedMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "total_counter_events_received",
+				Help:      "Total number of counter events received from Cloud Foundry Firehose.",
+			},
 		)
 
-		totalCounterEventsProcessedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "total_counter_events_processed"),
-			"Total number of counter events processed from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		totalCounterEventsProcessedMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "total_counter_events_processed",
+				Help:      "Total number of counter events processed from Cloud Foundry Firehose.",
+			},
 		)
 
-		counterEventsCachedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "counter_events_cached"),
-			"Number of counter events cached from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		counterEventsCachedMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "counter_events_cached",
+				Help:      "Number of counter events cached from Cloud Foundry Firehose.",
+			},
 		)
 
-		lastCounterEventReceivedTimestampDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "last_counter_event_received_timestamp"),
-			"Number of seconds since 1970 since last counter event received from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		lastCounterEventReceivedTimestampMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "last_counter_event_received_timestamp",
+				Help:      "Number of seconds since 1970 since last counter event received from Cloud Foundry Firehose.",
+			},
 		)
 
-		totalHttpStartStopReceivedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "total_http_start_stop_received"),
-			"Total number of http start stop received from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		totalHttpStartStopReceivedMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "total_http_start_stop_received",
+				Help:      "Total number of http start stop received from Cloud Foundry Firehose.",
+			},
 		)
 
-		totalHttpStartStopProcessedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "total_http_start_stop_processed"),
-			"Total number of http start stop processed from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		totalHttpStartStopProcessedMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "total_http_start_stop_processed",
+				Help:      "Total number of http start stop processed from Cloud Foundry Firehose.",
+			},
 		)
 
-		httpStartStopCachedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "http_start_stop_cached"),
-			"Number of http start stop cached from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		httpStartStopCachedMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "http_start_stop_cached",
+				Help:      "Number of http start stop cached from Cloud Foundry Firehose.",
+			},
 		)
 
-		lastHttpStartStopReceivedTimestampDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "last_http_start_stop_received_timestamp"),
-			"Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		lastHttpStartStopReceivedTimestampMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "last_http_start_stop_received_timestamp",
+				Help:      "Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose.",
+			},
 		)
 
-		totalValueMetricsReceivedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "total_value_metrics_received"),
-			"Total number of value metrics received from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		totalValueMetricsReceivedMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "total_value_metrics_received",
+				Help:      "Total number of value metrics received from Cloud Foundry Firehose.",
+			},
 		)
 
-		totalValueMetricsProcessedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "total_value_metrics_processed"),
-			"Total number of value metrics processed from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		totalValueMetricsProcessedMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "total_value_metrics_processed",
+				Help:      "Total number of value metrics processed from Cloud Foundry Firehose.",
+			},
 		)
 
-		valueMetricsCachedDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "value_metrics_cached"),
-			"Number of value metrics cached from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		valueMetricsCachedMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "value_metrics_cached",
+				Help:      "Number of value metrics cached from Cloud Foundry Firehose.",
+			},
 		)
 
-		lastValueMetricReceivedTimestampDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "last_value_metric_received_timestamp"),
-			"Number of seconds since 1970 since last value metric received from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		lastValueMetricReceivedTimestampMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "last_value_metric_received_timestamp",
+				Help:      "Number of seconds since 1970 since last value metric received from Cloud Foundry Firehose.",
+			},
 		)
 
-		slowConsumerAlertDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "slow_consumer_alert"),
-			"Nozzle could not keep up with Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		slowConsumerAlertMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "slow_consumer_alert",
+				Help:      "Nozzle could not keep up with Cloud Foundry Firehose.",
+			},
 		)
 
-		lastSlowConsumerAlertTimestampDesc = prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "last_slow_consumer_alert_timestamp"),
-			"Number of seconds since 1970 since last slow consumer alert received from Cloud Foundry Firehose.",
-			[]string{},
-			nil,
+		lastSlowConsumerAlertTimestampMetric = prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "",
+				Name:      "last_slow_consumer_alert_timestamp",
+				Help:      "Number of seconds since 1970 since last slow consumer alert received from Cloud Foundry Firehose.",
+			},
 		)
 	})
 
@@ -226,91 +271,91 @@ var _ = Describe("InternalMetricsCollector", func() {
 		})
 
 		It("returns a total_envelopes_received metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(totalEnvelopesReceivedDesc)))
+			Eventually(descriptions).Should(Receive(Equal(totalEnvelopesReceivedMetric.Desc())))
 		})
 
 		It("returns a last_envelope_received_timestamp metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(lastEnvelopeReceivedTimestampDesc)))
+			Eventually(descriptions).Should(Receive(Equal(lastEnvelopeReceivedTimestampMetric.Desc())))
 		})
 
 		It("returns a total_metrics_received metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(totalMetricsReceivedDesc)))
+			Eventually(descriptions).Should(Receive(Equal(totalMetricsReceivedMetric.Desc())))
 		})
 
 		It("returns a last_metric_received_timestamp metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(lastMetricReceivedTimestampDesc)))
+			Eventually(descriptions).Should(Receive(Equal(lastMetricReceivedTimestampMetric.Desc())))
 		})
 
 		It("returns a total_container_metrics_received metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(totalContainerMetricsReceivedDesc)))
+			Eventually(descriptions).Should(Receive(Equal(totalContainerMetricsReceivedMetric.Desc())))
 		})
 
 		It("returns a total_container_metrics_processed metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(totalContainerMetricsProcessedDesc)))
+			Eventually(descriptions).Should(Receive(Equal(totalContainerMetricsProcessedMetric.Desc())))
 		})
 
 		It("returns a container_metrics_cached metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(containerMetricsCachedDesc)))
+			Eventually(descriptions).Should(Receive(Equal(containerMetricsCachedMetric.Desc())))
 		})
 
 		It("returns a last_container_metric_received_timestamp metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(lastContainerMetricReceivedTimestampDesc)))
+			Eventually(descriptions).Should(Receive(Equal(lastContainerMetricReceivedTimestampMetric.Desc())))
 		})
 
 		It("returns a total_counter_events_received metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(totalCounterEventsReceivedDesc)))
+			Eventually(descriptions).Should(Receive(Equal(totalCounterEventsReceivedMetric.Desc())))
 		})
 
 		It("returns a total_counter_events_processed metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(totalCounterEventsProcessedDesc)))
+			Eventually(descriptions).Should(Receive(Equal(totalCounterEventsProcessedMetric.Desc())))
 		})
 
 		It("returns a counter_events_cached metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(counterEventsCachedDesc)))
+			Eventually(descriptions).Should(Receive(Equal(counterEventsCachedMetric.Desc())))
 		})
 
 		It("returns a last_counter_event_received_timestamp metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(lastCounterEventReceivedTimestampDesc)))
+			Eventually(descriptions).Should(Receive(Equal(lastCounterEventReceivedTimestampMetric.Desc())))
 		})
 
 		It("returns a total_http_start_stop_received metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(totalHttpStartStopReceivedDesc)))
+			Eventually(descriptions).Should(Receive(Equal(totalHttpStartStopReceivedMetric.Desc())))
 		})
 
 		It("returns a total_http_start_stop_processed metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(totalHttpStartStopProcessedDesc)))
+			Eventually(descriptions).Should(Receive(Equal(totalHttpStartStopProcessedMetric.Desc())))
 		})
 
 		It("returns a http_start_stop_cached metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(httpStartStopCachedDesc)))
+			Eventually(descriptions).Should(Receive(Equal(httpStartStopCachedMetric.Desc())))
 		})
 
 		It("returns a last_http_start_stop_received_timestamp metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(lastHttpStartStopReceivedTimestampDesc)))
+			Eventually(descriptions).Should(Receive(Equal(lastHttpStartStopReceivedTimestampMetric.Desc())))
 		})
 
 		It("returns a total_value_metrics_received metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(totalValueMetricsReceivedDesc)))
+			Eventually(descriptions).Should(Receive(Equal(totalValueMetricsReceivedMetric.Desc())))
 		})
 
 		It("returns a total_value_metrics_processed metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(totalValueMetricsProcessedDesc)))
+			Eventually(descriptions).Should(Receive(Equal(totalValueMetricsProcessedMetric.Desc())))
 		})
 
 		It("returns a value_metrics_cached metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(valueMetricsCachedDesc)))
+			Eventually(descriptions).Should(Receive(Equal(valueMetricsCachedMetric.Desc())))
 		})
 
 		It("returns a last_value_metric_received_timestamp metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(lastValueMetricReceivedTimestampDesc)))
+			Eventually(descriptions).Should(Receive(Equal(lastValueMetricReceivedTimestampMetric.Desc())))
 		})
 
 		It("returns a slow_consumer_alert metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(slowConsumerAlertDesc)))
+			Eventually(descriptions).Should(Receive(Equal(slowConsumerAlertMetric.Desc())))
 		})
 
 		It("returns a last_slow_consumer_alert_timestamp metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(lastSlowConsumerAlertTimestampDesc)))
+			Eventually(descriptions).Should(Receive(Equal(lastSlowConsumerAlertTimestampMetric.Desc())))
 		})
 	})
 
@@ -336,29 +381,7 @@ var _ = Describe("InternalMetricsCollector", func() {
 			slowConsumerAlert                    = false
 			lastSlowConsumerAlertTimestamp       = time.Now().Unix()
 
-			internalMetricsChan                        chan prometheus.Metric
-			totalEnvelopesReceivedMetric               prometheus.Metric
-			lastEnvelopeReceivedTimestampMetric        prometheus.Metric
-			totalMetricsReceivedMetric                 prometheus.Metric
-			lastMetricReceivedTimestampMetric          prometheus.Metric
-			totalContainerMetricsReceivedMetric        prometheus.Metric
-			totalContainerMetricsProcessedMetric       prometheus.Metric
-			containerMetricsCachedMetric               prometheus.Metric
-			lastContainerMetricReceivedTimestampMetric prometheus.Metric
-			totalCounterEventsReceivedMetric           prometheus.Metric
-			totalCounterEventsProcessedMetric          prometheus.Metric
-			counterEventsCachedMetric                  prometheus.Metric
-			lastCounterEventReceivedTimestampMetric    prometheus.Metric
-			totalHttpStartStopReceivedMetric           prometheus.Metric
-			totalHttpStartStopProcessedMetric          prometheus.Metric
-			httpStartStopCachedMetric                  prometheus.Metric
-			lastHttpStartStopReceivedTimestampMetric   prometheus.Metric
-			totalValueMetricsReceivedMetric            prometheus.Metric
-			totalValueMetricsProcessedMetric           prometheus.Metric
-			valueMetricsCachedMetric                   prometheus.Metric
-			lastValueMetricReceivedTimestampMetric     prometheus.Metric
-			slowConsumerAlertMetric                    prometheus.Metric
-			lastSlowConsumerAlertTimestampMetric       prometheus.Metric
+			internalMetricsChan chan prometheus.Metric
 		)
 
 		BeforeEach(func() {
@@ -385,137 +408,51 @@ var _ = Describe("InternalMetricsCollector", func() {
 
 			internalMetricsChan = make(chan prometheus.Metric)
 
-			totalEnvelopesReceivedMetric = prometheus.MustNewConstMetric(
-				totalEnvelopesReceivedDesc,
-				prometheus.CounterValue,
+			totalEnvelopesReceivedMetric.Set(
 				float64(totalEnvelopesReceived),
 			)
 
-			lastEnvelopeReceivedTimestampMetric = prometheus.MustNewConstMetric(
-				lastEnvelopeReceivedTimestampDesc,
-				prometheus.GaugeValue,
-				float64(lastEnvelopeReceivedTimestamp),
-			)
+			lastEnvelopeReceivedTimestampMetric.Set(float64(lastEnvelopeReceivedTimestamp))
 
-			totalMetricsReceivedMetric = prometheus.MustNewConstMetric(
-				totalMetricsReceivedDesc,
-				prometheus.CounterValue,
-				float64(totalMetricsReceived),
-			)
+			totalMetricsReceivedMetric.Set(float64(totalMetricsReceived))
 
-			lastMetricReceivedTimestampMetric = prometheus.MustNewConstMetric(
-				lastMetricReceivedTimestampDesc,
-				prometheus.GaugeValue,
-				float64(lastMetricReceivedTimestamp),
-			)
+			lastMetricReceivedTimestampMetric.Set(float64(lastMetricReceivedTimestamp))
 
-			totalContainerMetricsReceivedMetric = prometheus.MustNewConstMetric(
-				totalContainerMetricsReceivedDesc,
-				prometheus.CounterValue,
-				float64(totalContainerMetricsReceived),
-			)
+			totalContainerMetricsReceivedMetric.Set(float64(totalContainerMetricsReceived))
 
-			totalContainerMetricsProcessedMetric = prometheus.MustNewConstMetric(
-				totalContainerMetricsProcessedDesc,
-				prometheus.CounterValue,
-				float64(totalContainerMetricsProcessed),
-			)
+			totalContainerMetricsProcessedMetric.Set(float64(totalContainerMetricsProcessed))
 
-			containerMetricsCachedMetric = prometheus.MustNewConstMetric(
-				containerMetricsCachedDesc,
-				prometheus.GaugeValue,
-				float64(0),
-			)
+			containerMetricsCachedMetric.Set(float64(0))
 
-			lastContainerMetricReceivedTimestampMetric = prometheus.MustNewConstMetric(
-				lastContainerMetricReceivedTimestampDesc,
-				prometheus.GaugeValue,
-				float64(lastContainerMetricReceivedTimestamp),
-			)
+			lastContainerMetricReceivedTimestampMetric.Set(float64(lastContainerMetricReceivedTimestamp))
 
-			totalCounterEventsReceivedMetric = prometheus.MustNewConstMetric(
-				totalCounterEventsReceivedDesc,
-				prometheus.CounterValue,
-				float64(totalCounterEventsReceived),
-			)
+			totalCounterEventsReceivedMetric.Set(float64(totalCounterEventsReceived))
 
-			totalCounterEventsProcessedMetric = prometheus.MustNewConstMetric(
-				totalCounterEventsProcessedDesc,
-				prometheus.CounterValue,
-				float64(totalCounterEventsProcessed),
-			)
+			totalCounterEventsProcessedMetric.Set(float64(totalCounterEventsProcessed))
 
-			counterEventsCachedMetric = prometheus.MustNewConstMetric(
-				counterEventsCachedDesc,
-				prometheus.GaugeValue,
-				float64(0),
-			)
+			counterEventsCachedMetric.Set(float64(0))
 
-			lastCounterEventReceivedTimestampMetric = prometheus.MustNewConstMetric(
-				lastCounterEventReceivedTimestampDesc,
-				prometheus.GaugeValue,
-				float64(lastCounterEventReceivedTimestamp),
-			)
+			lastCounterEventReceivedTimestampMetric.Set(float64(lastCounterEventReceivedTimestamp))
 
-			totalHttpStartStopReceivedMetric = prometheus.MustNewConstMetric(
-				totalHttpStartStopReceivedDesc,
-				prometheus.CounterValue,
-				float64(totalHttpStartStopReceived),
-			)
+			totalHttpStartStopReceivedMetric.Set(float64(totalHttpStartStopReceived))
 
-			totalHttpStartStopProcessedMetric = prometheus.MustNewConstMetric(
-				totalHttpStartStopProcessedDesc,
-				prometheus.CounterValue,
-				float64(totalHttpStartStopProcessed),
-			)
+			totalHttpStartStopProcessedMetric.Set(float64(totalHttpStartStopProcessed))
 
-			httpStartStopCachedMetric = prometheus.MustNewConstMetric(
-				httpStartStopCachedDesc,
-				prometheus.GaugeValue,
-				float64(0),
-			)
+			httpStartStopCachedMetric.Set(float64(0))
 
-			lastHttpStartStopReceivedTimestampMetric = prometheus.MustNewConstMetric(
-				lastHttpStartStopReceivedTimestampDesc,
-				prometheus.GaugeValue,
-				float64(lastHttpStartStopReceivedTimestamp),
-			)
+			lastHttpStartStopReceivedTimestampMetric.Set(float64(lastHttpStartStopReceivedTimestamp))
 
-			totalValueMetricsReceivedMetric = prometheus.MustNewConstMetric(
-				totalValueMetricsReceivedDesc,
-				prometheus.CounterValue,
-				float64(totalValueMetricsReceived),
-			)
+			totalValueMetricsReceivedMetric.Set(float64(totalValueMetricsReceived))
 
-			totalValueMetricsProcessedMetric = prometheus.MustNewConstMetric(
-				totalValueMetricsProcessedDesc,
-				prometheus.CounterValue,
-				float64(totalValueMetricsProcessed),
-			)
+			totalValueMetricsProcessedMetric.Set(float64(totalValueMetricsProcessed))
 
-			valueMetricsCachedMetric = prometheus.MustNewConstMetric(
-				valueMetricsCachedDesc,
-				prometheus.GaugeValue,
-				float64(0),
-			)
+			valueMetricsCachedMetric.Set(float64(0))
 
-			lastValueMetricReceivedTimestampMetric = prometheus.MustNewConstMetric(
-				lastValueMetricReceivedTimestampDesc,
-				prometheus.GaugeValue,
-				float64(lastValueMetricReceivedTimestamp),
-			)
+			lastValueMetricReceivedTimestampMetric.Set(float64(lastValueMetricReceivedTimestamp))
 
-			slowConsumerAlertMetric = prometheus.MustNewConstMetric(
-				slowConsumerAlertDesc,
-				prometheus.UntypedValue,
-				0,
-			)
+			slowConsumerAlertMetric.Set(0)
 
-			lastSlowConsumerAlertTimestampMetric = prometheus.MustNewConstMetric(
-				lastSlowConsumerAlertTimestampDesc,
-				prometheus.GaugeValue,
-				float64(lastSlowConsumerAlertTimestamp),
-			)
+			lastSlowConsumerAlertTimestampMetric.Set(float64(lastSlowConsumerAlertTimestamp))
 		})
 
 		JustBeforeEach(func() {
@@ -524,87 +461,87 @@ var _ = Describe("InternalMetricsCollector", func() {
 		})
 
 		It("returns a total_envelopes_received metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(totalEnvelopesReceivedMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(totalEnvelopesReceivedMetric)))
 		})
 
 		It("returns a last_envelope_received_timestamp metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(lastEnvelopeReceivedTimestampMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(lastEnvelopeReceivedTimestampMetric)))
 		})
 
 		It("returns a total_metrics_received metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(totalMetricsReceivedMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(totalMetricsReceivedMetric)))
 		})
 
 		It("returns a last_metric_received_timestamp metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(lastMetricReceivedTimestampMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(lastMetricReceivedTimestampMetric)))
 		})
 
 		It("returns a total_container_metrics_received metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(totalContainerMetricsReceivedMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(totalContainerMetricsReceivedMetric)))
 		})
 
 		It("returns a total_container_metrics_processed metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(totalContainerMetricsProcessedMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(totalContainerMetricsProcessedMetric)))
 		})
 
 		It("returns a container_metrics_cached metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(containerMetricsCachedMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(containerMetricsCachedMetric)))
 		})
 
 		It("returns a last_container_metric_received_timestamp", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(lastContainerMetricReceivedTimestampMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(lastContainerMetricReceivedTimestampMetric)))
 		})
 
 		It("returns a total_counter_events_received metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(totalCounterEventsReceivedMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(totalCounterEventsReceivedMetric)))
 		})
 
 		It("returns a total_counter_events_processed metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(totalCounterEventsProcessedMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(totalCounterEventsProcessedMetric)))
 		})
 
 		It("returns a counter_events_cached metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(counterEventsCachedMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(counterEventsCachedMetric)))
 		})
 
 		It("returns a last_counter_event_received_timestamp metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(lastCounterEventReceivedTimestampMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(lastCounterEventReceivedTimestampMetric)))
 		})
 
 		It("returns a total_http_start_stop_received metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(totalHttpStartStopReceivedMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(totalHttpStartStopReceivedMetric)))
 		})
 
 		It("returns a total_http_start_stop_processed metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(totalHttpStartStopProcessedMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(totalHttpStartStopProcessedMetric)))
 		})
 
 		It("returns a http_start_stop_cached metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(httpStartStopCachedMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(httpStartStopCachedMetric)))
 		})
 
 		It("returns a last_http_start_stop_received_timestamp metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(lastHttpStartStopReceivedTimestampMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(lastHttpStartStopReceivedTimestampMetric)))
 		})
 
 		It("returns a total_value_metrics_received metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(totalValueMetricsReceivedMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(totalValueMetricsReceivedMetric)))
 		})
 
 		It("returns a total_value_metrics_processed metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(totalValueMetricsProcessedMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(totalValueMetricsProcessedMetric)))
 		})
 
 		It("returns a value_metrics_cached metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(valueMetricsCachedMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(valueMetricsCachedMetric)))
 		})
 
 		It("returns a last_value_metric_received_timestamp metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(lastValueMetricReceivedTimestampMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(lastValueMetricReceivedTimestampMetric)))
 		})
 
 		It("returns a slow_consumer_alert metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(slowConsumerAlertMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(slowConsumerAlertMetric)))
 		})
 
 		Context("when SlowConsumerAlert is true", func() {
@@ -612,21 +549,17 @@ var _ = Describe("InternalMetricsCollector", func() {
 				slowConsumerAlert = true
 				internalMetrics.SlowConsumerAlert = slowConsumerAlert
 
-				slowConsumerAlertMetric = prometheus.MustNewConstMetric(
-					slowConsumerAlertDesc,
-					prometheus.UntypedValue,
-					1,
-				)
+				slowConsumerAlertMetric.Set(1)
 			})
 
 			It("returns a slow_consumer_alert metric", func() {
-				Eventually(internalMetricsChan).Should(Receive(Equal(slowConsumerAlertMetric)))
+				Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(slowConsumerAlertMetric)))
 			})
 
 		})
 
 		It("returns a last_slow_consumer_alert_timestamp metric", func() {
-			Eventually(internalMetricsChan).Should(Receive(Equal(lastSlowConsumerAlertTimestampMetric)))
+			Eventually(internalMetricsChan).Should(Receive(PrometheusMetric(lastSlowConsumerAlertTimestampMetric)))
 		})
 	})
 })
