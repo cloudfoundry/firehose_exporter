@@ -14,6 +14,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	. "github.com/cloudfoundry-community/firehose_exporter/collectors"
+	. "github.com/cloudfoundry-community/firehose_exporter/utils/test_matchers"
 )
 
 var _ = Describe("CounterEventsCollector", func() {
@@ -198,19 +199,19 @@ var _ = Describe("CounterEventsCollector", func() {
 		})
 
 		It("returns a counter_event_fake_origin_fake_counter_event_1_total metric", func() {
-			Eventually(counterEventsChan).Should(Receive(Equal(totalCounterEvent1)))
+			Eventually(counterEventsChan).Should(Receive(PrometheusMetric(totalCounterEvent1)))
 		})
 
 		It("returns a counter_event_fake_origin_fake_counter_event_1_delta metric", func() {
-			Eventually(counterEventsChan).Should(Receive(Equal(deltaCounterEvent1)))
+			Eventually(counterEventsChan).Should(Receive(PrometheusMetric(deltaCounterEvent1)))
 		})
 
 		It("returns a counter_event_fake_origin_fake_counter_event_2_total metric", func() {
-			Eventually(counterEventsChan).Should(Receive(Equal(totalCounterEvent2)))
+			Eventually(counterEventsChan).Should(Receive(PrometheusMetric(totalCounterEvent2)))
 		})
 
 		It("returns a counter_event_fake_origin_fake_counter_event_2_delta metric", func() {
-			Eventually(counterEventsChan).Should(Receive(Equal(deltaCounterEvent2)))
+			Eventually(counterEventsChan).Should(Receive(PrometheusMetric(deltaCounterEvent2)))
 		})
 
 		Context("when there is no counter metrics", func() {

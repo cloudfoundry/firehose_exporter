@@ -14,6 +14,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	. "github.com/cloudfoundry-community/firehose_exporter/collectors"
+	. "github.com/cloudfoundry-community/firehose_exporter/utils/test_matchers"
 )
 
 var _ = Describe("ValueMetricsCollector", func() {
@@ -166,11 +167,11 @@ var _ = Describe("ValueMetricsCollector", func() {
 		})
 
 		It("returns a value_metric_fake_origin_fake_value_metric_1 metric", func() {
-			Eventually(valueMetricsChan).Should(Receive(Equal(valueMetric1)))
+			Eventually(valueMetricsChan).Should(Receive(PrometheusMetric(valueMetric1)))
 		})
 
 		It("returns a value_metric_fake_origin_fake_value_metric_2 metric", func() {
-			Eventually(valueMetricsChan).Should(Receive(Equal(valueMetric2)))
+			Eventually(valueMetricsChan).Should(Receive(PrometheusMetric(valueMetric2)))
 		})
 
 		Context("when there is no value metrics", func() {

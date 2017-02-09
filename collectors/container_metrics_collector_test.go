@@ -14,6 +14,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	. "github.com/cloudfoundry-community/firehose_exporter/collectors"
+	. "github.com/cloudfoundry-community/firehose_exporter/utils/test_matchers"
 )
 
 var _ = Describe("ContainerMetricsCollector", func() {
@@ -346,7 +347,7 @@ var _ = Describe("ContainerMetricsCollector", func() {
 		})
 
 		It("returns a container_metric_cpu_percentage metric for FakeApplicationId1", func() {
-			Eventually(containerMetricsChan).Should(Receive(Equal(cpuPercentageMetric.WithLabelValues(
+			Eventually(containerMetricsChan).Should(Receive(PrometheusMetric(cpuPercentageMetric.WithLabelValues(
 				origin,
 				boshDeployment,
 				boshJob,
@@ -358,7 +359,7 @@ var _ = Describe("ContainerMetricsCollector", func() {
 		})
 
 		It("returns a container_metric_memory_bytes metric for FakeApplicationId1", func() {
-			Eventually(containerMetricsChan).Should(Receive(Equal(memoryBytesMetric.WithLabelValues(
+			Eventually(containerMetricsChan).Should(Receive(PrometheusMetric(memoryBytesMetric.WithLabelValues(
 				origin,
 				boshDeployment,
 				boshJob,
@@ -370,7 +371,7 @@ var _ = Describe("ContainerMetricsCollector", func() {
 		})
 
 		It("returns a container_metric_disk_bytes metric for FakeApplicationId1", func() {
-			Eventually(containerMetricsChan).Should(Receive(Equal(diskBytesMetric.WithLabelValues(
+			Eventually(containerMetricsChan).Should(Receive(PrometheusMetric(diskBytesMetric.WithLabelValues(
 				origin,
 				boshDeployment,
 				boshJob,
@@ -382,7 +383,7 @@ var _ = Describe("ContainerMetricsCollector", func() {
 		})
 
 		It("returns a container_metric_memory_bytes_quota metric for FakeApplicationId1", func() {
-			Eventually(containerMetricsChan).Should(Receive(Equal(memoryBytesQuotaMetric.WithLabelValues(
+			Eventually(containerMetricsChan).Should(Receive(PrometheusMetric(memoryBytesQuotaMetric.WithLabelValues(
 				origin,
 				boshDeployment,
 				boshJob,
@@ -394,7 +395,7 @@ var _ = Describe("ContainerMetricsCollector", func() {
 		})
 
 		It("returns a container_metric_disk_bytes_quota metric for FakeApplicationId1", func() {
-			Eventually(containerMetricsChan).Should(Receive(Equal(diskBytesQuotaMetric.WithLabelValues(
+			Eventually(containerMetricsChan).Should(Receive(PrometheusMetric(diskBytesQuotaMetric.WithLabelValues(
 				origin,
 				boshDeployment,
 				boshJob,
@@ -406,7 +407,7 @@ var _ = Describe("ContainerMetricsCollector", func() {
 		})
 
 		It("returns a container_metric_cpu_percentage metric for FakeApplicationId2", func() {
-			Eventually(containerMetricsChan).Should(Receive(Equal(cpuPercentageMetric.WithLabelValues(
+			Eventually(containerMetricsChan).Should(Receive(PrometheusMetric(cpuPercentageMetric.WithLabelValues(
 				origin,
 				boshDeployment,
 				boshJob,
@@ -418,7 +419,7 @@ var _ = Describe("ContainerMetricsCollector", func() {
 		})
 
 		It("returns a container_metric_memory_bytes metric for FakeApplicationId2", func() {
-			Eventually(containerMetricsChan).Should(Receive(Equal(memoryBytesMetric.WithLabelValues(
+			Eventually(containerMetricsChan).Should(Receive(PrometheusMetric(memoryBytesMetric.WithLabelValues(
 				origin,
 				boshDeployment,
 				boshJob,
@@ -430,7 +431,7 @@ var _ = Describe("ContainerMetricsCollector", func() {
 		})
 
 		It("returns a container_metric_disk_bytes metric for FakeApplicationId2", func() {
-			Eventually(containerMetricsChan).Should(Receive(Equal(diskBytesMetric.WithLabelValues(
+			Eventually(containerMetricsChan).Should(Receive(PrometheusMetric(diskBytesMetric.WithLabelValues(
 				origin,
 				boshDeployment,
 				boshJob,
@@ -442,7 +443,7 @@ var _ = Describe("ContainerMetricsCollector", func() {
 		})
 
 		It("returns a container_metric_memory_bytes_quota metric for FakeApplicationId2", func() {
-			Eventually(containerMetricsChan).Should(Receive(Equal(memoryBytesQuotaMetric.WithLabelValues(
+			Eventually(containerMetricsChan).Should(Receive(PrometheusMetric(memoryBytesQuotaMetric.WithLabelValues(
 				origin,
 				boshDeployment,
 				boshJob,
@@ -454,7 +455,7 @@ var _ = Describe("ContainerMetricsCollector", func() {
 		})
 
 		It("returns a container_metric_disk_bytes_quota metric for FakeApplicationId2", func() {
-			Eventually(containerMetricsChan).Should(Receive(Equal(diskBytesQuotaMetric.WithLabelValues(
+			Eventually(containerMetricsChan).Should(Receive(PrometheusMetric(diskBytesQuotaMetric.WithLabelValues(
 				origin,
 				boshDeployment,
 				boshJob,
