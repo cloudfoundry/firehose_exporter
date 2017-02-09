@@ -33,23 +33,23 @@ For a list of all [Cloud Foundry Firehose][firehose] metrics check the [Cloud Fo
 
 *The HttpStartStop Collector is a work in progress. It is suitable for experimentation and may not become supported in the future*
 
-An `HttpStartStop` event represents the whole lifecycle of an HTTP request. The exporter summarizes all HTTP requests related to **applications** from the [Cloud Foundry Firehose][firehose] and emits:
+An `HttpStartStop` event represents the whole lifecycle of an HTTP request. The exporter summarizes **applications** related HTTP requests from a slidding window (`doppler.metric-expiration` command flag) from the [Cloud Foundry Firehose][firehose] and emits:
 
 | Metric | Description | Labels |
 | ------ | ----------- | ------ |
-| *metrics.namespace*_http_start_stop_request_total | Cloud Foundry Firehose http start stop total requests | `application_id`, `instance_id`, `uri`, `method`, `status_code` |
-| *metrics.namespace*_http_start_stop_response_size_bytes | Summary of Cloud Foundry Firehose http start stop request size in bytes | `application_id`, `instance_id`, `uri`, `method`, `quantile` *[1]* |
-| *metrics.namespace*_http_start_stop_response_size_bytes_count | Summary of Cloud Foundry Firehose http start stop request size in bytes (number of observations) | `application_id`, `instance_id`, `uri`, `method` |
-| *metrics.namespace*_http_start_stop_response_size_bytes_sum | Summary of Cloud Foundry Firehose http start stop request size in bytes (sum of observations) | `application_id`, `instance_id`, `uri`, `method` |
-| *metrics.namespace*_http_start_stop_last_request_timestamp | Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose | `application_id`, `instance_id`, `uri`, `method` |
-| *metrics.namespace*_http_start_stop_client_request_duration_seconds | Summary of Cloud Foundry Firehose http start stop client request duration in seconds | `application_id`, `instance_id`, `uri`, `method`, `quantile` *[1]* |
-| *metrics.namespace*_http_start_stop_client_request_duration_seconds_count | Summary of Cloud Foundry Firehose http start stop client request duration in seconds (number of observations) | `application_id`, `instance_id`, `uri`, `method` |
-| *metrics.namespace*_http_start_stop_client_request_duration_seconds_sum | Summary of Cloud Foundry Firehose http start stop client request duration in seconds (sum of observations) | `application_id`, `instance_id`, `uri`, `method` |
-| *metrics.namespace*_http_start_stop_server_request_duration_seconds | Summary of Cloud Foundry Firehose http start stop server request duration in seconds | `application_id`, `instance_id`, `uri`, `method`, `quantile` *[1]* |
-| *metrics.namespace*_http_start_stop_server_request_duration_seconds_count | Summary of Cloud Foundry Firehose http start stop server request duration in seconds (number of observations) | `application_id`, `instance_id`, `uri`, `method` |
-| *metrics.namespace*_http_start_stop_server_request_duration_seconds_sum | Summary of Cloud Foundry Firehose http start stop server request duration in seconds (sum of observations) | `application_id`, `instance_id`, `uri`, `method` |
+| *metrics.namespace*_http_start_stop_requests | Cloud Foundry Firehose http start stop requests | `application_id`, `instance_id`, `method`, `scheme`, `host`, `status_code` |
+| *metrics.namespace*_http_start_stop_response_size_bytes | Summary of Cloud Foundry Firehose http start stop request size in bytes | `application_id`, `instance_id`, `method`, `scheme`, `host`, `quantile` *[1]* |
+| *metrics.namespace*_http_start_stop_response_size_bytes_count | Summary of Cloud Foundry Firehose http start stop request size in bytes (number of observations) | `application_id`, `instance_id`, `method`, `scheme`, `host` |
+| *metrics.namespace*_http_start_stop_response_size_bytes_sum | Summary of Cloud Foundry Firehose http start stop request size in bytes (sum of observations) | `application_id`, `instance_id`, `method`, `scheme`, `host` |
+| *metrics.namespace*_http_start_stop_last_request_timestamp | Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose | `application_id`, `instance_id`, `method`, `scheme`, `host` |
+| *metrics.namespace*_http_start_stop_client_request_duration_seconds | Summary of Cloud Foundry Firehose http start stop client request duration in seconds | `application_id`, `instance_id`, `method`, `scheme`, `host`, `quantile` *[1]* |
+| *metrics.namespace*_http_start_stop_client_request_duration_seconds_count | Summary of Cloud Foundry Firehose http start stop client request duration in seconds (number of observations) | `application_id`, `instance_id`, `method`, `scheme`, `host` |
+| *metrics.namespace*_http_start_stop_client_request_duration_seconds_sum | Summary of Cloud Foundry Firehose http start stop client request duration in seconds (sum of observations) | `application_id`, `instance_id`, `method`, `scheme`, `host` |
+| *metrics.namespace*_http_start_stop_server_request_duration_seconds | Summary of Cloud Foundry Firehose http start stop server request duration in seconds | `application_id`, `instance_id`, `method`, `scheme`, `host`, `quantile` *[1]* |
+| *metrics.namespace*_http_start_stop_server_request_duration_seconds_count | Summary of Cloud Foundry Firehose http start stop server request duration in seconds (number of observations) | `application_id`, `instance_id`, `method`, `scheme`, `host` |
+| *metrics.namespace*_http_start_stop_server_request_duration_seconds_sum | Summary of Cloud Foundry Firehose http start stop server request duration in seconds (sum of observations) | `application_id`, `instance_id`, `method`, `scheme`, `host` |
 
-*[1]* Summaries reports [quantiles][quantile] (`0.5`, `0.9`, `0.99`) calculated from a slidding window (`doppler.metric-expiration` command flag).
+*[1]* Summaries reports [quantiles][quantile] (`0.5`, `0.9`, `0.99`)
 
 #### ValueMetric metrics
 
