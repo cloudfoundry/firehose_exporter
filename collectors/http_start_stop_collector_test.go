@@ -76,10 +76,11 @@ var _ = Describe("HttpStartStopCollector", func() {
 				Name:      "requests",
 				Help:      "Cloud Foundry Firehose http start stop requests.",
 			},
-			[]string{"application_id", "instance_id", "method", "scheme", "host", "status_code"},
+			[]string{"bosh_deployment", "application_id", "instance_id", "method", "scheme", "host", "status_code"},
 		)
 
 		requestsMetric.WithLabelValues(
+			boshDeployment,
 			httpStartStopApplicationId,
 			httpStartStopInstanceId,
 			httpStartStopMethod,
@@ -95,10 +96,11 @@ var _ = Describe("HttpStartStopCollector", func() {
 				Name:      "response_size_bytes",
 				Help:      "Summary of Cloud Foundry Firehose http start stop request size in bytes.",
 			},
-			[]string{"application_id", "instance_id", "method", "scheme", "host"},
+			[]string{"bosh_deployment", "application_id", "instance_id", "method", "scheme", "host"},
 		)
 
 		responseSizeBytesMetric.WithLabelValues(
+			boshDeployment,
 			httpStartStopApplicationId,
 			httpStartStopInstanceId,
 			httpStartStopMethod,
@@ -113,10 +115,11 @@ var _ = Describe("HttpStartStopCollector", func() {
 				Name:      "last_request_timestamp",
 				Help:      "Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose.",
 			},
-			[]string{"application_id", "instance_id", "method", "scheme", "host"},
+			[]string{"bosh_deployment", "application_id", "instance_id", "method", "scheme", "host"},
 		)
 
 		lastRequestTimestampMetric.WithLabelValues(
+			boshDeployment,
 			httpStartStopApplicationId,
 			httpStartStopInstanceId,
 			httpStartStopMethod,
@@ -131,10 +134,11 @@ var _ = Describe("HttpStartStopCollector", func() {
 				Name:      "client_request_duration_seconds",
 				Help:      "Summary of Cloud Foundry Firehose http start stop client request duration in seconds.",
 			},
-			[]string{"application_id", "instance_id", "method", "scheme", "host"},
+			[]string{"bosh_deployment", "application_id", "instance_id", "method", "scheme", "host"},
 		)
 
 		clientRequestDurationSecondsMetric.WithLabelValues(
+			boshDeployment,
 			httpStartStopApplicationId,
 			httpStartStopInstanceId,
 			httpStartStopMethod,
@@ -149,10 +153,11 @@ var _ = Describe("HttpStartStopCollector", func() {
 				Name:      "server_request_duration_seconds",
 				Help:      "Summary of Cloud Foundry Firehose http start stop server request duration in seconds.",
 			},
-			[]string{"application_id", "instance_id", "method", "scheme", "host"},
+			[]string{"bosh_deployment", "application_id", "instance_id", "method", "scheme", "host"},
 		)
 
 		serverRequestDurationSecondsMetric.WithLabelValues(
+			boshDeployment,
 			httpStartStopApplicationId,
 			httpStartStopInstanceId,
 			httpStartStopMethod,
@@ -180,6 +185,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 
 		It("returns a requests metric description", func() {
 			Eventually(descriptions).Should(Receive(Equal(requestsMetric.WithLabelValues(
+				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
@@ -191,6 +197,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 
 		It("returns a response_size_bytes metric description", func() {
 			Eventually(descriptions).Should(Receive(Equal(responseSizeBytesMetric.WithLabelValues(
+				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
@@ -201,6 +208,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 
 		It("returns a last_request_timestamp metric description", func() {
 			Eventually(descriptions).Should(Receive(Equal(lastRequestTimestampMetric.WithLabelValues(
+				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
@@ -211,6 +219,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 
 		It("returns a client_request_duration_seconds metric description", func() {
 			Eventually(descriptions).Should(Receive(Equal(clientRequestDurationSecondsMetric.WithLabelValues(
+				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
@@ -221,6 +230,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 
 		It("returns a server_request_duration_seconds metric description", func() {
 			Eventually(descriptions).Should(Receive(Equal(serverRequestDurationSecondsMetric.WithLabelValues(
+				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
@@ -298,6 +308,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 
 		It("returns a requests metric", func() {
 			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(requestsMetric.WithLabelValues(
+				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
@@ -309,6 +320,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 
 		It("returns a response_size_bytes metric", func() {
 			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(responseSizeBytesMetric.WithLabelValues(
+				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
@@ -319,6 +331,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 
 		It("returns a last_request_timestamp metric", func() {
 			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(lastRequestTimestampMetric.WithLabelValues(
+				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
@@ -329,6 +342,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 
 		It("returns a client_request_duration_seconds metric", func() {
 			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(clientRequestDurationSecondsMetric.WithLabelValues(
+				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
@@ -339,6 +353,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 
 		It("returns a server_request_duration_seconds metric", func() {
 			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(serverRequestDurationSecondsMetric.WithLabelValues(
+				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,

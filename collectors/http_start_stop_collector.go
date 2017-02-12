@@ -31,7 +31,7 @@ func NewHttpStartStopCollector(
 			Name:      "requests",
 			Help:      "Cloud Foundry Firehose http start stop requests.",
 		},
-		[]string{"application_id", "instance_id", "method", "scheme", "host", "status_code"},
+		[]string{"bosh_deployment", "application_id", "instance_id", "method", "scheme", "host", "status_code"},
 	)
 
 	responseSizeBytesMetric := prometheus.NewSummaryVec(
@@ -41,7 +41,7 @@ func NewHttpStartStopCollector(
 			Name:      "response_size_bytes",
 			Help:      "Summary of Cloud Foundry Firehose http start stop request size in bytes.",
 		},
-		[]string{"application_id", "instance_id", "method", "scheme", "host"},
+		[]string{"bosh_deployment", "application_id", "instance_id", "method", "scheme", "host"},
 	)
 
 	lastRequestTimestampMetric := prometheus.NewGaugeVec(
@@ -51,7 +51,7 @@ func NewHttpStartStopCollector(
 			Name:      "last_request_timestamp",
 			Help:      "Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose.",
 		},
-		[]string{"application_id", "instance_id", "method", "scheme", "host"},
+		[]string{"bosh_deployment", "application_id", "instance_id", "method", "scheme", "host"},
 	)
 
 	clientRequestDurationSecondsMetric := prometheus.NewSummaryVec(
@@ -61,7 +61,7 @@ func NewHttpStartStopCollector(
 			Name:      "client_request_duration_seconds",
 			Help:      "Summary of Cloud Foundry Firehose http start stop client request duration in seconds.",
 		},
-		[]string{"application_id", "instance_id", "method", "scheme", "host"},
+		[]string{"bosh_deployment", "application_id", "instance_id", "method", "scheme", "host"},
 	)
 
 	serverRequestDurationSecondsMetric := prometheus.NewSummaryVec(
@@ -71,7 +71,7 @@ func NewHttpStartStopCollector(
 			Name:      "server_request_duration_seconds",
 			Help:      "Summary of Cloud Foundry Firehose http start stop server request duration in seconds.",
 		},
-		[]string{"application_id", "instance_id", "method", "scheme", "host"},
+		[]string{"bosh_deployment", "application_id", "instance_id", "method", "scheme", "host"},
 	)
 
 	return &HttpStartStopCollector{
@@ -110,6 +110,7 @@ func (c HttpStartStopCollector) Collect(ch chan<- prometheus.Metric) {
 		}
 
 		c.requestsMetric.WithLabelValues(
+			httpStartStop.Deployment,
 			httpStartStop.ApplicationId,
 			httpStartStop.InstanceId,
 			httpStartStop.Method,
@@ -119,6 +120,7 @@ func (c HttpStartStopCollector) Collect(ch chan<- prometheus.Metric) {
 		).Inc()
 
 		c.responseSizeBytesMetric.WithLabelValues(
+			httpStartStop.Deployment,
 			httpStartStop.ApplicationId,
 			httpStartStop.InstanceId,
 			httpStartStop.Method,
@@ -133,6 +135,7 @@ func (c HttpStartStopCollector) Collect(ch chan<- prometheus.Metric) {
 			lastRequestTimestamp = utils.NanosecondsToSeconds(httpStartStop.ServerStartTimestamp)
 		}
 		c.lastRequestTimestampMetric.WithLabelValues(
+			httpStartStop.Deployment,
 			httpStartStop.ApplicationId,
 			httpStartStop.InstanceId,
 			httpStartStop.Method,
@@ -143,6 +146,7 @@ func (c HttpStartStopCollector) Collect(ch chan<- prometheus.Metric) {
 		clientDuration := httpStartStop.ClientStopTimestamp - httpStartStop.ClientStartTimestamp
 		if clientDuration > 0 {
 			c.clientRequestDurationSecondsMetric.WithLabelValues(
+				httpStartStop.Deployment,
 				httpStartStop.ApplicationId,
 				httpStartStop.InstanceId,
 				httpStartStop.Method,
@@ -154,6 +158,7 @@ func (c HttpStartStopCollector) Collect(ch chan<- prometheus.Metric) {
 		serverDuration := httpStartStop.ServerStopTimestamp - httpStartStop.ServerStartTimestamp
 		if serverDuration > 0 {
 			c.serverRequestDurationSecondsMetric.WithLabelValues(
+				httpStartStop.Deployment,
 				httpStartStop.ApplicationId,
 				httpStartStop.InstanceId,
 				httpStartStop.Method,
