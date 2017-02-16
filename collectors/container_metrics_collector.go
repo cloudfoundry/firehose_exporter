@@ -10,6 +10,7 @@ import (
 
 type ContainerMetricsCollector struct {
 	namespace              string
+	environment            string
 	metricsStore           *metrics.Store
 	cpuPercentageMetric    *prometheus.GaugeVec
 	memoryBytesMetric      *prometheus.GaugeVec
@@ -20,60 +21,67 @@ type ContainerMetricsCollector struct {
 
 func NewContainerMetricsCollector(
 	namespace string,
+	environment string,
 	metricsStore *metrics.Store,
 ) *ContainerMetricsCollector {
 	cpuPercentageMetric := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: container_metrics_subsystem,
-			Name:      "cpu_percentage",
-			Help:      "Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100.",
+			Namespace:   namespace,
+			Subsystem:   container_metrics_subsystem,
+			Name:        "cpu_percentage",
+			Help:        "Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 		[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
 	)
 
 	memoryBytesMetric := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: container_metrics_subsystem,
-			Name:      "memory_bytes",
-			Help:      "Cloud Foundry Firehose container metric: bytes of memory used.",
+			Namespace:   namespace,
+			Subsystem:   container_metrics_subsystem,
+			Name:        "memory_bytes",
+			Help:        "Cloud Foundry Firehose container metric: bytes of memory used.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 		[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
 	)
 
 	diskBytesMetric := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: container_metrics_subsystem,
-			Name:      "disk_bytes",
-			Help:      "Cloud Foundry Firehose container metric: bytes of disk used.",
+			Namespace:   namespace,
+			Subsystem:   container_metrics_subsystem,
+			Name:        "disk_bytes",
+			Help:        "Cloud Foundry Firehose container metric: bytes of disk used.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 		[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
 	)
 
 	memoryBytesQuotaMetric := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: container_metrics_subsystem,
-			Name:      "memory_bytes_quota",
-			Help:      "Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container.",
+			Namespace:   namespace,
+			Subsystem:   container_metrics_subsystem,
+			Name:        "memory_bytes_quota",
+			Help:        "Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 		[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
 	)
 
 	diskBytesQuotaMetric := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: container_metrics_subsystem,
-			Name:      "disk_bytes_quota",
-			Help:      "Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container.",
+			Namespace:   namespace,
+			Subsystem:   container_metrics_subsystem,
+			Name:        "disk_bytes_quota",
+			Help:        "Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 		[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
 	)
 
 	return &ContainerMetricsCollector{
 		namespace:              namespace,
+		environment:            environment,
 		metricsStore:           metricsStore,
 		cpuPercentageMetric:    cpuPercentageMetric,
 		memoryBytesMetric:      memoryBytesMetric,

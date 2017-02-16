@@ -8,6 +8,7 @@ import (
 
 type InternalMetricsCollector struct {
 	namespace                                  string
+	environment                                string
 	metricsStore                               *metrics.Store
 	totalEnvelopesReceivedMetric               prometheus.Gauge
 	lastEnvelopeReceivedTimestampMetric        prometheus.Gauge
@@ -35,208 +36,232 @@ type InternalMetricsCollector struct {
 
 func NewInternalMetricsCollector(
 	namespace string,
+	environment string,
 	metricsStore *metrics.Store,
 ) *InternalMetricsCollector {
 	totalEnvelopesReceivedMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "total_envelopes_received",
-			Help:      "Total number of envelopes received from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "total_envelopes_received",
+			Help:        "Total number of envelopes received from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	lastEnvelopeReceivedTimestampMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "last_envelope_received_timestamp",
-			Help:      "Number of seconds since 1970 since last envelope received from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "last_envelope_received_timestamp",
+			Help:        "Number of seconds since 1970 since last envelope received from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	totalMetricsReceivedMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "total_metrics_received",
-			Help:      "Total number of metrics received from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "total_metrics_received",
+			Help:        "Total number of metrics received from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	lastMetricReceivedTimestampMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "last_metric_received_timestamp",
-			Help:      "Number of seconds since 1970 since last metric received from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "last_metric_received_timestamp",
+			Help:        "Number of seconds since 1970 since last metric received from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	totalContainerMetricsReceivedMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "total_container_metrics_received",
-			Help:      "Total number of container metrics received from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "total_container_metrics_received",
+			Help:        "Total number of container metrics received from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	totalContainerMetricsProcessedMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "total_container_metrics_processed",
-			Help:      "Total number of container metrics processed from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "total_container_metrics_processed",
+			Help:        "Total number of container metrics processed from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	containerMetricsCachedMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "container_metrics_cached",
-			Help:      "Number of container metrics cached from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "container_metrics_cached",
+			Help:        "Number of container metrics cached from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	lastContainerMetricReceivedTimestampMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "last_container_metric_received_timestamp",
-			Help:      "Number of seconds since 1970 since last container metric received from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "last_container_metric_received_timestamp",
+			Help:        "Number of seconds since 1970 since last container metric received from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	totalCounterEventsReceivedMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "total_counter_events_received",
-			Help:      "Total number of counter events received from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "total_counter_events_received",
+			Help:        "Total number of counter events received from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	totalCounterEventsProcessedMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "total_counter_events_processed",
-			Help:      "Total number of counter events processed from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "total_counter_events_processed",
+			Help:        "Total number of counter events processed from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	counterEventsCachedMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "counter_events_cached",
-			Help:      "Number of counter events cached from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "counter_events_cached",
+			Help:        "Number of counter events cached from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	lastCounterEventReceivedTimestampMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "last_counter_event_received_timestamp",
-			Help:      "Number of seconds since 1970 since last counter event received from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "last_counter_event_received_timestamp",
+			Help:        "Number of seconds since 1970 since last counter event received from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	totalHttpStartStopReceivedMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "total_http_start_stop_received",
-			Help:      "Total number of http start stop received from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "total_http_start_stop_received",
+			Help:        "Total number of http start stop received from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	totalHttpStartStopProcessedMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "total_http_start_stop_processed",
-			Help:      "Total number of http start stop processed from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "total_http_start_stop_processed",
+			Help:        "Total number of http start stop processed from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	httpStartStopCachedMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "http_start_stop_cached",
-			Help:      "Number of http start stop cached from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "http_start_stop_cached",
+			Help:        "Number of http start stop cached from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	lastHttpStartStopReceivedTimestampMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "last_http_start_stop_received_timestamp",
-			Help:      "Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "last_http_start_stop_received_timestamp",
+			Help:        "Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	totalValueMetricsReceivedMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "total_value_metrics_received",
-			Help:      "Total number of value metrics received from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "total_value_metrics_received",
+			Help:        "Total number of value metrics received from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	totalValueMetricsProcessedMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "total_value_metrics_processed",
-			Help:      "Total number of value metrics processed from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "total_value_metrics_processed",
+			Help:        "Total number of value metrics processed from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	valueMetricsCachedMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "value_metrics_cached",
-			Help:      "Number of value metrics cached from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "value_metrics_cached",
+			Help:        "Number of value metrics cached from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	lastValueMetricReceivedTimestampMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "last_value_metric_received_timestamp",
-			Help:      "Number of seconds since 1970 since last value metric received from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "last_value_metric_received_timestamp",
+			Help:        "Number of seconds since 1970 since last value metric received from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	slowConsumerAlertMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "slow_consumer_alert",
-			Help:      "Nozzle could not keep up with Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "slow_consumer_alert",
+			Help:        "Nozzle could not keep up with Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	lastSlowConsumerAlertTimestampMetric := prometheus.NewGauge(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: "",
-			Name:      "last_slow_consumer_alert_timestamp",
-			Help:      "Number of seconds since 1970 since last slow consumer alert received from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   "",
+			Name:        "last_slow_consumer_alert_timestamp",
+			Help:        "Number of seconds since 1970 since last slow consumer alert received from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
 
 	collector := &InternalMetricsCollector{
 		namespace:                                  namespace,
+		environment:                                environment,
 		metricsStore:                               metricsStore,
 		totalEnvelopesReceivedMetric:               totalEnvelopesReceivedMetric,
 		lastEnvelopeReceivedTimestampMetric:        lastEnvelopeReceivedTimestampMetric,

@@ -81,6 +81,11 @@ var (
 		"Metrics Namespace ($FIREHOSE_EXPORTER_METRICS_NAMESPACE).",
 	)
 
+	metricsEnvironment = flag.String(
+		"metrics.environment", "",
+		"Environment label to be attached to metrics ($FIREHOSE_EXPORTER_METRICS_ENVIRONMENT).",
+	)
+
 	metricsCleanupInterval = flag.Duration(
 		"metrics.cleanup-interval", 2*time.Minute,
 		"Metrics clean up interval ($FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL).",
@@ -144,6 +149,7 @@ func overrideFlagsWithEnvVars() {
 	overrideWithEnvVar("FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS", filterDeployments)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_FILTER_EVENTS", filterEvents)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_METRICS_NAMESPACE", metricsNamespace)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_METRICS_ENVIRONMENT", metricsEnvironment)
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL", metricsCleanupInterval)
 	overrideWithEnvBool("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY", skipSSLValidation)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS", listenAddress)
@@ -281,19 +287,19 @@ func main() {
 		log.Fatal(nozzle.Start())
 	}()
 
-	internalMetricsCollector := collectors.NewInternalMetricsCollector(*metricsNamespace, metricsStore)
+	internalMetricsCollector := collectors.NewInternalMetricsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
 	prometheus.MustRegister(internalMetricsCollector)
 
-	containerMetricsCollector := collectors.NewContainerMetricsCollector(*metricsNamespace, metricsStore)
+	containerMetricsCollector := collectors.NewContainerMetricsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
 	prometheus.MustRegister(containerMetricsCollector)
 
-	counterEventsCollector := collectors.NewCounterEventsCollector(*metricsNamespace, metricsStore)
+	counterEventsCollector := collectors.NewCounterEventsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
 	prometheus.MustRegister(counterEventsCollector)
 
-	httpStartStopCollector := collectors.NewHttpStartStopCollector(*metricsNamespace, metricsStore)
+	httpStartStopCollector := collectors.NewHttpStartStopCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
 	prometheus.MustRegister(httpStartStopCollector)
 
-	valueMetricsCollector := collectors.NewValueMetricsCollector(*metricsNamespace, metricsStore)
+	valueMetricsCollector := collectors.NewValueMetricsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
 	prometheus.MustRegister(valueMetricsCollector)
 
 	http.Handle(*metricsPath, prometheus.Handler())

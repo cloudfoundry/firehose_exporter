@@ -20,6 +20,7 @@ import (
 var _ = Describe("ContainerMetricsCollector", func() {
 	var (
 		namespace                 string
+		environment               string
 		metricsStore              *metrics.Store
 		metricsExpiration         time.Duration
 		metricsCleanupInterval    time.Duration
@@ -58,16 +59,18 @@ var _ = Describe("ContainerMetricsCollector", func() {
 
 	BeforeEach(func() {
 		namespace = "test_exporter"
+		environment = "test_environment"
 		deploymentFilter = filters.NewDeploymentFilter([]string{})
 		eventFilter, _ = filters.NewEventFilter([]string{})
 		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval, deploymentFilter, eventFilter)
 
 		cpuPercentageMetric = prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
-				Namespace: namespace,
-				Subsystem: "container_metric",
-				Name:      "cpu_percentage",
-				Help:      "Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100.",
+				Namespace:   namespace,
+				Subsystem:   "container_metric",
+				Name:        "cpu_percentage",
+				Help:        "Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100.",
+				ConstLabels: prometheus.Labels{"environment": environment},
 			},
 			[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
 		)
@@ -94,10 +97,11 @@ var _ = Describe("ContainerMetricsCollector", func() {
 
 		memoryBytesMetric = prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
-				Namespace: namespace,
-				Subsystem: "container_metric",
-				Name:      "memory_bytes",
-				Help:      "Cloud Foundry Firehose container metric: bytes of memory used.",
+				Namespace:   namespace,
+				Subsystem:   "container_metric",
+				Name:        "memory_bytes",
+				Help:        "Cloud Foundry Firehose container metric: bytes of memory used.",
+				ConstLabels: prometheus.Labels{"environment": environment},
 			},
 			[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
 		)
@@ -124,10 +128,11 @@ var _ = Describe("ContainerMetricsCollector", func() {
 
 		diskBytesMetric = prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
-				Namespace: namespace,
-				Subsystem: "container_metric",
-				Name:      "disk_bytes",
-				Help:      "Cloud Foundry Firehose container metric: bytes of disk used.",
+				Namespace:   namespace,
+				Subsystem:   "container_metric",
+				Name:        "disk_bytes",
+				Help:        "Cloud Foundry Firehose container metric: bytes of disk used.",
+				ConstLabels: prometheus.Labels{"environment": environment},
 			},
 			[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
 		)
@@ -154,10 +159,11 @@ var _ = Describe("ContainerMetricsCollector", func() {
 
 		memoryBytesQuotaMetric = prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
-				Namespace: namespace,
-				Subsystem: "container_metric",
-				Name:      "memory_bytes_quota",
-				Help:      "Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container.",
+				Namespace:   namespace,
+				Subsystem:   "container_metric",
+				Name:        "memory_bytes_quota",
+				Help:        "Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container.",
+				ConstLabels: prometheus.Labels{"environment": environment},
 			},
 			[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
 		)
@@ -184,10 +190,11 @@ var _ = Describe("ContainerMetricsCollector", func() {
 
 		diskBytesQuotaMetric = prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
-				Namespace: namespace,
-				Subsystem: "container_metric",
-				Name:      "disk_bytes_quota",
-				Help:      "Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container.",
+				Namespace:   namespace,
+				Subsystem:   "container_metric",
+				Name:        "disk_bytes_quota",
+				Help:        "Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container.",
+				ConstLabels: prometheus.Labels{"environment": environment},
 			},
 			[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
 		)
@@ -214,7 +221,7 @@ var _ = Describe("ContainerMetricsCollector", func() {
 	})
 
 	JustBeforeEach(func() {
-		containerMetricsCollector = NewContainerMetricsCollector(namespace, metricsStore)
+		containerMetricsCollector = NewContainerMetricsCollector(namespace, environment, metricsStore)
 	})
 
 	Describe("Describe", func() {

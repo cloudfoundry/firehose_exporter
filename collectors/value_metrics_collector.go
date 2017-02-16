@@ -11,23 +11,26 @@ import (
 
 type ValueMetricsCollector struct {
 	namespace                 string
+	environment               string
 	metricsStore              *metrics.Store
 	valueMetricsCollectorDesc *prometheus.Desc
 }
 
 func NewValueMetricsCollector(
 	namespace string,
+	environment string,
 	metricsStore *metrics.Store,
 ) *ValueMetricsCollector {
 	valueMetricsCollectorDesc := prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, value_metrics_subsystem, "collector"),
 		"Cloud Foundry Firehose value metrics collector.",
 		nil,
-		nil,
+		prometheus.Labels{"environment": environment},
 	)
 
 	return &ValueMetricsCollector{
 		namespace:                 namespace,
+		environment:               environment,
 		metricsStore:              metricsStore,
 		valueMetricsCollectorDesc: valueMetricsCollectorDesc,
 	}
@@ -41,7 +44,7 @@ func (c ValueMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 				prometheus.BuildFQName(c.namespace, value_metrics_subsystem, metricName),
 				fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric.Name, valueMetric.Origin),
 				[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit"},
-				nil,
+				prometheus.Labels{"environment": c.environment},
 			),
 			prometheus.GaugeValue,
 			float64(valueMetric.Value),

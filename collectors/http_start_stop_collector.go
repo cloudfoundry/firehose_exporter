@@ -12,6 +12,7 @@ import (
 
 type HttpStartStopCollector struct {
 	namespace                          string
+	environment                        string
 	metricsStore                       *metrics.Store
 	requestsMetric                     *prometheus.GaugeVec
 	responseSizeBytesMetric            *prometheus.SummaryVec
@@ -22,60 +23,67 @@ type HttpStartStopCollector struct {
 
 func NewHttpStartStopCollector(
 	namespace string,
+	environment string,
 	metricsStore *metrics.Store,
 ) *HttpStartStopCollector {
 	requestsMetric := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: http_start_stop_subsystem,
-			Name:      "requests",
-			Help:      "Cloud Foundry Firehose http start stop requests.",
+			Namespace:   namespace,
+			Subsystem:   http_start_stop_subsystem,
+			Name:        "requests",
+			Help:        "Cloud Foundry Firehose http start stop requests.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 		[]string{"bosh_deployment", "application_id", "instance_id", "method", "scheme", "host", "status_code"},
 	)
 
 	responseSizeBytesMetric := prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
-			Namespace: namespace,
-			Subsystem: http_start_stop_subsystem,
-			Name:      "response_size_bytes",
-			Help:      "Summary of Cloud Foundry Firehose http start stop request size in bytes.",
+			Namespace:   namespace,
+			Subsystem:   http_start_stop_subsystem,
+			Name:        "response_size_bytes",
+			Help:        "Summary of Cloud Foundry Firehose http start stop request size in bytes.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 		[]string{"bosh_deployment", "application_id", "instance_id", "method", "scheme", "host"},
 	)
 
 	lastRequestTimestampMetric := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: namespace,
-			Subsystem: http_start_stop_subsystem,
-			Name:      "last_request_timestamp",
-			Help:      "Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose.",
+			Namespace:   namespace,
+			Subsystem:   http_start_stop_subsystem,
+			Name:        "last_request_timestamp",
+			Help:        "Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 		[]string{"bosh_deployment", "application_id", "instance_id", "method", "scheme", "host"},
 	)
 
 	clientRequestDurationSecondsMetric := prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
-			Namespace: namespace,
-			Subsystem: http_start_stop_subsystem,
-			Name:      "client_request_duration_seconds",
-			Help:      "Summary of Cloud Foundry Firehose http start stop client request duration in seconds.",
+			Namespace:   namespace,
+			Subsystem:   http_start_stop_subsystem,
+			Name:        "client_request_duration_seconds",
+			Help:        "Summary of Cloud Foundry Firehose http start stop client request duration in seconds.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 		[]string{"bosh_deployment", "application_id", "instance_id", "method", "scheme", "host"},
 	)
 
 	serverRequestDurationSecondsMetric := prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
-			Namespace: namespace,
-			Subsystem: http_start_stop_subsystem,
-			Name:      "server_request_duration_seconds",
-			Help:      "Summary of Cloud Foundry Firehose http start stop server request duration in seconds.",
+			Namespace:   namespace,
+			Subsystem:   http_start_stop_subsystem,
+			Name:        "server_request_duration_seconds",
+			Help:        "Summary of Cloud Foundry Firehose http start stop server request duration in seconds.",
+			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 		[]string{"bosh_deployment", "application_id", "instance_id", "method", "scheme", "host"},
 	)
 
 	return &HttpStartStopCollector{
 		namespace:                          namespace,
+		environment:                        environment,
 		metricsStore:                       metricsStore,
 		requestsMetric:                     requestsMetric,
 		responseSizeBytesMetric:            responseSizeBytesMetric,

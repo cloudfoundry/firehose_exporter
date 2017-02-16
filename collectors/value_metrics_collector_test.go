@@ -20,6 +20,7 @@ import (
 var _ = Describe("ValueMetricsCollector", func() {
 	var (
 		namespace              string
+		environment            string
 		metricsStore           *metrics.Store
 		metricsExpiration      time.Duration
 		metricsCleanupInterval time.Duration
@@ -32,6 +33,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 
 	BeforeEach(func() {
 		namespace = "test_exporter"
+		environment = "test_environment"
 		deploymentFilter = filters.NewDeploymentFilter([]string{})
 		eventFilter, _ = filters.NewEventFilter([]string{})
 		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval, deploymentFilter, eventFilter)
@@ -40,12 +42,12 @@ var _ = Describe("ValueMetricsCollector", func() {
 			prometheus.BuildFQName(namespace, "value_metric", "collector"),
 			"Cloud Foundry Firehose value metrics collector.",
 			nil,
-			nil,
+			prometheus.Labels{"environment": environment},
 		)
 	})
 
 	JustBeforeEach(func() {
-		valueMetricsCollector = NewValueMetricsCollector(namespace, metricsStore)
+		valueMetricsCollector = NewValueMetricsCollector(namespace, environment, metricsStore)
 	})
 
 	Describe("Describe", func() {
@@ -132,7 +134,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 					prometheus.BuildFQName(namespace, "value_metric", originNormalized+"_"+valueMetric1NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric1Name, origin),
 					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit"},
-					nil,
+					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
 				valueMetric1Value,
@@ -149,7 +151,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 					prometheus.BuildFQName(namespace, "value_metric", originNormalized+"_"+valueMetric2NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric2Name, origin),
 					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit"},
-					nil,
+					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
 				valueMetric2Value,

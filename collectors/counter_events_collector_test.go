@@ -20,6 +20,7 @@ import (
 var _ = Describe("CounterEventsCollector", func() {
 	var (
 		namespace              string
+		environment            string
 		metricsStore           *metrics.Store
 		metricsExpiration      time.Duration
 		metricsCleanupInterval time.Duration
@@ -32,6 +33,7 @@ var _ = Describe("CounterEventsCollector", func() {
 
 	BeforeEach(func() {
 		namespace = "test_exporter"
+		environment = "test_environment"
 		deploymentFilter = filters.NewDeploymentFilter([]string{})
 		eventFilter, _ = filters.NewEventFilter([]string{})
 		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval, deploymentFilter, eventFilter)
@@ -40,12 +42,12 @@ var _ = Describe("CounterEventsCollector", func() {
 			prometheus.BuildFQName(namespace, "counter_event", "collector"),
 			"Cloud Foundry Firehose counter metrics collector.",
 			nil,
-			nil,
+			prometheus.Labels{"environment": environment},
 		)
 	})
 
 	JustBeforeEach(func() {
-		counterEventsCollector = NewCounterEventsCollector(namespace, metricsStore)
+		counterEventsCollector = NewCounterEventsCollector(namespace, environment, metricsStore)
 	})
 
 	Describe("Describe", func() {
@@ -134,7 +136,7 @@ var _ = Describe("CounterEventsCollector", func() {
 					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_"+counterEvent1NameNormalized+"_total"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", counterEvent1Name, origin),
 					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
-					nil,
+					prometheus.Labels{"environment": environment},
 				),
 				prometheus.CounterValue,
 				float64(counterEvent1Total),
@@ -150,7 +152,7 @@ var _ = Describe("CounterEventsCollector", func() {
 					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_"+counterEvent1NameNormalized+"_delta"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event from '%s'.", counterEvent1Name, origin),
 					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
-					nil,
+					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
 				float64(counterEvent1Delta),
@@ -166,7 +168,7 @@ var _ = Describe("CounterEventsCollector", func() {
 					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_"+counterEvent2NameNormalized+"_total"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", counterEvent2Name, origin),
 					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
-					nil,
+					prometheus.Labels{"environment": environment},
 				),
 				prometheus.CounterValue,
 				float64(counterEvent2Total),
@@ -182,7 +184,7 @@ var _ = Describe("CounterEventsCollector", func() {
 					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_"+counterEvent2NameNormalized+"_delta"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event from '%s'.", counterEvent2Name, origin),
 					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
-					nil,
+					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
 				float64(counterEvent2Delta),

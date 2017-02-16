@@ -14,11 +14,11 @@ For a list of all [Cloud Foundry Firehose][firehose] metrics check the [Cloud Fo
 
 | Metric | Description | Labels |
 | ------ | ----------- | ------ |
-| *metrics.namespace*_container_metric_cpu_percentage | Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100 | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
-| *metrics.namespace*_container_metric_memory_bytes | Cloud Foundry Firehose container metric: bytes of memory used | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
-| *metrics.namespace*_container_metric_disk_bytes | Cloud Foundry Firehose container metric: bytes of disk used | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
-| *metrics.namespace*_container_metric_memory_bytes_quota | Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
-| *metrics.namespace*_container_metric_disk_bytes_quota | Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
+| *metrics.namespace*_container_metric_cpu_percentage | Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100 | `environment`, `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
+| *metrics.namespace*_container_metric_memory_bytes | Cloud Foundry Firehose container metric: bytes of memory used | `environment`, `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
+| *metrics.namespace*_container_metric_disk_bytes | Cloud Foundry Firehose container metric: bytes of disk used | `environment`, `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
+| *metrics.namespace*_container_metric_memory_bytes_quota | Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container | `environment`, `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
+| *metrics.namespace*_container_metric_disk_bytes_quota | Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container | `environment`, `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `application_id`, `instance_index`|
 
 #### CounterEvent metrics
 
@@ -26,8 +26,8 @@ For a list of all [Cloud Foundry Firehose][firehose] metrics check the [Cloud Fo
 
 | Metric | Description | Labels |
 | ------ | ----------- | ------ |
-| *metrics.namespace*_counter_event_*origin*_*counter_event_name*_total | Cloud Foundry Firehose '*counter_event_name*' total counter event from '*origin*' | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip` |
-| *metrics.namespace*_counter_event_*origin*_*counter_event_name*_delta | Cloud Foundry Firehose '*counter_event_name*' delta counter event from '*origin*' | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip` |
+| *metrics.namespace*_counter_event_*origin*_*counter_event_name*_total | Cloud Foundry Firehose '*counter_event_name*' total counter event from '*origin*' | `environment`, `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip` |
+| *metrics.namespace*_counter_event_*origin*_*counter_event_name*_delta | Cloud Foundry Firehose '*counter_event_name*' delta counter event from '*origin*' | `environment`, `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip` |
 
 #### HttpStartStop metrics
 
@@ -37,17 +37,17 @@ An `HttpStartStop` event represents the whole lifecycle of an HTTP request. The 
 
 | Metric | Description | Labels |
 | ------ | ----------- | ------ |
-| *metrics.namespace*_http_start_stop_requests | Cloud Foundry Firehose http start stop requests | `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host`, `status_code` |
-| *metrics.namespace*_http_start_stop_response_size_bytes | Summary of Cloud Foundry Firehose http start stop request size in bytes | `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host`, `quantile` *[1]* |
-| *metrics.namespace*_http_start_stop_response_size_bytes_count | Summary of Cloud Foundry Firehose http start stop request size in bytes (number of observations) | `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host` |
-| *metrics.namespace*_http_start_stop_response_size_bytes_sum | Summary of Cloud Foundry Firehose http start stop request size in bytes (sum of observations) | `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host` |
-| *metrics.namespace*_http_start_stop_last_request_timestamp | Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose | `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host` |
-| *metrics.namespace*_http_start_stop_client_request_duration_seconds | Summary of Cloud Foundry Firehose http start stop client request duration in seconds | `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host`, `quantile` *[1]* |
-| *metrics.namespace*_http_start_stop_client_request_duration_seconds_count | Summary of Cloud Foundry Firehose http start stop client request duration in seconds (number of observations) | `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host` |
-| *metrics.namespace*_http_start_stop_client_request_duration_seconds_sum | Summary of Cloud Foundry Firehose http start stop client request duration in seconds (sum of observations) | `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host` |
-| *metrics.namespace*_http_start_stop_server_request_duration_seconds | Summary of Cloud Foundry Firehose http start stop server request duration in seconds | `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host`, `quantile` *[1]* |
-| *metrics.namespace*_http_start_stop_server_request_duration_seconds_count | Summary of Cloud Foundry Firehose http start stop server request duration in seconds (number of observations) | `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host` |
-| *metrics.namespace*_http_start_stop_server_request_duration_seconds_sum | Summary of Cloud Foundry Firehose http start stop server request duration in seconds (sum of observations) | `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host` |
+| *metrics.namespace*_http_start_stop_requests | Cloud Foundry Firehose http start stop requests | `environment`, `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host`, `status_code` |
+| *metrics.namespace*_http_start_stop_response_size_bytes | Summary of Cloud Foundry Firehose http start stop request size in bytes | `environment`, `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host`, `quantile` *[1]* |
+| *metrics.namespace*_http_start_stop_response_size_bytes_count | Summary of Cloud Foundry Firehose http start stop request size in bytes (number of observations) | `environment`, `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host` |
+| *metrics.namespace*_http_start_stop_response_size_bytes_sum | Summary of Cloud Foundry Firehose http start stop request size in bytes (sum of observations) | `environment`, `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host` |
+| *metrics.namespace*_http_start_stop_last_request_timestamp | Number of seconds since 1970 since last http start stop received from Cloud Foundry Firehose | `environment`, `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host` |
+| *metrics.namespace*_http_start_stop_client_request_duration_seconds | Summary of Cloud Foundry Firehose http start stop client request duration in seconds | `environment`, `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host`, `quantile` *[1]* |
+| *metrics.namespace*_http_start_stop_client_request_duration_seconds_count | Summary of Cloud Foundry Firehose http start stop client request duration in seconds (number of observations) | `environment`, `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host` |
+| *metrics.namespace*_http_start_stop_client_request_duration_seconds_sum | Summary of Cloud Foundry Firehose http start stop client request duration in seconds (sum of observations) | `environment`, `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host` |
+| *metrics.namespace*_http_start_stop_server_request_duration_seconds | Summary of Cloud Foundry Firehose http start stop server request duration in seconds | `environment`, `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host`, `quantile` *[1]* |
+| *metrics.namespace*_http_start_stop_server_request_duration_seconds_count | Summary of Cloud Foundry Firehose http start stop server request duration in seconds (number of observations) | `environment`, `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host` |
+| *metrics.namespace*_http_start_stop_server_request_duration_seconds_sum | Summary of Cloud Foundry Firehose http start stop server request duration in seconds (sum of observations) | `environment`, `bosh_deployment`, `application_id`, `instance_id`, `method`, `scheme`, `host` |
 
 *[1]* Summaries reports [quantiles][quantile] (`0.5`, `0.9`, `0.99`)
 
@@ -57,7 +57,7 @@ An `HttpStartStop` event represents the whole lifecycle of an HTTP request. The 
 
 | Metric | Description | Labels |
 | ------ | ----------- | ------ |
-| *metrics.namespace*_value_metric_*origin*_*value_metric_name* | Cloud Foundry Firehose '*value_metric_name*' value metric from '*origin*' | `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `unit` |
+| *metrics.namespace*_value_metric_*origin*_*value_metric_name* | Cloud Foundry Firehose '*value_metric_name*' value metric from '*origin*' | `environment`, `origin`, `bosh_deployment`, `bosh_job_name`, `bosh_job_id`, `bosh_job_ip`, `unit` |
 
 ### How can I filter by a particular Firehose event?
 
