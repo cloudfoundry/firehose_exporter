@@ -71,6 +71,12 @@ The `filter.deployments` command flag allows you to filter metrics which origin 
 
 No, this exporter only supports targetting a single [Cloud Foundry Firehose][firehose] endpoint. If you want to get metrics from several endpoints, you will need to use one exporter per endpoint.
 
+### How can scale this exporter if I get a Slow Consumer alert?
+
+You can scale the exporter by increasing the number of exporter instances and using the same `doppler.subscription-id` command flag. If you use the same subscription ID on each instance, the [Firehose][firehose] evenly distributes events across all instances of the exporter. For example, if you have two exporters with the same subscription ID, the [Firehose][firehose] sends half of the events to one exporter and half to the other.
+
+For more information, check the [Scaling Nozzles][scaling-nozzles] documentation.
+
 ### How can I get readeable names for Container Metrics labels, like the application name?
 
 You can combine this exporter with the [Cloud Foundry Prometheus Exporter][cf_exporter], that provides administrative information about `Applications`, `Organizations`, `Services` and `Spaces`.
@@ -95,3 +101,4 @@ We will be glad to address any questions not answered here. Please, just open a 
 [firehose]: https://docs.cloudfoundry.org/loggregator/architecture.html#firehose
 [issues]: https://github.com/cloudfoundry-community/firehose_exporter/issues
 [quantile]: https://en.wikipedia.org/wiki/Quantile
+[scaling-nozzles]: https://docs.cloudfoundry.org/loggregator/log-ops-guide.html#scaling-nozzles
