@@ -84,7 +84,7 @@ uaac client add prometheus-firehose \
 | `web.listen-address`<br />`FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS` | No | `:9186` | Address to listen on for web interface and telemetry |
 | `web.telemetry-path`<br />`FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH` | No | `/metrics` | Path under which to expose Prometheus metrics |
 | `web.auth.username`<br />`FIREHOSE_EXPORTER_WEB_AUTH_USERNAME` | No | | Username for web interface basic auth |
-| `web.auth.pasword`<br />`FIREHOSE_EXPORTER_WEB_AUTH_PASSWORD` | No | | Password for web interface basic auth |
+| `web.auth.password`<br />`FIREHOSE_EXPORTER_WEB_AUTH_PASSWORD` | No | | Password for web interface basic auth |
 | `web.tls.cert_file`<br />`FIREHOSE_EXPORTER_WEB_TLS_CERTFILE` | No | | Path to a file that contains the TLS certificate (PEM format). If the certificate is signed by a certificate authority, the file should be the concatenation of the server's certificate, any intermediates, and the CA's certificate |
 | `web.tls.key_file`<br />`FIREHOSE_EXPORTER_WEB_TLS_KEYFILE` | No | | Path to a file that contains the TLS private key (PEM format) |
 
