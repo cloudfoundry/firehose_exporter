@@ -12,3 +12,9 @@ var _ = Describe("NormalizeName", func() {
 		Expect(NormalizeName("This_is__a-MetricName.Example/with:0totals")).To(Equal("this_is_a_metric_name_example_with_0_totals"))
 	})
 })
+
+var _ = Describe("NormalizeDesc", func() {
+	It("normalizes a description", func() {
+		Expect(NormalizeDesc("This_is-a.Desc.Example")).To(Equal("This_is-a-Desc-Example"))
+	})
+})

@@ -70,12 +70,13 @@ var _ = Describe("ValueMetricsCollector", func() {
 
 	Describe("Collect", func() {
 		var (
-			origin           = "fake-origin"
-			originNormalized = "fake_origin"
-			boshDeployment   = "fake-deployment-name"
-			boshJob          = "fake-job-name"
-			boshIndex        = "0"
-			boshIP           = "1.2.3.4"
+			origin               = "fake.origin"
+			originNameNormalized = "fake_origin"
+			originDescNormalized = "fake-origin"
+			boshDeployment       = "fake-deployment-name"
+			boshJob              = "fake-job-name"
+			boshIndex            = "0"
+			boshIP               = "1.2.3.4"
 
 			valueMetric1Name           = "FakeValueMetric1"
 			valueMetric1NameNormalized = "fake_value_metric_1"
@@ -131,8 +132,8 @@ var _ = Describe("ValueMetricsCollector", func() {
 
 			valueMetric1 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
-					prometheus.BuildFQName(namespace, "value_metric", originNormalized+"_"+valueMetric1NameNormalized),
-					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric1Name, origin),
+					prometheus.BuildFQName(namespace, "value_metric", originNameNormalized+"_"+valueMetric1NameNormalized),
+					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric1Name, originDescNormalized),
 					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit"},
 					prometheus.Labels{"environment": environment},
 				),
@@ -148,8 +149,8 @@ var _ = Describe("ValueMetricsCollector", func() {
 
 			valueMetric2 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
-					prometheus.BuildFQName(namespace, "value_metric", originNormalized+"_"+valueMetric2NameNormalized),
-					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric2Name, origin),
+					prometheus.BuildFQName(namespace, "value_metric", originNameNormalized+"_"+valueMetric2NameNormalized),
+					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric2Name, originDescNormalized),
 					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit"},
 					prometheus.Labels{"environment": environment},
 				),

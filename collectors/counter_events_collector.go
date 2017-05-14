@@ -42,7 +42,7 @@ func (c CounterEventsCollector) Collect(ch chan<- prometheus.Metric) {
 		ch <- prometheus.MustNewConstMetric(
 			prometheus.NewDesc(
 				prometheus.BuildFQName(c.namespace, counter_events_subsystem, metricName),
-				fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", counterEvent.Name, counterEvent.Origin),
+				fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", counterEvent.Name, utils.NormalizeDesc(counterEvent.Origin)),
 				[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
 				prometheus.Labels{"environment": c.environment},
 			),
@@ -59,7 +59,7 @@ func (c CounterEventsCollector) Collect(ch chan<- prometheus.Metric) {
 		ch <- prometheus.MustNewConstMetric(
 			prometheus.NewDesc(
 				prometheus.BuildFQName(c.namespace, counter_events_subsystem, metricName),
-				fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event from '%s'.", counterEvent.Name, counterEvent.Origin),
+				fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event from '%s'.", counterEvent.Name, utils.NormalizeDesc(counterEvent.Origin)),
 				[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
 				prometheus.Labels{"environment": c.environment},
 			),

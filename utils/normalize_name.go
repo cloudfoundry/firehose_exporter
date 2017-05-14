@@ -25,3 +25,7 @@ func NormalizeName(name string) string {
 
 	return strings.Join(normalizedName, "_")
 }
+
+func NormalizeDesc(desc string) string {
+	return strings.Replace(desc, ".", "-", -1)
+}
