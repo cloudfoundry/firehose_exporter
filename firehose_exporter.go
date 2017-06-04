@@ -61,6 +61,11 @@ var (
 		"Cloud Foundry Doppler max retry delay duration ($FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_DELAY).",
 	)
 
+	dopplerMaxRetryCount = flag.Int(
+		"doppler.max-retry-count", 0,
+		"Cloud Foundry Doppler max retry count ($FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_COUNT).",
+	)
+
 	dopplerMetricExpiration = flag.Duration(
 		"doppler.metric-expiration", 5*time.Minute,
 		"How long a Cloud Foundry Doppler metric is valid ($FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION).",
@@ -145,6 +150,7 @@ func overrideFlagsWithEnvVars() {
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT", dopplerIdleTimeout)
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_MIN_RETRY_DELAY", dopplerMinRetryDelay)
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_DELAY", dopplerMaxRetryDelay)
+	overrideWithEnvInt("FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_COUNT", dopplerMaxRetryCount)
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION", dopplerMetricExpiration)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS", filterDeployments)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_FILTER_EVENTS", filterEvents)
@@ -167,14 +173,14 @@ func overrideWithEnvVar(name string, value *string) {
 	}
 }
 
-func overrideWithEnvUint(name string, value *uint) {
+func overrideWithEnvInt(name string, value *int) {
 	envValue := os.Getenv(name)
 	if envValue != "" {
 		intValue, err := strconv.Atoi(envValue)
 		if err != nil {
 			log.Fatalf("Invalid `%s`: %s", name, err)
 		}
-		*value = uint(intValue)
+		*value = int(intValue)
 	}
 }
 
@@ -280,6 +286,7 @@ func main() {
 		*dopplerIdleTimeout,
 		*dopplerMinRetryDelay,
 		*dopplerMaxRetryDelay,
+		*dopplerMaxRetryCount,
 		authTokenRefresher,
 		metricsStore,
 	)

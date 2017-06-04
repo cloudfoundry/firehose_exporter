@@ -74,6 +74,7 @@ uaac client add prometheus-firehose \
 | `doppler.idle-timeout`<br />`FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT` | No | | Cloud Foundry Doppler Idle Timeout duration |
 | `doppler.min-retry-delay`<br />`FIREHOSE_EXPORTER_DOPPLER_MIN_RETRY_DELAY` | No | | Cloud Foundry Doppler min retry delay duration |
 | `doppler.max-retry-delay`<br />`FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_DELAY` | No | | Cloud Foundry Doppler max retry delay duration |
+| `doppler.max-retry-count`<br />`FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_COUNT` | No | | Cloud Foundry Doppler max retry count |
 | `doppler.metric-expiration`<br />`FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION` | No | `5 minutes` | How long Cloud Foundry metrics received from the Firehose are valid |
 | `filter.deployments`<br />`FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS` | No | | Comma separated deployments to filter |
 | `filter.events`<br />`FIREHOSE_EXPORTER_FILTER_EVENTS` | No | | Comma separated events to filter. If not set, all events will be enabled (`ContainerMetric`, `CounterEvent`, `HttpStartStop`, `ValueMetric`) |

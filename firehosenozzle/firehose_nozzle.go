@@ -20,6 +20,7 @@ type FirehoseNozzle struct {
 	idleTimeout        time.Duration
 	minRetryDelay      time.Duration
 	maxRetryDelay      time.Duration
+	maxRetryCount      int
 	authTokenRefresher consumer.TokenRefresher
 	metricsStore       *metrics.Store
 	errs               <-chan error
@@ -34,6 +35,7 @@ func New(
 	idleTimeout time.Duration,
 	minRetryDelay time.Duration,
 	maxRetryDelay time.Duration,
+	maxRetryCount int,
 	authTokenRefresher consumer.TokenRefresher,
 	metricsStore *metrics.Store,
 ) *FirehoseNozzle {
@@ -44,6 +46,7 @@ func New(
 		idleTimeout:        idleTimeout,
 		minRetryDelay:      minRetryDelay,
 		maxRetryDelay:      maxRetryDelay,
+		maxRetryCount:      maxRetryCount,
 		authTokenRefresher: authTokenRefresher,
 		metricsStore:       metricsStore,
 		errs:               make(<-chan error),
@@ -74,6 +77,9 @@ func (n *FirehoseNozzle) consumeFirehose() {
 	}
 	if n.maxRetryDelay > 0 {
 		n.consumer.SetMaxRetryDelay(n.maxRetryDelay)
+	}
+	if n.maxRetryCount > 0 {
+		n.consumer.SetMaxRetryCount(n.maxRetryCount)
 	}
 	n.messages, n.errs = n.consumer.Firehose(n.subscriptionID, "")
 }
