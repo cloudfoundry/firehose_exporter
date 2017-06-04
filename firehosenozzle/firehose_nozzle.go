@@ -115,8 +115,6 @@ func (n *FirehoseNozzle) handleError(err error) bool {
 		switch noaRetryError := err.(noaerrors.RetryError).Err.(type) {
 		case *websocket.CloseError:
 			switch noaRetryError.Code {
-			case websocket.CloseNormalClosure:
-			// no op
 			case websocket.ClosePolicyViolation:
 				log.Errorf("Nozzle couldn't keep up. Please try scaling up the Nozzle.")
 				n.metricsStore.AlertSlowConsumerError()
