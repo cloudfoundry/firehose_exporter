@@ -69,6 +69,7 @@ func (n *FirehoseNozzle) consumeFirehose() {
 		nil,
 	)
 	n.consumer.RefreshTokenFrom(n.authTokenRefresher)
+	n.consumer.SetDebugPrinter(DebugPrinter{})
 	if n.idleTimeout > 0 {
 		n.consumer.SetIdleTimeout(n.idleTimeout)
 	}
@@ -128,4 +129,10 @@ func (n *FirehoseNozzle) handleError(err error) bool {
 	n.consumer.Close()
 
 	return false
+}
+
+type DebugPrinter struct{}
+
+func (dp DebugPrinter) Print(title, dump string) {
+	log.Debugf("%s: %s", title, dump)
 }
