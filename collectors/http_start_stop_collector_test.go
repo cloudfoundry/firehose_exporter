@@ -203,7 +203,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 		})
 
 		It("returns a response_size_bytes metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(responseSizeBytesMetric.WithLabelValues(
+			Eventually(descriptions).Should(Receive(Equal(responseSizeBytesMetric.MetricVec.WithLabelValues(
 				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
@@ -214,7 +214,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 		})
 
 		It("returns a last_request_timestamp metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(lastRequestTimestampMetric.WithLabelValues(
+			Eventually(descriptions).Should(Receive(Equal(lastRequestTimestampMetric.MetricVec.WithLabelValues(
 				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
@@ -225,7 +225,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 		})
 
 		It("returns a client_request_duration_seconds metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(clientRequestDurationSecondsMetric.WithLabelValues(
+			Eventually(descriptions).Should(Receive(Equal(clientRequestDurationSecondsMetric.MetricVec.WithLabelValues(
 				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
@@ -236,7 +236,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 		})
 
 		It("returns a server_request_duration_seconds metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(serverRequestDurationSecondsMetric.WithLabelValues(
+			Eventually(descriptions).Should(Receive(Equal(serverRequestDurationSecondsMetric.MetricVec.WithLabelValues(
 				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
@@ -326,7 +326,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 		})
 
 		It("returns a response_size_bytes metric", func() {
-			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(responseSizeBytesMetric.WithLabelValues(
+			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(responseSizeBytesMetric.MetricVec.WithLabelValues(
 				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
@@ -337,7 +337,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 		})
 
 		It("returns a last_request_timestamp metric", func() {
-			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(lastRequestTimestampMetric.WithLabelValues(
+			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(lastRequestTimestampMetric.MetricVec.WithLabelValues(
 				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
@@ -348,7 +348,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 		})
 
 		It("returns a client_request_duration_seconds metric", func() {
-			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(clientRequestDurationSecondsMetric.WithLabelValues(
+			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(clientRequestDurationSecondsMetric.MetricVec.WithLabelValues(
 				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
@@ -359,7 +359,7 @@ var _ = Describe("HttpStartStopCollector", func() {
 		})
 
 		It("returns a server_request_duration_seconds metric", func() {
-			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(serverRequestDurationSecondsMetric.WithLabelValues(
+			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(serverRequestDurationSecondsMetric.MetricVec.WithLabelValues(
 				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
