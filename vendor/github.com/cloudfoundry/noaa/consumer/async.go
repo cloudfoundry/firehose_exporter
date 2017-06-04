@@ -1,12 +1,9 @@
 package consumer
 
 import (
-	"bufio"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -23,6 +20,7 @@ import (
 const (
 	DefaultMinRetryDelay = 500 * time.Millisecond
 	DefaultMaxRetryDelay = time.Minute
+	DefaultMaxRetryCount = 1000
 )
 
 // SetMinRetryDelay sets the duration that automatically reconnecting methods
@@ -44,6 +42,14 @@ func (c *Consumer) SetMinRetryDelay(d time.Duration) {
 // Defaults to DefaultMaxRetryDelay.
 func (c *Consumer) SetMaxRetryDelay(d time.Duration) {
 	atomic.StoreInt64(&c.maxRetryDelay, int64(d))
+}
+
+// SetMaxRetryCount sets the maximum number of reconnnection attemps that
+// methods on c (e.g. Firehose, Stream, TailingLogs) will make before failing.
+//
+// Defaults to DefaultMaxRetryCount.
+func (c *Consumer) SetMaxRetryCount(count int) {
+	atomic.StoreInt64(&c.maxRetryCount, int64(count))
 }
 
 // TailingLogs listens indefinitely for log messages only; other event types
@@ -95,14 +101,41 @@ func (c *Consumer) StreamWithoutReconnect(appGuid string, authToken string) (<-c
 //
 // Whenever an error is encountered, the error will be sent down the error
 // channel and Firehose will attempt to reconnect indefinitely.
-func (c *Consumer) Firehose(subscriptionId string, authToken string) (<-chan *events.Envelope, <-chan error) {
-	return c.firehose(subscriptionId, authToken, true)
+func (c *Consumer) Firehose(
+	subscriptionId string,
+	authToken string,
+) (<-chan *events.Envelope, <-chan error) {
+	return c.firehose(newFirehose(
+		subscriptionId,
+		authToken,
+	))
 }
 
 // FirehoseWithoutReconnect functions identically to Firehose but without any
 // reconnect attempts when errors occur.
-func (c *Consumer) FirehoseWithoutReconnect(subscriptionId string, authToken string) (<-chan *events.Envelope, <-chan error) {
-	return c.firehose(subscriptionId, authToken, false)
+func (c *Consumer) FirehoseWithoutReconnect(
+	subscriptionId string,
+	authToken string,
+) (<-chan *events.Envelope, <-chan error) {
+	return c.firehose(newFirehose(
+		subscriptionId,
+		authToken,
+		WithRetry(false),
+	))
+}
+
+// FilteredFirehose streams a filtered set of envelopes. It has functionality
+// similar to Firehose.
+func (c *Consumer) FilteredFirehose(
+	subscriptionId string,
+	authToken string,
+	filter EnvelopeFilter,
+) (<-chan *events.Envelope, <-chan error) {
+	return c.firehose(newFirehose(
+		subscriptionId,
+		authToken,
+		WithEnvelopeFilter(filter),
+	))
 }
 
 // SetDebugPrinter sets the websocket connection to write debug information to
@@ -192,23 +225,22 @@ func (c *Consumer) streamAppDataTo(conn *connection, appGuid, authToken string, 
 	errors <- err
 }
 
-func (c *Consumer) firehose(subID, authToken string, retry bool) (<-chan *events.Envelope, <-chan error) {
+func (c *Consumer) firehose(options *firehose) (<-chan *events.Envelope, <-chan error) {
 	outputs := make(chan *events.Envelope)
 	errors := make(chan error, 1)
 	callback := func(env *events.Envelope) {
 		outputs <- env
 	}
 
-	streamPath := "/firehose/" + subID
 	conn := c.newConn()
 	go func() {
 		defer close(errors)
 		defer close(outputs)
-		if retry {
-			c.retryAction(c.listenAction(conn, streamPath, authToken, callback), errors)
+		if options.retry {
+			c.retryAction(c.listenAction(conn, options.streamPath(), options.authToken, callback), errors)
 			return
 		}
-		err, _ := c.listenAction(conn, streamPath, authToken, callback)()
+		err, _ := c.listenAction(conn, options.streamPath(), options.authToken, callback)()
 		errors <- err
 	}()
 	return outputs, errors
@@ -269,10 +301,12 @@ func (c *Consumer) retryAction(action func() (err error, done bool), errors chan
 
 	context := retryContext{
 		sleep: atomic.LoadInt64(&c.minRetryDelay),
+		count: 0,
 	}
 
 	c.SetOnConnectCallback(func() {
 		atomic.StoreInt64(&context.sleep, atomic.LoadInt64(&c.minRetryDelay))
+		atomic.StoreInt64(&context.count, 0)
 		if oldConnectCallback != nil {
 			oldConnectCallback()
 		}
@@ -289,6 +323,15 @@ func (c *Consumer) retryAction(action func() (err error, done bool), errors chan
 			errors <- err
 			return
 		}
+
+		retryCount := atomic.LoadInt64(&context.count)
+		maxRetryCount := atomic.LoadInt64(&c.maxRetryCount)
+		if retryCount >= maxRetryCount {
+			c.debugPrinter.Print("WEBSOCKET ERROR", fmt.Sprintf("Maximum number of retries %d reached", maxRetryCount))
+			errors <- ErrMaxRetriesReached
+			return
+		}
+		atomic.StoreInt64(&context.count, retryCount+1)
 
 		if err != nil {
 			c.debugPrinter.Print("WEBSOCKET ERROR", fmt.Sprintf("%s. Retrying...", err.Error()))
@@ -377,18 +420,18 @@ func (c *Consumer) establishWebsocketConnection(path, authToken string) (*websoc
 }
 
 func (c *Consumer) tryWebsocketConnection(path, token string) (*websocket.Conn, *httpError) {
-	header := http.Header{"Origin": []string{"http://localhost"}, "Authorization": []string{token}}
-	URL := c.trafficControllerUrl + path
+	header := http.Header{"Origin": []string{c.trafficControllerUrl}, "Authorization": []string{token}}
+	url := c.trafficControllerUrl + path
 
-	c.debugPrinter.Print("WEBSOCKET REQUEST:",
+	c.debugPrinter.Print("WEBSOCKET REQUEST",
 		"GET "+path+" HTTP/1.1\n"+
 			"Host: "+c.trafficControllerUrl+"\n"+
 			"Upgrade: websocket\nConnection: Upgrade\nSec-WebSocket-Version: 13\nSec-WebSocket-Key: [HIDDEN]\n"+
 			headersString(header))
 
-	ws, resp, err := c.dialer.Dial(URL, header)
+	ws, resp, err := c.dialer.Dial(url, header)
 	if resp != nil {
-		c.debugPrinter.Print("WEBSOCKET RESPONSE:",
+		c.debugPrinter.Print("WEBSOCKET RESPONSE",
 			resp.Proto+" "+resp.Status+"\n"+
 				headersString(resp.Header))
 	}
@@ -408,61 +451,6 @@ func (c *Consumer) tryWebsocketConnection(path, token string) (*websocket.Conn, 
 		return nil, httpErr
 	}
 	return ws, nil
-}
-
-func (c *Consumer) proxyDial(network, addr string) (net.Conn, error) {
-	targetUrl, err := url.Parse("http://" + addr)
-	if err != nil {
-		return nil, err
-	}
-
-	proxy := c.proxy
-	if proxy == nil {
-		proxy = http.ProxyFromEnvironment
-	}
-
-	proxyUrl, err := proxy(&http.Request{URL: targetUrl})
-	if err != nil {
-		return nil, err
-	}
-	if proxyUrl == nil {
-		return net.Dial(network, addr)
-	}
-
-	connectHeader := make(http.Header)
-	if user := proxyUrl.User; user != nil {
-		proxyUser := user.Username()
-		if proxyPassword, passwordSet := user.Password(); passwordSet {
-			credential := base64.StdEncoding.EncodeToString([]byte(proxyUser + ":" + proxyPassword))
-			connectHeader.Set("Proxy-Authorization", "Basic "+credential)
-		}
-	}
-
-	proxyConn, err := net.Dial(network, proxyUrl.Host)
-	if err != nil {
-		return nil, err
-	}
-
-	connectReq := &http.Request{
-		Method: "CONNECT",
-		URL:    targetUrl,
-		Host:   targetUrl.Host,
-		Header: connectHeader,
-	}
-	connectReq.Write(proxyConn)
-
-	connectResp, err := http.ReadResponse(bufio.NewReader(proxyConn), connectReq)
-	if err != nil {
-		proxyConn.Close()
-		return nil, err
-	}
-	if connectResp.StatusCode != http.StatusOK {
-		f := strings.SplitN(connectResp.Status, " ", 2)
-		proxyConn.Close()
-		return nil, errors.New(f[1])
-	}
-
-	return proxyConn, nil
 }
 
 func headersString(header http.Header) string {
@@ -518,7 +506,7 @@ func (c *connection) closed() bool {
 // use it primarily to guarantee 64-bit byte alignment on 32-bit systems.
 // https://golang.org/src/sync/atomic/doc.go?#L50
 type retryContext struct {
-	// sleep must be the first word within this struct to ensure 64-bit byte
-	// alignment.
-	sleep int64
+	// sleep and count must be the first words within this struct to ensure
+	// 64-bit byte alignment.
+	sleep, count int64
 }

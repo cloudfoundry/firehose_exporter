@@ -1,23 +1,12 @@
-#NOAA
+# NOAA [![slack.cloudfoundry.org][slack-badge]][loggregator-slack]
 
-[![Concourse Status](https://loggregator.ci.cf-app.com/api/v1/pipelines/loggregator/jobs/noaa-unit-tests/badge)](https://loggregator.ci.cf-app.com/teams/main/pipelines/loggregator/jobs/noaa-unit-tests)
+[![Concourse Status](https://loggregator.ci.cf-app.com/api/v1/pipelines/submodules/jobs/noaa-unit-tests/badge)](https://loggregator.ci.cf-app.com/teams/main/pipelines/submodules/jobs/noaa-unit-tests)
 [![Coverage Status](https://coveralls.io/repos/cloudfoundry/noaa/badge.png)](https://coveralls.io/r/cloudfoundry/noaa)
 [![GoDoc](https://godoc.org/github.com/cloudfoundry/noaa?status.png)](https://godoc.org/github.com/cloudfoundry/noaa)
 
 noaa is a client library to consume metric and log messages from Doppler.
 
-##WARNING
-
-This library does not work with Go 1.3 through 1.3.3, due to a bug in the standard libraries.
-
-We support the two most recent stable versions of Golang.
-
-###Deprecation
-The consumer of the `noaa` package has been deprecated in favor of the consumer in the `consumer` package.
-When creating a new NOAA consumer, use `consumer.New()` instead of `noaa.NewConsumer()`.
-See the samples for more details.
-
-##Get the Code
+## Get the Code
 
 This Go project is designed to be imported into `$GOPATH`, rather than being cloned into any working directory. There are two ways to do this.
 
@@ -132,7 +121,11 @@ bin/container_metrics
 For more information to setup a test environment in order to pull container
 metrics look at the README.md in the container_metrics sample.
 
-##Development
+## Development
 
 Use `go get -d -v -t ./... && ginkgo --race --randomizeAllSpecs --failOnPending --skipMeasurements --cover` to
 run the tests.
+
+
+[slack-badge]:          https://slack.cloudfoundry.org/badge.svg
+[loggregator-slack]:    https://cloudfoundry.slack.com/archives/loggregator
