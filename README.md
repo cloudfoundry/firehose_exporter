@@ -25,6 +25,14 @@ $ go install github.com/cloudfoundry-community/firehose_exporter
 $ firehose_exporter <flags>
 ```
 
+### Docker
+
+To run the firehose exporter as a Docker container, run:
+
+```bash
+docker run -p 9186:9186 cfcommunity/firehose-exporter <flags>
+```
+
 ### Cloud Foundry
 
 The exporter can be deployed to an already existing [Cloud Foundry][cloudfoundry] environment:
