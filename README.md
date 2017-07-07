@@ -30,7 +30,7 @@ $ firehose_exporter <flags>
 To run the firehose exporter as a Docker container, run:
 
 ```bash
-docker run -p 9186:9186 cfcommunity/firehose-exporter <flags>
+$ docker run -p 9186:9186 cfcommunity/firehose-exporter <flags>
 ```
 
 ### Cloud Foundry
