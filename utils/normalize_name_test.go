@@ -9,7 +9,7 @@ import (
 
 var _ = Describe("NormalizeName", func() {
 	It("normalizes a name", func() {
-		Expect(NormalizeName("This_is__a-MetricName.Example/with:0totals")).To(Equal("this_is_a_metric_name_example_with_0_totals"))
+		Expect(NormalizeName("This_is_-_a-MetricName.Example/with:0totals")).To(Equal("this_is_a_metric_name_example_with_0_totals"))
 	})
 })
 
