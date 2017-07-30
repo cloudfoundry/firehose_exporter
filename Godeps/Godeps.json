@@ -1,7 +1,7 @@
 {
 	"ImportPath": "github.com/cloudfoundry-community/firehose_exporter",
 	"GoVersion": "go1.8",
-	"GodepVersion": "v77",
+	"GodepVersion": "v79",
 	"Packages": [
 		"./..."
 	],
@@ -231,7 +231,8 @@
 		},
 		{
 			"ImportPath": "github.com/patrickmn/go-cache",
-			"Rev": "1881a9bccb818787f68c52bfba648c6cf34c34fa"
+			"Comment": "v2.0.0-11-ga3647f8",
+			"Rev": "a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0"
 		},
 		{
 			"ImportPath": "github.com/prometheus/client_golang/prometheus",
