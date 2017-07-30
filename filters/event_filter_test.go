@@ -42,6 +42,16 @@ var _ = Describe("EventFilter", func() {
 				Expect(err.Error()).To(Equal("Event filter `LogMessage` is not supported"))
 			})
 		})
+
+		Context("when a filter has leading and/or trailing whitespaces", func() {
+			BeforeEach(func() {
+				filter = []string{"   ContainerMetric  "}
+			})
+
+			It("returns an error", func() {
+				Expect(err).ToNot(HaveOccurred())
+			})
+		})
 	})
 
 	Describe("Enabled", func() {

@@ -3,6 +3,7 @@ package filters
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/cloudfoundry/sonde-go/events"
 )
@@ -15,7 +16,7 @@ func NewEventFilter(filter []string) (*EventFilter, error) {
 	eventsEnabled := make(map[events.Envelope_EventType]bool)
 
 	for _, eventName := range filter {
-		eventType, err := parseEventName(eventName)
+		eventType, err := parseEventName(strings.Trim(eventName, " "))
 		if err != nil {
 			return nil, err
 		}
