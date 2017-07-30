@@ -309,7 +309,8 @@ func main() {
 	valueMetricsCollector := collectors.NewValueMetricsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
 	prometheus.MustRegister(valueMetricsCollector)
 
-	http.Handle(*metricsPath, prometheus.Handler())
+	handler := prometheusHandler()
+	http.Handle(*metricsPath, handler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
              <head><title>Cloud Foundry Firehose Exporter</title></head>
