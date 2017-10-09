@@ -17,7 +17,7 @@
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry-incubator/uaago",
-			"Rev": "1627a524bb8637bae9bbb61c42593db3e436d08f"
+			"Rev": "f020e05c9126e294b1fbfd89743adea3f7d6e098"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/noaa",
