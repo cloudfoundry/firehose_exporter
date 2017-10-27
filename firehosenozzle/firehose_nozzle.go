@@ -82,7 +82,7 @@ func (n *FirehoseNozzle) consumeFirehose() {
 	if n.maxRetryCount > 0 {
 		n.consumer.SetMaxRetryCount(n.maxRetryCount)
 	}
-	n.messages, n.errs = n.consumer.Firehose(n.subscriptionID, "")
+	n.messages, n.errs = n.consumer.FilteredFirehose(n.subscriptionID, "", consumer.Metrics)
 }
 
 func (n *FirehoseNozzle) parseEnvelopes() error {
