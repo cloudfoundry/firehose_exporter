@@ -62,6 +62,11 @@ var (
 		"Cloud Foundry Doppler max retry delay duration ($FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_DELAY).",
 	)
 
+	dopplerMaxRetryCount = flag.Int(
+		"doppler.max-retry-count", 0,
+		"Cloud Foundry Doppler max retry count ($FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_COUNT).",
+	)
+
 	dopplerMetricExpiration = flag.Duration(
 		"doppler.metric-expiration", 5*time.Minute,
 		"How long a Cloud Foundry Doppler metric is valid ($FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION).",
@@ -80,6 +85,11 @@ var (
 	metricsNamespace = flag.String(
 		"metrics.namespace", "firehose",
 		"Metrics Namespace ($FIREHOSE_EXPORTER_METRICS_NAMESPACE).",
+	)
+
+	metricsEnvironment = flag.String(
+		"metrics.environment", "",
+		"Environment label to be attached to metrics ($FIREHOSE_EXPORTER_METRICS_ENVIRONMENT).",
 	)
 
 	metricsCleanupInterval = flag.Duration(
@@ -111,6 +121,25 @@ var (
                 "appinfoapi.url", "",
                 "URL for api service for application info lookup ($CF_APP_API_URL).",
         )
+	authUsername = flag.String(
+		"web.auth.username", "",
+		"Username for web interface basic auth ($FIREHOSE_EXPORTER_WEB_AUTH_USERNAME).",
+	)
+
+	authPassword = flag.String(
+		"web.auth.password", "",
+		"Password for web interface basic auth ($FIREHOSE_EXPORTER_WEB_AUTH_PASSWORD).",
+	)
+
+	tlsCertFile = flag.String(
+		"web.tls.cert_file", "",
+		"Path to a file that contains the TLS certificate (PEM format). If the certificate is signed by a certificate authority, the file should be the concatenation of the server's certificate, any intermediates, and the CA's certificate ($FIREHOSE_EXPORTER_WEB_TLS_CERTFILE).",
+	)
+
+	tlsKeyFile = flag.String(
+		"web.tls.key_file", "",
+		"Path to a file that contains the TLS private key (PEM format) ($FIREHOSE_EXPORTER_WEB_TLS_KEYFILE).",
+	)
 )
 
 func init() {
@@ -126,15 +155,21 @@ func overrideFlagsWithEnvVars() {
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT", dopplerIdleTimeout)
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_MIN_RETRY_DELAY", dopplerMinRetryDelay)
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_DELAY", dopplerMaxRetryDelay)
+	overrideWithEnvInt("FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_COUNT", dopplerMaxRetryCount)
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION", dopplerMetricExpiration)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS", filterDeployments)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_FILTER_EVENTS", filterEvents)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_METRICS_NAMESPACE", metricsNamespace)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_METRICS_ENVIRONMENT", metricsEnvironment)
 	overrideWithEnvDuration("FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL", metricsCleanupInterval)
 	overrideWithEnvBool("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY", skipSSLValidation)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS", listenAddress)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH", metricsPath)
 	overrideWithEnvVar("CF_APP_API_URL", appInfoApiUrl)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_AUTH_USERNAME", authUsername)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_AUTH_PASSWORD", authPassword)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_TLS_CERTFILE", tlsCertFile)
+	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_TLS_KEYFILE", tlsKeyFile)
 }
 
 func overrideWithEnvVar(name string, value *string) {
@@ -144,14 +179,14 @@ func overrideWithEnvVar(name string, value *string) {
 	}
 }
 
-func overrideWithEnvUint(name string, value *uint) {
+func overrideWithEnvInt(name string, value *int) {
 	envValue := os.Getenv(name)
 	if envValue != "" {
 		intValue, err := strconv.Atoi(envValue)
 		if err != nil {
 			log.Fatalf("Invalid `%s`: %s", name, err)
 		}
-		*value = uint(intValue)
+		*value = int(intValue)
 	}
 }
 
@@ -175,6 +210,38 @@ func overrideWithEnvBool(name string, value *bool) {
 			log.Fatalf("Invalid `%s`: %s", name, err)
 		}
 	}
+}
+
+type basicAuthHandler struct {
+	handler  http.HandlerFunc
+	username string
+	password string
+}
+
+func (h *basicAuthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	username, password, ok := r.BasicAuth()
+	if !ok || username != h.username || password != h.password {
+		log.Errorf("Invalid HTTP auth from `%s`", r.RemoteAddr)
+		w.Header().Set("WWW-Authenticate", "Basic realm=\"metrics\"")
+		http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+		return
+	}
+	h.handler(w, r)
+	return
+}
+
+func prometheusHandler() http.Handler {
+	handler := prometheus.Handler()
+
+	if *authUsername != "" && *authPassword != "" {
+		handler = &basicAuthHandler{
+			handler:  prometheus.Handler().ServeHTTP,
+			username: *authUsername,
+			password: *authPassword,
+		}
+	}
+
+	return handler
 }
 
 func main() {
@@ -225,6 +292,7 @@ func main() {
 		*dopplerIdleTimeout,
 		*dopplerMinRetryDelay,
 		*dopplerMaxRetryDelay,
+		*dopplerMaxRetryCount,
 		authTokenRefresher,
 		metricsStore,
 	)
@@ -238,22 +306,23 @@ func main() {
 
         go cfinstanceinfoapi.UpdateAppMap(*appInfoApiUrl, appmap)
 
-	internalMetricsCollector := collectors.NewInternalMetricsCollector(*metricsNamespace, metricsStore)
+	internalMetricsCollector := collectors.NewInternalMetricsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
 	prometheus.MustRegister(internalMetricsCollector)
 
-	containerMetricsCollector := collectors.NewContainerMetricsCollector(*metricsNamespace, metricsStore, appmap)
+	containerMetricsCollector := collectors.NewContainerMetricsCollector(*metricsNamespace, *metricsEnvironment, metricsStore, appmap)
 	prometheus.MustRegister(containerMetricsCollector)
 
-	counterEventsCollector := collectors.NewCounterEventsCollector(*metricsNamespace, metricsStore)
+	counterEventsCollector := collectors.NewCounterEventsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
 	prometheus.MustRegister(counterEventsCollector)
 
-	httpStartStopCollector := collectors.NewHttpStartStopCollector(*metricsNamespace, metricsStore)
+	httpStartStopCollector := collectors.NewHttpStartStopCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
 	prometheus.MustRegister(httpStartStopCollector)
 
-	valueMetricsCollector := collectors.NewValueMetricsCollector(*metricsNamespace, metricsStore)
+	valueMetricsCollector := collectors.NewValueMetricsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
 	prometheus.MustRegister(valueMetricsCollector)
 
-	http.Handle(*metricsPath, prometheus.Handler())
+	handler := prometheusHandler()
+	http.Handle(*metricsPath, handler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
              <head><title>Cloud Foundry Firehose Exporter</title></head>
@@ -264,6 +333,11 @@ func main() {
              </html>`))
 	})
 
-	log.Infoln("Listening on", *listenAddress)
-	log.Fatal(http.ListenAndServe(*listenAddress, nil))
+	if *tlsCertFile != "" && *tlsKeyFile != "" {
+		log.Infoln("Listening TLS on", *listenAddress)
+		log.Fatal(http.ListenAndServeTLS(*listenAddress, *tlsCertFile, *tlsKeyFile, nil))
+	} else {
+		log.Infoln("Listening on", *listenAddress)
+		log.Fatal(http.ListenAndServe(*listenAddress, nil))
+	}
 }

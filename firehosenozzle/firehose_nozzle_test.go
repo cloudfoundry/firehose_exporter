@@ -32,6 +32,7 @@ var _ = Describe("FirehoseNozzle", func() {
 		idleTimeout       time.Duration
 		minRetryDelay     time.Duration
 		maxRetryDelay     time.Duration
+		maxRetryCount     int
 
 		fakeUAA   *fakes.FakeUAA
 		fakeToken string
@@ -58,6 +59,7 @@ var _ = Describe("FirehoseNozzle", func() {
 		idleTimeout = 0
 		minRetryDelay = 0
 		maxRetryDelay = 0
+		maxRetryCount = 0
 
 		fakeUAA = fakes.NewFakeUAA("bearer", "123456789")
 		fakeToken = fakeUAA.AuthToken()
@@ -101,6 +103,7 @@ var _ = Describe("FirehoseNozzle", func() {
 			idleTimeout,
 			minRetryDelay,
 			maxRetryDelay,
+			maxRetryCount,
 			authTokenRefresher,
 			metricsStore,
 		)

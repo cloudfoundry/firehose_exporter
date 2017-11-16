@@ -14,11 +14,13 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	. "github.com/mjseid/firehose_exporter/collectors"
+	. "github.com/mjseid/firehose_exporter/utils/test_matchers"
 )
 
 var _ = Describe("ValueMetricsCollector", func() {
 	var (
 		namespace              string
+		environment            string
 		metricsStore           *metrics.Store
 		metricsExpiration      time.Duration
 		metricsCleanupInterval time.Duration
@@ -31,6 +33,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 
 	BeforeEach(func() {
 		namespace = "test_exporter"
+		environment = "test_environment"
 		deploymentFilter = filters.NewDeploymentFilter([]string{})
 		eventFilter, _ = filters.NewEventFilter([]string{})
 		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval, deploymentFilter, eventFilter)
@@ -39,12 +42,12 @@ var _ = Describe("ValueMetricsCollector", func() {
 			prometheus.BuildFQName(namespace, "value_metric", "collector"),
 			"Cloud Foundry Firehose value metrics collector.",
 			nil,
-			nil,
+			prometheus.Labels{"environment": environment},
 		)
 	})
 
 	JustBeforeEach(func() {
-		valueMetricsCollector = NewValueMetricsCollector(namespace, metricsStore)
+		valueMetricsCollector = NewValueMetricsCollector(namespace, environment, metricsStore)
 	})
 
 	Describe("Describe", func() {
@@ -67,12 +70,13 @@ var _ = Describe("ValueMetricsCollector", func() {
 
 	Describe("Collect", func() {
 		var (
-			origin           = "fake-origin"
-			originNormalized = "fake_origin"
-			boshDeployment   = "fake-deployment-name"
-			boshJob          = "fake-job-name"
-			boshIndex        = "0"
-			boshIP           = "1.2.3.4"
+			origin               = "fake.origin"
+			originNameNormalized = "fake_origin"
+			originDescNormalized = "fake-origin"
+			boshDeployment       = "fake-deployment-name"
+			boshJob              = "fake-job-name"
+			boshIndex            = "0"
+			boshIP               = "1.2.3.4"
 
 			valueMetric1Name           = "FakeValueMetric1"
 			valueMetric1NameNormalized = "fake_value_metric_1"
@@ -128,10 +132,10 @@ var _ = Describe("ValueMetricsCollector", func() {
 
 			valueMetric1 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
-					prometheus.BuildFQName(namespace, "value_metric", originNormalized+"_"+valueMetric1NameNormalized),
-					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric1Name, origin),
+					prometheus.BuildFQName(namespace, "value_metric", originNameNormalized+"_"+valueMetric1NameNormalized),
+					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric1Name, originDescNormalized),
 					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit"},
-					nil,
+					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
 				valueMetric1Value,
@@ -145,10 +149,10 @@ var _ = Describe("ValueMetricsCollector", func() {
 
 			valueMetric2 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
-					prometheus.BuildFQName(namespace, "value_metric", originNormalized+"_"+valueMetric2NameNormalized),
-					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric2Name, origin),
+					prometheus.BuildFQName(namespace, "value_metric", originNameNormalized+"_"+valueMetric2NameNormalized),
+					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric2Name, originDescNormalized),
 					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit"},
-					nil,
+					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
 				valueMetric2Value,
@@ -166,11 +170,11 @@ var _ = Describe("ValueMetricsCollector", func() {
 		})
 
 		It("returns a value_metric_fake_origin_fake_value_metric_1 metric", func() {
-			Eventually(valueMetricsChan).Should(Receive(Equal(valueMetric1)))
+			Eventually(valueMetricsChan).Should(Receive(PrometheusMetric(valueMetric1)))
 		})
 
 		It("returns a value_metric_fake_origin_fake_value_metric_2 metric", func() {
-			Eventually(valueMetricsChan).Should(Receive(Equal(valueMetric2)))
+			Eventually(valueMetricsChan).Should(Receive(PrometheusMetric(valueMetric2)))
 		})
 
 		Context("when there is no value metrics", func() {

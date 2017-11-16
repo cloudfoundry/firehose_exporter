@@ -1,47 +1,47 @@
 {
 	"ImportPath": "github.com/mjseid/firehose_exporter",
-	"GoVersion": "go1.7",
-	"GodepVersion": "v74",
+	"GoVersion": "go1.9",
+	"GodepVersion": "v79",
 	"Packages": [
 		"./..."
 	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/Sirupsen/logrus",
-			"Comment": "v0.10.0-38-g3ec0642",
-			"Rev": "3ec0642a7fb6488f65b06f9040adc67e3990296a"
+			"Comment": "v1.0.3-11-g89742ae",
+			"Rev": "89742aefa4b206dcf400792f3bd35b542998eb3b"
 		},
 		{
 			"ImportPath": "github.com/beorn7/perks/quantile",
 			"Rev": "4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9"
 		},
 		{
-			"ImportPath": "github.com/bmizerany/perks/quantile",
-			"Rev": "d9a9656a3a4b1c2864fdb44db2ef8619772d92aa"
-		},
-		{
 			"ImportPath": "github.com/cloudfoundry-incubator/uaago",
-			"Rev": "1db9cfd27865007e07ffd5914c0fdf5fb7fc09ba"
+			"Rev": "1627a524bb8637bae9bbb61c42593db3e436d08f"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/noaa",
-			"Rev": "1939b6e4d6d76b2ee8541befd6a8fb8aa076933e"
+			"Comment": "v2.1.0-3-g7704643",
+			"Rev": "7704643fe84d8b7cb7e3185031cfa3d5caa51c62"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/noaa/consumer",
-			"Rev": "1939b6e4d6d76b2ee8541befd6a8fb8aa076933e"
+			"Comment": "v2.1.0-3-g7704643",
+			"Rev": "7704643fe84d8b7cb7e3185031cfa3d5caa51c62"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/noaa/consumer/internal",
-			"Rev": "1939b6e4d6d76b2ee8541befd6a8fb8aa076933e"
+			"Comment": "v2.1.0-3-g7704643",
+			"Rev": "7704643fe84d8b7cb7e3185031cfa3d5caa51c62"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/noaa/errors",
-			"Rev": "1939b6e4d6d76b2ee8541befd6a8fb8aa076933e"
+			"Comment": "v2.1.0-3-g7704643",
+			"Rev": "7704643fe84d8b7cb7e3185031cfa3d5caa51c62"
 		},
 		{
 			"ImportPath": "github.com/cloudfoundry/sonde-go/events",
-			"Rev": "04fbe57ef6878d0050682b5b0697091003ebf960"
+			"Rev": "c48c4f0332609a0e402af4ae31595204c9f7b363"
 		},
 		{
 			"ImportPath": "github.com/fatih/camelcase",
@@ -49,32 +49,47 @@
 		},
 		{
 			"ImportPath": "github.com/gogo/protobuf/gogoproto",
-			"Comment": "v0.3-45-ga11c89f",
-			"Rev": "a11c89fbb0ad4acfa8abc4a4d5f7e27c477169b1"
+			"Comment": "v0.5-9-g117892bf",
+			"Rev": "117892bf1866fbaa2318c03e50e40564c8845457"
 		},
 		{
 			"ImportPath": "github.com/gogo/protobuf/proto",
-			"Comment": "v0.3-45-ga11c89f",
-			"Rev": "a11c89fbb0ad4acfa8abc4a4d5f7e27c477169b1"
+			"Comment": "v0.5-9-g117892bf",
+			"Rev": "117892bf1866fbaa2318c03e50e40564c8845457"
 		},
 		{
 			"ImportPath": "github.com/gogo/protobuf/protoc-gen-gogo/descriptor",
-			"Comment": "v0.3-45-ga11c89f",
-			"Rev": "a11c89fbb0ad4acfa8abc4a4d5f7e27c477169b1"
+			"Comment": "v0.5-9-g117892bf",
+			"Rev": "117892bf1866fbaa2318c03e50e40564c8845457"
 		},
 		{
 			"ImportPath": "github.com/golang/protobuf/proto",
-			"Rev": "1f49d83d9aa00e6ce4fc8258c71cc7786aec968a"
+			"Rev": "b982704f8bb716bb608144408cff30e15fbde841"
 		},
 		{
 			"ImportPath": "github.com/gorilla/websocket",
-			"Comment": "v1.0.0-39-ge8f0f8a",
-			"Rev": "e8f0f8aaa98dfb6586cbdf2978d511e3199a960a"
+			"Comment": "v1.1.0-29-ga91eba7",
+			"Rev": "a91eba7f97777409bc2c443f5534d41dd20c5720"
+		},
+		{
+			"ImportPath": "github.com/mailru/easyjson",
+			"Rev": "4d347d79dea0067c945f374f990601decb08abb5"
+		},
+		{
+			"ImportPath": "github.com/mailru/easyjson/buffer",
+			"Rev": "4d347d79dea0067c945f374f990601decb08abb5"
+		},
+		{
+			"ImportPath": "github.com/mailru/easyjson/jlexer",
+			"Rev": "4d347d79dea0067c945f374f990601decb08abb5"
+		},
+		{
+			"ImportPath": "github.com/mailru/easyjson/jwriter",
+			"Rev": "4d347d79dea0067c945f374f990601decb08abb5"
 		},
 		{
 			"ImportPath": "github.com/matttproud/golang_protobuf_extensions/pbutil",
-			"Comment": "v1.0.0-2-gc12348c",
-			"Rev": "c12348ce28de40eed0136aa2b644d0ee0650e56c"
+			"Rev": "fc2b8d3a73c4867e51861bbdd5ae3c1f0869dd6a"
 		},
 		{
 			"ImportPath": "github.com/nu7hatch/gouuid",
@@ -82,197 +97,275 @@
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
-			"Comment": "v1.2.0-66-g74c678d",
-			"Rev": "74c678d97c305753605c338c6c78c49ec104b5e7"
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo/config",
-			"Comment": "v1.2.0-66-g74c678d",
-			"Rev": "74c678d97c305753605c338c6c78c49ec104b5e7"
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo/internal/codelocation",
-			"Comment": "v1.2.0-66-g74c678d",
-			"Rev": "74c678d97c305753605c338c6c78c49ec104b5e7"
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo/internal/containernode",
-			"Comment": "v1.2.0-66-g74c678d",
-			"Rev": "74c678d97c305753605c338c6c78c49ec104b5e7"
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo/internal/failer",
-			"Comment": "v1.2.0-66-g74c678d",
-			"Rev": "74c678d97c305753605c338c6c78c49ec104b5e7"
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo/internal/leafnodes",
-			"Comment": "v1.2.0-66-g74c678d",
-			"Rev": "74c678d97c305753605c338c6c78c49ec104b5e7"
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo/internal/remote",
-			"Comment": "v1.2.0-66-g74c678d",
-			"Rev": "74c678d97c305753605c338c6c78c49ec104b5e7"
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo/internal/spec",
-			"Comment": "v1.2.0-66-g74c678d",
-			"Rev": "74c678d97c305753605c338c6c78c49ec104b5e7"
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
+		},
+		{
+			"ImportPath": "github.com/onsi/ginkgo/internal/spec_iterator",
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo/internal/specrunner",
-			"Comment": "v1.2.0-66-g74c678d",
-			"Rev": "74c678d97c305753605c338c6c78c49ec104b5e7"
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo/internal/suite",
-			"Comment": "v1.2.0-66-g74c678d",
-			"Rev": "74c678d97c305753605c338c6c78c49ec104b5e7"
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo/internal/testingtproxy",
-			"Comment": "v1.2.0-66-g74c678d",
-			"Rev": "74c678d97c305753605c338c6c78c49ec104b5e7"
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo/internal/writer",
-			"Comment": "v1.2.0-66-g74c678d",
-			"Rev": "74c678d97c305753605c338c6c78c49ec104b5e7"
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo/reporters",
-			"Comment": "v1.2.0-66-g74c678d",
-			"Rev": "74c678d97c305753605c338c6c78c49ec104b5e7"
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo/reporters/stenographer",
-			"Comment": "v1.2.0-66-g74c678d",
-			"Rev": "74c678d97c305753605c338c6c78c49ec104b5e7"
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
+		},
+		{
+			"ImportPath": "github.com/onsi/ginkgo/reporters/stenographer/support/go-colorable",
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
+		},
+		{
+			"ImportPath": "github.com/onsi/ginkgo/reporters/stenographer/support/go-isatty",
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo/types",
-			"Comment": "v1.2.0-66-g74c678d",
-			"Rev": "74c678d97c305753605c338c6c78c49ec104b5e7"
+			"Comment": "v1.4.0-4-g11459a8",
+			"Rev": "11459a886d9cd66b319dac7ef1e917ee221372c9"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega",
-			"Comment": "v1.0-115-g9ed8da1",
-			"Rev": "9ed8da19f2156b87a803a8fdf6d126f627a12db1"
+			"Comment": "v1.2.0-2-gdcabb60",
+			"Rev": "dcabb60a477c2b6f456df65037cb6708210fbb02"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega/format",
-			"Comment": "v1.0-115-g9ed8da1",
-			"Rev": "9ed8da19f2156b87a803a8fdf6d126f627a12db1"
+			"Comment": "v1.2.0-2-gdcabb60",
+			"Rev": "dcabb60a477c2b6f456df65037cb6708210fbb02"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega/internal/assertion",
-			"Comment": "v1.0-115-g9ed8da1",
-			"Rev": "9ed8da19f2156b87a803a8fdf6d126f627a12db1"
+			"Comment": "v1.2.0-2-gdcabb60",
+			"Rev": "dcabb60a477c2b6f456df65037cb6708210fbb02"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega/internal/asyncassertion",
-			"Comment": "v1.0-115-g9ed8da1",
-			"Rev": "9ed8da19f2156b87a803a8fdf6d126f627a12db1"
+			"Comment": "v1.2.0-2-gdcabb60",
+			"Rev": "dcabb60a477c2b6f456df65037cb6708210fbb02"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega/internal/oraclematcher",
-			"Comment": "v1.0-115-g9ed8da1",
-			"Rev": "9ed8da19f2156b87a803a8fdf6d126f627a12db1"
+			"Comment": "v1.2.0-2-gdcabb60",
+			"Rev": "dcabb60a477c2b6f456df65037cb6708210fbb02"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega/internal/testingtsupport",
-			"Comment": "v1.0-115-g9ed8da1",
-			"Rev": "9ed8da19f2156b87a803a8fdf6d126f627a12db1"
+			"Comment": "v1.2.0-2-gdcabb60",
+			"Rev": "dcabb60a477c2b6f456df65037cb6708210fbb02"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega/matchers",
-			"Comment": "v1.0-115-g9ed8da1",
-			"Rev": "9ed8da19f2156b87a803a8fdf6d126f627a12db1"
+			"Comment": "v1.2.0-2-gdcabb60",
+			"Rev": "dcabb60a477c2b6f456df65037cb6708210fbb02"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega/matchers/support/goraph/bipartitegraph",
-			"Comment": "v1.0-115-g9ed8da1",
-			"Rev": "9ed8da19f2156b87a803a8fdf6d126f627a12db1"
+			"Comment": "v1.2.0-2-gdcabb60",
+			"Rev": "dcabb60a477c2b6f456df65037cb6708210fbb02"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega/matchers/support/goraph/edge",
-			"Comment": "v1.0-115-g9ed8da1",
-			"Rev": "9ed8da19f2156b87a803a8fdf6d126f627a12db1"
+			"Comment": "v1.2.0-2-gdcabb60",
+			"Rev": "dcabb60a477c2b6f456df65037cb6708210fbb02"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega/matchers/support/goraph/node",
-			"Comment": "v1.0-115-g9ed8da1",
-			"Rev": "9ed8da19f2156b87a803a8fdf6d126f627a12db1"
+			"Comment": "v1.2.0-2-gdcabb60",
+			"Rev": "dcabb60a477c2b6f456df65037cb6708210fbb02"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega/matchers/support/goraph/util",
-			"Comment": "v1.0-115-g9ed8da1",
-			"Rev": "9ed8da19f2156b87a803a8fdf6d126f627a12db1"
+			"Comment": "v1.2.0-2-gdcabb60",
+			"Rev": "dcabb60a477c2b6f456df65037cb6708210fbb02"
 		},
 		{
 			"ImportPath": "github.com/onsi/gomega/types",
-			"Comment": "v1.0-115-g9ed8da1",
-			"Rev": "9ed8da19f2156b87a803a8fdf6d126f627a12db1"
+			"Comment": "v1.2.0-2-gdcabb60",
+			"Rev": "dcabb60a477c2b6f456df65037cb6708210fbb02"
 		},
 		{
 			"ImportPath": "github.com/patrickmn/go-cache",
-			"Comment": "v2.0.0",
 			"Rev": "1881a9bccb818787f68c52bfba648c6cf34c34fa"
 		},
 		{
 			"ImportPath": "github.com/prometheus/client_golang/prometheus",
-			"Comment": "v0.8.0-5-g8aae34f",
-			"Rev": "8aae34f3ffc9a93c75efeaad87bb192aa7750900"
+			"Comment": "v0.8.0-81-g42552c1",
+			"Rev": "42552c195dd3f3089fbf9cf26e139da150af35aa"
 		},
 		{
 			"ImportPath": "github.com/prometheus/client_model/go",
-			"Comment": "model-0.0.2-12-gfa8ad6f",
-			"Rev": "fa8ad6fec33561be4280a8f0514318c79d7f6cb6"
+			"Comment": "model-0.0.2-14-g6f38060",
+			"Rev": "6f3806018612930941127f2a7c6c453ba2c527d2"
 		},
 		{
 			"ImportPath": "github.com/prometheus/common/expfmt",
-			"Rev": "76316eadbb7895a0310c6098559b975216dc33bf"
+			"Rev": "13ba4ddd0caa9c28ca7b7bffe1dfa9ed8d5ef207"
 		},
 		{
 			"ImportPath": "github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg",
-			"Rev": "76316eadbb7895a0310c6098559b975216dc33bf"
+			"Rev": "13ba4ddd0caa9c28ca7b7bffe1dfa9ed8d5ef207"
 		},
 		{
 			"ImportPath": "github.com/prometheus/common/log",
-			"Rev": "76316eadbb7895a0310c6098559b975216dc33bf"
+			"Rev": "13ba4ddd0caa9c28ca7b7bffe1dfa9ed8d5ef207"
 		},
 		{
 			"ImportPath": "github.com/prometheus/common/model",
-			"Rev": "76316eadbb7895a0310c6098559b975216dc33bf"
+			"Rev": "13ba4ddd0caa9c28ca7b7bffe1dfa9ed8d5ef207"
 		},
 		{
 			"ImportPath": "github.com/prometheus/common/version",
-			"Rev": "76316eadbb7895a0310c6098559b975216dc33bf"
+			"Rev": "13ba4ddd0caa9c28ca7b7bffe1dfa9ed8d5ef207"
 		},
 		{
 			"ImportPath": "github.com/prometheus/procfs",
-			"Rev": "abf152e5f3e97f2fafac028d2cc06c1feb87ffa5"
+			"Rev": "490cc6eb5fa45bf8a8b7b73c8bc82a8160e8531d"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh/terminal",
+			"Rev": "575fdbe86e5dd89229707ebec0575ce7d088a4a6"
+		},
+		{
+			"ImportPath": "golang.org/x/net/html",
+			"Rev": "db8e4de5b2d6653f66aea53094624468caad15d2"
+		},
+		{
+			"ImportPath": "golang.org/x/net/html/atom",
+			"Rev": "db8e4de5b2d6653f66aea53094624468caad15d2"
+		},
+		{
+			"ImportPath": "golang.org/x/net/html/charset",
+			"Rev": "db8e4de5b2d6653f66aea53094624468caad15d2"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",
-			"Rev": "8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9"
+			"Rev": "442cd600860ce722f6615730eb008a37a87b13ee"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/windows",
-			"Rev": "8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9"
+			"Rev": "442cd600860ce722f6615730eb008a37a87b13ee"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/windows/registry",
-			"Rev": "8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9"
+			"Rev": "442cd600860ce722f6615730eb008a37a87b13ee"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/windows/svc/eventlog",
-			"Rev": "8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9"
+			"Rev": "442cd600860ce722f6615730eb008a37a87b13ee"
+		},
+		{
+			"ImportPath": "golang.org/x/text/encoding",
+			"Rev": "19e51611da83d6be54ddafce4a4af510cb3e9ea4"
+		},
+		{
+			"ImportPath": "golang.org/x/text/encoding/charmap",
+			"Rev": "19e51611da83d6be54ddafce4a4af510cb3e9ea4"
+		},
+		{
+			"ImportPath": "golang.org/x/text/encoding/internal",
+			"Rev": "19e51611da83d6be54ddafce4a4af510cb3e9ea4"
+		},
+		{
+			"ImportPath": "golang.org/x/text/encoding/internal/identifier",
+			"Rev": "19e51611da83d6be54ddafce4a4af510cb3e9ea4"
+		},
+		{
+			"ImportPath": "golang.org/x/text/encoding/japanese",
+			"Rev": "19e51611da83d6be54ddafce4a4af510cb3e9ea4"
+		},
+		{
+			"ImportPath": "golang.org/x/text/encoding/korean",
+			"Rev": "19e51611da83d6be54ddafce4a4af510cb3e9ea4"
+		},
+		{
+			"ImportPath": "golang.org/x/text/encoding/simplifiedchinese",
+			"Rev": "19e51611da83d6be54ddafce4a4af510cb3e9ea4"
+		},
+		{
+			"ImportPath": "golang.org/x/text/encoding/traditionalchinese",
+			"Rev": "19e51611da83d6be54ddafce4a4af510cb3e9ea4"
+		},
+		{
+			"ImportPath": "golang.org/x/text/encoding/unicode",
+			"Rev": "19e51611da83d6be54ddafce4a4af510cb3e9ea4"
+		},
+		{
+			"ImportPath": "golang.org/x/text/internal/utf8internal",
+			"Rev": "19e51611da83d6be54ddafce4a4af510cb3e9ea4"
+		},
+		{
+			"ImportPath": "golang.org/x/text/runes",
+			"Rev": "19e51611da83d6be54ddafce4a4af510cb3e9ea4"
+		},
+		{
+			"ImportPath": "golang.org/x/text/transform",
+			"Rev": "19e51611da83d6be54ddafce4a4af510cb3e9ea4"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
-			"Rev": "e4d366fc3c7938e2958e662b4258c7a89e1f0e3e"
+			"Rev": "49c95bdc21843256fb6c4e0d370a05f24a0bf213"
 		}
 	]
 }

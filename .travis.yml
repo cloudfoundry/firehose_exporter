@@ -1,5 +1,38 @@
+sudo: required
+
 language: go
 
 go_import_path: github.com/cloudfoundry-community/firehose_exporter
 
-script: make test
+services:
+  - docker
+
+env:
+  matrix:
+    - DOCKER_IMAGE_NAME=cfcommunity/firehose-exporter
+  global:
+    - secure: fM+Pv0DAo4CeELmb1uxrYngVo4bj6p4Uk9gRGbpvsDmdol611V7mwv7SqDZGXgTDvoBjhiFM743++qJTDQz0+Mjv7thOx0po8q6VCxZ65wxFaobF8ydPcJbHV/IRuUbYWGutcvLD8AAHm8kd6K3Y4WYAT8FsvWUj2CbtdQ0LGucrOcWyF9Bec7ne+UBNlZexoSzdCBkrN6k8Z4J1P0m18/cRdBlbL2/BcGyI264XoBm5IflNOXz3vlAXJM7Bv5J/a1VVkQk7jDdNAry06CqXy5Yu3zi0x17cAx7cWu3WGejlDiILK5ojSZW73yK9XLHP3jE9GLlaXhoG19/i2W+go/uUova3B0auD1Ldk9C66IOnxwR2PY46qFf0KX0bRe7dScQLDuTuvJB4JaAuGyZHtaV0kmRAEpCqsmxA0TSTxLNlnCJdJjlCwDyMHPpIkvlbMNZT0ZDnTEY2K57LaBEprpd6ir0nXWW6aY7O2X02qnNqUMmegmeB1/N8Qh7IuczGTaUD2c0ku3e9yOzRfidvySCi6K4i0gD50AsY7Wg6lDful2AggR5myGAWBzaJvDjqv7j9uPJIKqHwFxW0O3C7K59Hr9mXWxLAuoJCjtZu6P0G7Q+XYvUzJtV278ULX0BudTzdRZ8ALZATu8b62DQgV/PZg/tVjF5b/zWglVkJZbo=
+    - secure: Dnc1tiJs4rtMLUOnl49HmY5OVDtka8WjqSLSfcFYlhDOV2miK8YpQB8zySvdjsOSPGNl119aK+z3e4ZfSH8742KEpgEd+trdYDxCexqR4eT39L9+vTwTBQkEYZHXX2atiYZbojlAVul/X1xBBQAHF0MA1zuG+xNo2er3Ekte6qlrOB84wTpRwMDFQuyG9sYMeYBAifGXPGY2oOx7bGlMZNXXtK2+8vllRqSXD0l/bUuYBlTtJMsTSGO1+OHqkXwDFKr5b/3NBKtFs+yDJ7QTkJpzXUrDVr4GtzN6HfdFxGQMZDs/0GTNecMUgYCpWpFAHkqoCTo0FOn/4bBTbk6TzmFU2t9MGCyRO1DF8fmWl4ahBdR1TIcOISdgJfX052caWO1FmvLb1g64pM0XJyU4ZpnMXCJwjiQ4KWyz2uQCzisARmtLYLEayBrUn3aUmPPu+aCJ70UUZNYHGBoZ5Ue12zaxWKQsua2Fj3kIwlTzvDGiWKvKIh8q/WQJKUb3+gAtGbYXKyEaZ+iXsqzdw+DIYklNju7BIyjs1jI6D8uVi88WOQtBTa07bBk/bKnwJkwBMj/ByDHbG9x8dmDjhDfQCrsdcHwF0yM0cE4J7K6+Hbjw9g9KzgT8SfmwHCev5Nbc0afkYEPx9XPXCJgFr3cypAyWDWjGCi5mvcUeixM4Rv4=
+    - secure: ZExNU5Kv+unVA449XBlcI66jN5YVW+iCWFr4Hho3eq3pfMQe/f3Zzlj+3riLPpkNOHgIt/FxqaVF5F5Op5CfPPvdqZ2n/WGM2unnKG/aWNsPuzdUeSLXbz8kcf8lH5RMpEQ/R6qaTq0XRlDo8i8gQzMb8gZ4bIVNPrAKSWZFGW3zmvNmKjkPjiUX2lVCZt+TEez3ZpEi6/5efOI+62AONWAYITm6RsMZAWmamIUr/3k/OWGDIiz7w9+AnCf92XATfHa48sgy1npmmZW5pzrYQoA4fnseieXSywCtZd3Qn/Sh1ScXWTsU+nbxTfkxfTquxDN6DpAAJ5S9Z8CvMCfPHisHuFjkJ9tRNlXyx0QCMR/paFTJeyOTzOU8g1WVO+pv0FYQhiFWu5xPQo1V7LLX8UBydPhtfhh8Es04hZLggQ+qe3q5VvXecz0971mx/+YBh+ZxGOAgrrpBkB/oTFze5bSbQsKnx+7DN3bDnZP2eg6VQu3vaS1XcKFUV08ATU5Qp/ULf77QzaGzDBwTFXBiOh3eGTuPs/Z9lUtx3fGcIP8GPdRNvhQIZt9G0/2q+FfDEGcyzli2fRbCQQ//Al1aU+J4FkZHnY+1TJL0DeKa/G4QeHcH9bcD8My/tEiqEXyitj0sCMkQGvBsbTZ0kCGiq4DzQEZo8DWeCrseCiYukG4=
+
+jobs:
+  include:
+    - stage: tests
+      script: make test
+    - stage: docker image
+      script:
+        - make crossbuild
+        - ln -s .build/linux-amd64/firehose_exporter firehose_exporter
+        - |
+          if [ -n "$TRAVIS_TAG" ]; then
+            make docker DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME DOCKER_IMAGE_TAG=$TRAVIS_TAG
+          else
+            make docker DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME DOCKER_IMAGE_TAG=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+          fi
+        - |
+          if [[ "$TRAVIS_TAG" =~ ^v[0-9]+(\.[0-9]+){2}$ ]]; then
+            docker tag "$DOCKER_IMAGE_NAME:$TRAVIS_TAG" "$DOCKER_IMAGE_NAME:latest"
+          fi
+        - docker images
+        - docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
+        - docker push $DOCKER_IMAGE_NAME
