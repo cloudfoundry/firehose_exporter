@@ -139,7 +139,7 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
                         c.appinfo[containerMetric.ApplicationId].Org,
 		).Set(float64(containerMetric.MemoryBytesQuota))
 
-		c.diskBytesQuotaMetric.WithLabelValues(,
+		c.diskBytesQuotaMetric.WithLabelValues(
 			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
