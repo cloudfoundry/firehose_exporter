@@ -43,5 +43,15 @@ var _ = Describe("DeploymentFilter", func() {
 				Expect(deploymentFilter.Enabled("fake-deployment-2")).To(BeTrue())
 			})
 		})
+
+		Context("when a filter has leading and/or trailing whitespaces", func() {
+			BeforeEach(func() {
+				filter = []string{"   fake-deployment-1  "}
+			})
+
+			It("returns true", func() {
+				Expect(deploymentFilter.Enabled("fake-deployment-1")).To(BeTrue())
+			})
+		})
 	})
 })

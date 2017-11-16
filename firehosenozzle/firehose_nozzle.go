@@ -20,6 +20,7 @@ type FirehoseNozzle struct {
 	idleTimeout        time.Duration
 	minRetryDelay      time.Duration
 	maxRetryDelay      time.Duration
+	maxRetryCount      int
 	authTokenRefresher consumer.TokenRefresher
 	metricsStore       *metrics.Store
 	errs               <-chan error
@@ -34,6 +35,7 @@ func New(
 	idleTimeout time.Duration,
 	minRetryDelay time.Duration,
 	maxRetryDelay time.Duration,
+	maxRetryCount int,
 	authTokenRefresher consumer.TokenRefresher,
 	metricsStore *metrics.Store,
 ) *FirehoseNozzle {
@@ -44,6 +46,7 @@ func New(
 		idleTimeout:        idleTimeout,
 		minRetryDelay:      minRetryDelay,
 		maxRetryDelay:      maxRetryDelay,
+		maxRetryCount:      maxRetryCount,
 		authTokenRefresher: authTokenRefresher,
 		metricsStore:       metricsStore,
 		errs:               make(<-chan error),
@@ -66,6 +69,7 @@ func (n *FirehoseNozzle) consumeFirehose() {
 		nil,
 	)
 	n.consumer.RefreshTokenFrom(n.authTokenRefresher)
+	n.consumer.SetDebugPrinter(DebugPrinter{})
 	if n.idleTimeout > 0 {
 		n.consumer.SetIdleTimeout(n.idleTimeout)
 	}
@@ -75,7 +79,10 @@ func (n *FirehoseNozzle) consumeFirehose() {
 	if n.maxRetryDelay > 0 {
 		n.consumer.SetMaxRetryDelay(n.maxRetryDelay)
 	}
-	n.messages, n.errs = n.consumer.Firehose(n.subscriptionID, "")
+	if n.maxRetryCount > 0 {
+		n.consumer.SetMaxRetryCount(n.maxRetryCount)
+	}
+	n.messages, n.errs = n.consumer.FilteredFirehose(n.subscriptionID, "", consumer.Metrics)
 }
 
 func (n *FirehoseNozzle) parseEnvelopes() error {
@@ -108,8 +115,6 @@ func (n *FirehoseNozzle) handleError(err error) bool {
 		switch noaRetryError := err.(noaerrors.RetryError).Err.(type) {
 		case *websocket.CloseError:
 			switch noaRetryError.Code {
-			case websocket.CloseNormalClosure:
-			// no op
 			case websocket.ClosePolicyViolation:
 				log.Errorf("Nozzle couldn't keep up. Please try scaling up the Nozzle.")
 				n.metricsStore.AlertSlowConsumerError()
@@ -122,4 +127,10 @@ func (n *FirehoseNozzle) handleError(err error) bool {
 	n.consumer.Close()
 
 	return false
+}
+
+type DebugPrinter struct{}
+
+func (dp DebugPrinter) Print(title, dump string) {
+	log.Debugf("%s: %s", title, dump)
 }

@@ -16,7 +16,7 @@ func NormalizeName(name string) string {
 
 	words := camelcase.Split(name)
 	for _, word := range words {
-		safeWord := strings.Trim(safeNameRE.ReplaceAllLiteralString(word, "_"), "_")
+		safeWord := strings.Trim(safeNameRE.ReplaceAllLiteralString(strings.Trim(word, "_"), "_"), "_")
 		lowerWord := strings.TrimSpace(strings.ToLower(safeWord))
 		if lowerWord != "" {
 			normalizedName = append(normalizedName, lowerWord)
@@ -24,4 +24,8 @@ func NormalizeName(name string) string {
 	}
 
 	return strings.Join(normalizedName, "_")
+}
+
+func NormalizeDesc(desc string) string {
+	return strings.Replace(desc, ".", "-", -1)
 }

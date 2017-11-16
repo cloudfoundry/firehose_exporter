@@ -14,11 +14,13 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	. "github.com/mjseid/firehose_exporter/collectors"
+	. "github.com/mjseid/firehose_exporter/utils/test_matchers"
 )
 
 var _ = Describe("CounterEventsCollector", func() {
 	var (
 		namespace              string
+		environment            string
 		metricsStore           *metrics.Store
 		metricsExpiration      time.Duration
 		metricsCleanupInterval time.Duration
@@ -31,6 +33,7 @@ var _ = Describe("CounterEventsCollector", func() {
 
 	BeforeEach(func() {
 		namespace = "test_exporter"
+		environment = "test_environment"
 		deploymentFilter = filters.NewDeploymentFilter([]string{})
 		eventFilter, _ = filters.NewEventFilter([]string{})
 		metricsStore = metrics.NewStore(metricsExpiration, metricsCleanupInterval, deploymentFilter, eventFilter)
@@ -39,12 +42,12 @@ var _ = Describe("CounterEventsCollector", func() {
 			prometheus.BuildFQName(namespace, "counter_event", "collector"),
 			"Cloud Foundry Firehose counter metrics collector.",
 			nil,
-			nil,
+			prometheus.Labels{"environment": environment},
 		)
 	})
 
 	JustBeforeEach(func() {
-		counterEventsCollector = NewCounterEventsCollector(namespace, metricsStore)
+		counterEventsCollector = NewCounterEventsCollector(namespace, environment, metricsStore)
 	})
 
 	Describe("Describe", func() {
@@ -67,12 +70,13 @@ var _ = Describe("CounterEventsCollector", func() {
 
 	Describe("Collect", func() {
 		var (
-			origin           = "fake-origin"
-			originNormalized = "fake_origin"
-			boshDeployment   = "fake-deployment-name"
-			boshJob          = "fake-job-name"
-			boshIndex        = "0"
-			boshIP           = "1.2.3.4"
+			origin               = "fake.origin"
+			originNameNormalized = "fake_origin"
+			originDescNormalized = "fake-origin"
+			boshDeployment       = "fake-deployment-name"
+			boshJob              = "fake-job-name"
+			boshIndex            = "0"
+			boshIP               = "1.2.3.4"
 
 			counterEvent1Name           = "FakeCounterEvent1"
 			counterEvent1NameNormalized = "fake_counter_event_1"
@@ -130,10 +134,10 @@ var _ = Describe("CounterEventsCollector", func() {
 
 			totalCounterEvent1 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
-					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_"+counterEvent1NameNormalized+"_total"),
-					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", counterEvent1Name, origin),
+					prometheus.BuildFQName(namespace, "counter_event", originNameNormalized+"_"+counterEvent1NameNormalized+"_total"),
+					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", counterEvent1Name, originDescNormalized),
 					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
-					nil,
+					prometheus.Labels{"environment": environment},
 				),
 				prometheus.CounterValue,
 				float64(counterEvent1Total),
@@ -146,10 +150,10 @@ var _ = Describe("CounterEventsCollector", func() {
 
 			deltaCounterEvent1 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
-					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_"+counterEvent1NameNormalized+"_delta"),
-					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event from '%s'.", counterEvent1Name, origin),
+					prometheus.BuildFQName(namespace, "counter_event", originNameNormalized+"_"+counterEvent1NameNormalized+"_delta"),
+					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event from '%s'.", counterEvent1Name, originDescNormalized),
 					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
-					nil,
+					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
 				float64(counterEvent1Delta),
@@ -162,10 +166,10 @@ var _ = Describe("CounterEventsCollector", func() {
 
 			totalCounterEvent2 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
-					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_"+counterEvent2NameNormalized+"_total"),
-					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", counterEvent2Name, origin),
+					prometheus.BuildFQName(namespace, "counter_event", originNameNormalized+"_"+counterEvent2NameNormalized+"_total"),
+					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", counterEvent2Name, originDescNormalized),
 					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
-					nil,
+					prometheus.Labels{"environment": environment},
 				),
 				prometheus.CounterValue,
 				float64(counterEvent2Total),
@@ -178,10 +182,10 @@ var _ = Describe("CounterEventsCollector", func() {
 
 			deltaCounterEvent2 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
-					prometheus.BuildFQName(namespace, "counter_event", originNormalized+"_"+counterEvent2NameNormalized+"_delta"),
-					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event from '%s'.", counterEvent2Name, origin),
+					prometheus.BuildFQName(namespace, "counter_event", originNameNormalized+"_"+counterEvent2NameNormalized+"_delta"),
+					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event from '%s'.", counterEvent2Name, originDescNormalized),
 					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
-					nil,
+					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
 				float64(counterEvent2Delta),
@@ -198,19 +202,19 @@ var _ = Describe("CounterEventsCollector", func() {
 		})
 
 		It("returns a counter_event_fake_origin_fake_counter_event_1_total metric", func() {
-			Eventually(counterEventsChan).Should(Receive(Equal(totalCounterEvent1)))
+			Eventually(counterEventsChan).Should(Receive(PrometheusMetric(totalCounterEvent1)))
 		})
 
 		It("returns a counter_event_fake_origin_fake_counter_event_1_delta metric", func() {
-			Eventually(counterEventsChan).Should(Receive(Equal(deltaCounterEvent1)))
+			Eventually(counterEventsChan).Should(Receive(PrometheusMetric(deltaCounterEvent1)))
 		})
 
 		It("returns a counter_event_fake_origin_fake_counter_event_2_total metric", func() {
-			Eventually(counterEventsChan).Should(Receive(Equal(totalCounterEvent2)))
+			Eventually(counterEventsChan).Should(Receive(PrometheusMetric(totalCounterEvent2)))
 		})
 
 		It("returns a counter_event_fake_origin_fake_counter_event_2_delta metric", func() {
-			Eventually(counterEventsChan).Should(Receive(Equal(deltaCounterEvent2)))
+			Eventually(counterEventsChan).Should(Receive(PrometheusMetric(deltaCounterEvent2)))
 		})
 
 		Context("when there is no counter metrics", func() {
