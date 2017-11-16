@@ -104,19 +104,15 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 
 	for _, containerMetric := range c.metricsStore.GetContainerMetrics() {
 		c.cpuPercentageMetric.WithLabelValues(
-			containerMetric.Job,
-			containerMetric.Index,
 			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
-                        c.appinfo[containerMetric.ApplicationId].Name,
+			c.appinfo[containerMetric.ApplicationId].Name,
                         c.appinfo[containerMetric.ApplicationId].Space,
                         c.appinfo[containerMetric.ApplicationId].Org,
 		).Set(containerMetric.CpuPercentage)
 
 		c.memoryBytesMetric.WithLabelValues(
-			containerMetric.Job,
-			containerMetric.Index,
 			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
@@ -126,8 +122,6 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 		).Set(float64(containerMetric.MemoryBytes))
 
 		c.diskBytesMetric.WithLabelValues(
-			containerMetric.Job,
-			containerMetric.Index,
 			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
@@ -137,8 +131,6 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 		).Set(float64(containerMetric.DiskBytes))
 
 		c.memoryBytesQuotaMetric.WithLabelValues(
-			containerMetric.Job,
-			containerMetric.Index,
 			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
@@ -147,9 +139,7 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
                         c.appinfo[containerMetric.ApplicationId].Org,
 		).Set(float64(containerMetric.MemoryBytesQuota))
 
-		c.diskBytesQuotaMetric.WithLabelValues(
-			containerMetric.Job,
-			containerMetric.Index,
+		c.diskBytesQuotaMetric.WithLabelValues(,
 			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
