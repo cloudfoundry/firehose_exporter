@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"sync"
 )
 
 type AppInfo struct {
@@ -15,14 +16,14 @@ type AppInfo struct {
 	Org   string `json:"org,omitempty"`
 }
 
-func UpdateAppMap(apiUrl string, appmap map[string]AppInfo) {
+func UpdateAppMap(apiUrl string, appmap map[string]AppInfo, amutex *sync.RWMutex) {
 	c := time.Tick(3 * time.Minute)
 	for _ = range c {
-		GenAppMap(apiUrl, appmap)
+		GenAppMap(apiUrl, appmap, amutex)
 	}
 }
 
-func GenAppMap(apiUrl string, appmap map[string]AppInfo) {
+func GenAppMap(apiUrl string, appmap map[string]AppInfo, amutex *sync.RWMutex) {
 	log.Println("updating app map")
 
 	// get space info from cf-portal url
@@ -44,7 +45,9 @@ func GenAppMap(apiUrl string, appmap map[string]AppInfo) {
 	//fmt.Printf("%+v",pinfo)
 
 	for index := range pinfo {
+		amutex.Lock()
 		appmap[pinfo[index].Guid] = pinfo[index]
+		amutex.Unlock()
 	}
 
 	//fmt.Printf("%v",appmap)

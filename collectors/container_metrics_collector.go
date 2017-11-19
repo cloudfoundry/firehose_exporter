@@ -2,6 +2,7 @@ package collectors
 
 import (
 	"strconv"
+	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -19,6 +20,7 @@ type ContainerMetricsCollector struct {
 	memoryBytesQuotaMetric *prometheus.GaugeVec
 	diskBytesQuotaMetric   *prometheus.GaugeVec
 	appinfo                map[string]cfinstanceinfoapi.AppInfo
+	amutex		       *sync.RWMutex
 }
 
 func NewContainerMetricsCollector(
@@ -26,6 +28,7 @@ func NewContainerMetricsCollector(
 	environment string,
 	metricsStore *metrics.Store,
 	appinfo map[string]cfinstanceinfoapi.AppInfo,
+	amutex *sync.RWMutex,
 ) *ContainerMetricsCollector {
 	cpuPercentageMetric := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -91,7 +94,8 @@ func NewContainerMetricsCollector(
 		diskBytesMetric:        diskBytesMetric,
 		memoryBytesQuotaMetric: memoryBytesQuotaMetric,
 		diskBytesQuotaMetric:   diskBytesQuotaMetric,
-		appinfo:                    appinfo,
+		appinfo:                appinfo,
+		amutex: 		amutex,
 	}
 }
 
@@ -103,6 +107,7 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	c.diskBytesQuotaMetric.Reset()
 
 	for _, containerMetric := range c.metricsStore.GetContainerMetrics() {
+		c.amutex.RLock()
 		c.cpuPercentageMetric.WithLabelValues(
 			containerMetric.IP,
 			containerMetric.ApplicationId,
@@ -111,7 +116,9 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
                         c.appinfo[containerMetric.ApplicationId].Space,
                         c.appinfo[containerMetric.ApplicationId].Org,
 		).Set(containerMetric.CpuPercentage)
+		c.amutex.RUnlock()
 
+		c.amutex.RLock()
 		c.memoryBytesMetric.WithLabelValues(
 			containerMetric.IP,
 			containerMetric.ApplicationId,
@@ -120,7 +127,9 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
                         c.appinfo[containerMetric.ApplicationId].Space,
                         c.appinfo[containerMetric.ApplicationId].Org,
 		).Set(float64(containerMetric.MemoryBytes))
-
+		c.amutex.RUnlock()
+		
+		c.amutex.RLock()
 		c.diskBytesMetric.WithLabelValues(
 			containerMetric.IP,
 			containerMetric.ApplicationId,
@@ -129,7 +138,9 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
                         c.appinfo[containerMetric.ApplicationId].Space,
                         c.appinfo[containerMetric.ApplicationId].Org,
 		).Set(float64(containerMetric.DiskBytes))
+		c.amutex.RUnlock()
 
+		c.amutex.RLock()
 		c.memoryBytesQuotaMetric.WithLabelValues(
 			containerMetric.IP,
 			containerMetric.ApplicationId,
@@ -138,7 +149,9 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
                         c.appinfo[containerMetric.ApplicationId].Space,
                         c.appinfo[containerMetric.ApplicationId].Org,
 		).Set(float64(containerMetric.MemoryBytesQuota))
+		c.amutex.RUnlock()
 
+		c.amutex.RLock()
 		c.diskBytesQuotaMetric.WithLabelValues(
 			containerMetric.IP,
 			containerMetric.ApplicationId,
@@ -147,6 +160,7 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
                         c.appinfo[containerMetric.ApplicationId].Space,
                         c.appinfo[containerMetric.ApplicationId].Org,
 		).Set(float64(containerMetric.DiskBytesQuota))
+		c.amutex.RUnlock()
 	}
 
 	c.cpuPercentageMetric.Collect(ch)
