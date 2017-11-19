@@ -8,8 +8,8 @@ import (
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/patrickmn/go-cache"
 
-	"github.com/cloudfoundry-community/firehose_exporter/filters"
-	"github.com/cloudfoundry-community/firehose_exporter/utils"
+	"github.com/mjseid/firehose_exporter/filters"
+	"github.com/mjseid/firehose_exporter/utils"
 )
 
 type Store struct {

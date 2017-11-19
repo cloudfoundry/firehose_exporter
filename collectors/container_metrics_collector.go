@@ -2,10 +2,12 @@ package collectors
 
 import (
 	"strconv"
+	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/cloudfoundry-community/firehose_exporter/metrics"
+	"github.com/mjseid/firehose_exporter/cfinstanceinfoapi"
+	"github.com/mjseid/firehose_exporter/metrics"
 )
 
 type ContainerMetricsCollector struct {
@@ -17,12 +19,16 @@ type ContainerMetricsCollector struct {
 	diskBytesMetric        *prometheus.GaugeVec
 	memoryBytesQuotaMetric *prometheus.GaugeVec
 	diskBytesQuotaMetric   *prometheus.GaugeVec
+	appinfo                map[string]cfinstanceinfoapi.AppInfo
+	amutex		       *sync.RWMutex
 }
 
 func NewContainerMetricsCollector(
 	namespace string,
 	environment string,
 	metricsStore *metrics.Store,
+	appinfo map[string]cfinstanceinfoapi.AppInfo,
+	amutex *sync.RWMutex,
 ) *ContainerMetricsCollector {
 	cpuPercentageMetric := prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
@@ -32,7 +38,7 @@ func NewContainerMetricsCollector(
 			Help:        "Cloud Foundry Firehose container metric: CPU used, on a scale of 0 to 100.",
 			ConstLabels: prometheus.Labels{"environment": environment},
 		},
-		[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
+                []string{"bosh_job_ip", "application_id", "instance_index", "app_name", "space", "org"},
 	)
 
 	memoryBytesMetric := prometheus.NewGaugeVec(
@@ -43,7 +49,7 @@ func NewContainerMetricsCollector(
 			Help:        "Cloud Foundry Firehose container metric: bytes of memory used.",
 			ConstLabels: prometheus.Labels{"environment": environment},
 		},
-		[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
+                []string{"bosh_job_ip", "application_id", "instance_index", "app_name", "space", "org"},
 	)
 
 	diskBytesMetric := prometheus.NewGaugeVec(
@@ -54,7 +60,7 @@ func NewContainerMetricsCollector(
 			Help:        "Cloud Foundry Firehose container metric: bytes of disk used.",
 			ConstLabels: prometheus.Labels{"environment": environment},
 		},
-		[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
+                []string{"bosh_job_ip", "application_id", "instance_index", "app_name", "space", "org"},
 	)
 
 	memoryBytesQuotaMetric := prometheus.NewGaugeVec(
@@ -65,7 +71,7 @@ func NewContainerMetricsCollector(
 			Help:        "Cloud Foundry Firehose container metric: maximum bytes of memory allocated to container.",
 			ConstLabels: prometheus.Labels{"environment": environment},
 		},
-		[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
+                []string{"bosh_job_ip", "application_id", "instance_index", "app_name", "space", "org"},
 	)
 
 	diskBytesQuotaMetric := prometheus.NewGaugeVec(
@@ -76,7 +82,7 @@ func NewContainerMetricsCollector(
 			Help:        "Cloud Foundry Firehose container metric: maximum bytes of disk allocated to container.",
 			ConstLabels: prometheus.Labels{"environment": environment},
 		},
-		[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "application_id", "instance_index"},
+                []string{"bosh_job_ip", "application_id", "instance_index", "app_name", "space", "org"},
 	)
 
 	return &ContainerMetricsCollector{
@@ -88,6 +94,8 @@ func NewContainerMetricsCollector(
 		diskBytesMetric:        diskBytesMetric,
 		memoryBytesQuotaMetric: memoryBytesQuotaMetric,
 		diskBytesQuotaMetric:   diskBytesQuotaMetric,
+		appinfo:                appinfo,
+		amutex: 		amutex,
 	}
 }
 
@@ -99,55 +107,60 @@ func (c ContainerMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	c.diskBytesQuotaMetric.Reset()
 
 	for _, containerMetric := range c.metricsStore.GetContainerMetrics() {
+		c.amutex.RLock()
 		c.cpuPercentageMetric.WithLabelValues(
-			containerMetric.Origin,
-			containerMetric.Deployment,
-			containerMetric.Job,
-			containerMetric.Index,
 			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
+			c.appinfo[containerMetric.ApplicationId].Name,
+                        c.appinfo[containerMetric.ApplicationId].Space,
+                        c.appinfo[containerMetric.ApplicationId].Org,
 		).Set(containerMetric.CpuPercentage)
+		c.amutex.RUnlock()
 
+		c.amutex.RLock()
 		c.memoryBytesMetric.WithLabelValues(
-			containerMetric.Origin,
-			containerMetric.Deployment,
-			containerMetric.Job,
-			containerMetric.Index,
 			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
+			c.appinfo[containerMetric.ApplicationId].Name,
+                        c.appinfo[containerMetric.ApplicationId].Space,
+                        c.appinfo[containerMetric.ApplicationId].Org,
 		).Set(float64(containerMetric.MemoryBytes))
-
+		c.amutex.RUnlock()
+		
+		c.amutex.RLock()
 		c.diskBytesMetric.WithLabelValues(
-			containerMetric.Origin,
-			containerMetric.Deployment,
-			containerMetric.Job,
-			containerMetric.Index,
 			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
+			c.appinfo[containerMetric.ApplicationId].Name,
+                        c.appinfo[containerMetric.ApplicationId].Space,
+                        c.appinfo[containerMetric.ApplicationId].Org,
 		).Set(float64(containerMetric.DiskBytes))
+		c.amutex.RUnlock()
 
+		c.amutex.RLock()
 		c.memoryBytesQuotaMetric.WithLabelValues(
-			containerMetric.Origin,
-			containerMetric.Deployment,
-			containerMetric.Job,
-			containerMetric.Index,
 			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
+			c.appinfo[containerMetric.ApplicationId].Name,
+                        c.appinfo[containerMetric.ApplicationId].Space,
+                        c.appinfo[containerMetric.ApplicationId].Org,
 		).Set(float64(containerMetric.MemoryBytesQuota))
+		c.amutex.RUnlock()
 
+		c.amutex.RLock()
 		c.diskBytesQuotaMetric.WithLabelValues(
-			containerMetric.Origin,
-			containerMetric.Deployment,
-			containerMetric.Job,
-			containerMetric.Index,
 			containerMetric.IP,
 			containerMetric.ApplicationId,
 			strconv.Itoa(int(containerMetric.InstanceIndex)),
+			c.appinfo[containerMetric.ApplicationId].Name,
+                        c.appinfo[containerMetric.ApplicationId].Space,
+                        c.appinfo[containerMetric.ApplicationId].Org,
 		).Set(float64(containerMetric.DiskBytesQuota))
+		c.amutex.RUnlock()
 	}
 
 	c.cpuPercentageMetric.Collect(ch)

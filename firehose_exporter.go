@@ -8,16 +8,18 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
 
-	"github.com/cloudfoundry-community/firehose_exporter/collectors"
-	"github.com/cloudfoundry-community/firehose_exporter/filters"
-	"github.com/cloudfoundry-community/firehose_exporter/firehosenozzle"
-	"github.com/cloudfoundry-community/firehose_exporter/metrics"
-	"github.com/cloudfoundry-community/firehose_exporter/uaatokenrefresher"
+	"github.com/mjseid/firehose_exporter/cfinstanceinfoapi"
+        "github.com/mjseid/firehose_exporter/collectors"
+        "github.com/mjseid/firehose_exporter/filters"
+        "github.com/mjseid/firehose_exporter/firehosenozzle"
+        "github.com/mjseid/firehose_exporter/metrics"
+        "github.com/mjseid/firehose_exporter/uaatokenrefresher"
 )
 
 var (
@@ -116,6 +118,10 @@ var (
 		"Path under which to expose Prometheus metrics ($FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH).",
 	)
 
+	appInfoApiUrl = flag.String(
+                "appinfoapi.url", "",
+                "URL for api service for application info lookup ($CF_APP_API_URL).",
+        )
 	authUsername = flag.String(
 		"web.auth.username", "",
 		"Username for web interface basic auth ($FIREHOSE_EXPORTER_WEB_AUTH_USERNAME).",
@@ -160,6 +166,7 @@ func overrideFlagsWithEnvVars() {
 	overrideWithEnvBool("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY", skipSSLValidation)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS", listenAddress)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH", metricsPath)
+	overrideWithEnvVar("CF_APP_API_URL", appInfoApiUrl)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_AUTH_USERNAME", authUsername)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_AUTH_PASSWORD", authPassword)
 	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_TLS_CERTFILE", tlsCertFile)
@@ -294,10 +301,17 @@ func main() {
 		log.Fatal(nozzle.Start())
 	}()
 
+	appmap := make(map[string]cfinstanceinfoapi.AppInfo)
+	amutex := &sync.RWMutex{}
+	
+        log.Infoln("generating first app map")
+        cfinstanceinfoapi.GenAppMap(*appInfoApiUrl, appmap, amutex)
+        go cfinstanceinfoapi.UpdateAppMap(*appInfoApiUrl, appmap, amutex)
+
 	internalMetricsCollector := collectors.NewInternalMetricsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
 	prometheus.MustRegister(internalMetricsCollector)
 
-	containerMetricsCollector := collectors.NewContainerMetricsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
+	containerMetricsCollector := collectors.NewContainerMetricsCollector(*metricsNamespace, *metricsEnvironment, metricsStore, appmap, amutex)
 	prometheus.MustRegister(containerMetricsCollector)
 
 	counterEventsCollector := collectors.NewCounterEventsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)

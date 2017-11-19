@@ -6,12 +6,12 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/cloudfoundry-community/firehose_exporter/filters"
-	"github.com/cloudfoundry-community/firehose_exporter/utils"
+	"github.com/mjseid/firehose_exporter/filters"
+	"github.com/mjseid/firehose_exporter/utils"
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/gogo/protobuf/proto"
 
-	. "github.com/cloudfoundry-community/firehose_exporter/metrics"
+	. "github.com/mjseid/firehose_exporter/metrics"
 )
 
 var _ = Describe("Store", func() {

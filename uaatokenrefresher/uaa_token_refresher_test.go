@@ -4,9 +4,9 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/cloudfoundry-community/firehose_exporter/uaatokenrefresher/fakes"
+	"github.com/mjseid/firehose_exporter/uaatokenrefresher/fakes"
 
-	. "github.com/cloudfoundry-community/firehose_exporter/uaatokenrefresher"
+	. "github.com/mjseid/firehose_exporter/uaatokenrefresher"
 )
 
 var _ = Describe("UAATokenRefresher", func() {

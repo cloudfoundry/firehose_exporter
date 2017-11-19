@@ -3,7 +3,7 @@ package collectors
 // Metric name parts.
 const (
 	// Container Metrics Subsystem.
-	container_metrics_subsystem = "container_metric"
+	container_metrics_subsystem = "container"
 
 	// Counter Events Subsystem.
 	counter_events_subsystem = "counter_event"
