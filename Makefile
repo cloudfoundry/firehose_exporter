@@ -29,6 +29,7 @@ vet:
 
 test: deps
 	@echo ">> running tests"
+	@$(GINKGO) version
 	@$(GINKGO) -r -race .
 
 promu:
