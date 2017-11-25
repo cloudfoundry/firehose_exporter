@@ -5,8 +5,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/cloudfoundry-community/firehose_exporter/metrics"
-	"github.com/cloudfoundry-community/firehose_exporter/utils"
+	"github.com/bosh-prometheus/firehose_exporter/metrics"
+	"github.com/bosh-prometheus/firehose_exporter/utils"
 )
 
 type CounterEventsCollector struct {

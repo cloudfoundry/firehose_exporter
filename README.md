@@ -1,16 +1,16 @@
-# Cloud Foundry Firehose Exporter [![Build Status](https://travis-ci.org/cloudfoundry-community/firehose_exporter.png)](https://travis-ci.org/cloudfoundry-community/firehose_exporter)
+# Cloud Foundry Firehose Exporter [![Build Status](https://travis-ci.org/bosh-prometheus/firehose_exporter.png)](https://travis-ci.org/bosh-prometheus/firehose_exporter)
 
 A [Prometheus][prometheus] exporter proxy for [Cloud Foundry Firehose][firehose] metrics. Please refer to the [FAQ][faq] for general questions about this exporter.
 
 ## Architecture overview
 
-![](https://cdn.rawgit.com/cloudfoundry-community/firehose_exporter/master/architecture/architecture.svg)
+![](https://cdn.rawgit.com/bosh-prometheus/firehose_exporter/master/architecture/architecture.svg)
 
 ## Installation
 
 ### Binaries
 
-Download the already existing [binaries](https://github.com/cloudfoundry-community/firehose_exporter/releases) for your platform:
+Download the already existing [binaries](https://github.com/bosh-prometheus/firehose_exporter/releases) for your platform:
 
 ```bash
 $ ./firehose_exporter <flags>
@@ -21,7 +21,7 @@ $ ./firehose_exporter <flags>
 Using the standard `go install` (you must have [Go][golang] already installed in your local machine):
 
 ```bash
-$ go install github.com/cloudfoundry-community/firehose_exporter
+$ go install github.com/bosh-prometheus/firehose_exporter
 $ firehose_exporter <flags>
 ```
 
@@ -30,7 +30,7 @@ $ firehose_exporter <flags>
 To run the firehose exporter as a Docker container, run:
 
 ```bash
-$ docker run -p 9186:9186 cfcommunity/firehose-exporter <flags>
+$ docker run -p 9186:9186 boshprometheus/firehose-exporter <flags>
 ```
 
 ### Cloud Foundry
@@ -38,7 +38,7 @@ $ docker run -p 9186:9186 cfcommunity/firehose-exporter <flags>
 The exporter can be deployed to an already existing [Cloud Foundry][cloudfoundry] environment:
 
 ```bash
-$ git clone https://github.com/cloudfoundry-community/firehose_exporter.git
+$ git clone https://github.com/bosh-prometheus/firehose_exporter.git
 $ cd firehose_exporter
 ```
 
@@ -130,17 +130,17 @@ The exporter returns additionally the following internal metrics:
 
 ## Contributing
 
-Refer to [CONTRIBUTING.md](https://github.com/cloudfoundry-community/firehose_exporter/blob/master/CONTRIBUTING.md).
+Refer to [CONTRIBUTING.md](https://github.com/bosh-prometheus/firehose_exporter/blob/master/CONTRIBUTING.md).
 
 ## License
 
-Apache License 2.0, see [LICENSE](https://github.com/cloudfoundry-community/firehose_exporter/blob/master/LICENSE).
+Apache License 2.0, see [LICENSE](https://github.com/bosh-prometheus/firehose_exporter/blob/master/LICENSE).
 
 [cloudfoundry]: https://www.cloudfoundry.org/
 [cfmetrics]: https://docs.cloudfoundry.org/loggregator/all_metrics.html
-[faq]: https://github.com/cloudfoundry-community/firehose_exporter/blob/master/FAQ.md
+[faq]: https://github.com/bosh-prometheus/firehose_exporter/blob/master/FAQ.md
 [firehose]: https://docs.cloudfoundry.org/loggregator/architecture.html#firehose
 [golang]: https://golang.org/
-[manifest]: https://github.com/cloudfoundry-community/firehose_exporter/blob/master/manifest.yml
+[manifest]: https://github.com/bosh-prometheus/firehose_exporter/blob/master/manifest.yml
 [prometheus]: https://prometheus.io/
-[prometheus-boshrelease]: https://github.com/cloudfoundry-community/prometheus-boshrelease
+[prometheus-boshrelease]: https://github.com/bosh-prometheus/prometheus-boshrelease

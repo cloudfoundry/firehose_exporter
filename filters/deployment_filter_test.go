@@ -4,7 +4,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	. "github.com/cloudfoundry-community/firehose_exporter/filters"
+	. "github.com/bosh-prometheus/firehose_exporter/filters"
 )
 
 var _ = Describe("DeploymentFilter", func() {

@@ -7,7 +7,7 @@ import (
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/gogo/protobuf/proto"
 
-	. "github.com/cloudfoundry-community/firehose_exporter/utils"
+	. "github.com/bosh-prometheus/firehose_exporter/utils"
 )
 
 var _ = Describe("UUID", func() {

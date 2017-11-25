@@ -96,9 +96,9 @@ The *on* specifies the matching label, in this case, the *application_id*. The *
 
 We will be glad to address any questions not answered here. Please, just open a [new issue][issues].
 
-[cf_exporter]: https://github.com/cloudfoundry-community/cf_exporter
+[cf_exporter]: https://github.com/bosh-prometheus/cf_exporter
 [cfmetrics]: https://docs.cloudfoundry.org/loggregator/all_metrics.html
 [firehose]: https://docs.cloudfoundry.org/loggregator/architecture.html#firehose
-[issues]: https://github.com/cloudfoundry-community/firehose_exporter/issues
+[issues]: https://github.com/bosh-prometheus/firehose_exporter/issues
 [quantile]: https://en.wikipedia.org/wiki/Quantile
 [scaling-nozzles]: https://docs.cloudfoundry.org/loggregator/log-ops-guide.html#scaling-nozzles

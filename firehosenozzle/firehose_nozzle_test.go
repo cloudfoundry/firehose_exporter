@@ -9,16 +9,16 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/cloudfoundry-community/firehose_exporter/filters"
-	firehosefakes "github.com/cloudfoundry-community/firehose_exporter/firehosenozzle/fakes"
-	"github.com/cloudfoundry-community/firehose_exporter/metrics"
-	"github.com/cloudfoundry-community/firehose_exporter/uaatokenrefresher"
-	"github.com/cloudfoundry-community/firehose_exporter/uaatokenrefresher/fakes"
+	"github.com/bosh-prometheus/firehose_exporter/filters"
+	firehosefakes "github.com/bosh-prometheus/firehose_exporter/firehosenozzle/fakes"
+	"github.com/bosh-prometheus/firehose_exporter/metrics"
+	"github.com/bosh-prometheus/firehose_exporter/uaatokenrefresher"
+	"github.com/bosh-prometheus/firehose_exporter/uaatokenrefresher/fakes"
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/gogo/protobuf/proto"
 	"github.com/gorilla/websocket"
 
-	. "github.com/cloudfoundry-community/firehose_exporter/firehosenozzle"
+	. "github.com/bosh-prometheus/firehose_exporter/firehosenozzle"
 )
 
 func init() {

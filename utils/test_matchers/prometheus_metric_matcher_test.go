@@ -6,7 +6,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	. "github.com/cloudfoundry-community/firehose_exporter/utils/test_matchers"
+	. "github.com/bosh-prometheus/firehose_exporter/utils/test_matchers"
 )
 
 var _ = Describe("PrometheusMetric", func() {

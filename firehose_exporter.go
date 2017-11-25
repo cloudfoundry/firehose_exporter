@@ -13,11 +13,11 @@ import (
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
 
-	"github.com/cloudfoundry-community/firehose_exporter/collectors"
-	"github.com/cloudfoundry-community/firehose_exporter/filters"
-	"github.com/cloudfoundry-community/firehose_exporter/firehosenozzle"
-	"github.com/cloudfoundry-community/firehose_exporter/metrics"
-	"github.com/cloudfoundry-community/firehose_exporter/uaatokenrefresher"
+	"github.com/bosh-prometheus/firehose_exporter/collectors"
+	"github.com/bosh-prometheus/firehose_exporter/filters"
+	"github.com/bosh-prometheus/firehose_exporter/firehosenozzle"
+	"github.com/bosh-prometheus/firehose_exporter/metrics"
+	"github.com/bosh-prometheus/firehose_exporter/uaatokenrefresher"
 )
 
 var (

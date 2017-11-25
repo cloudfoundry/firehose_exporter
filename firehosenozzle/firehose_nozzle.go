@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/prometheus/common/log"
 
-	"github.com/cloudfoundry-community/firehose_exporter/metrics"
+	"github.com/bosh-prometheus/firehose_exporter/metrics"
 )
 
 type FirehoseNozzle struct {

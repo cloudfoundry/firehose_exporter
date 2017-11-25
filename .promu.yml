@@ -2,7 +2,7 @@ verbose: false
 go:
   cgo: false
 repository:
-  path: github.com/cloudfoundry-community/firehose_exporter
+  path: github.com/bosh-prometheus/firehose_exporter
 build:
   flags: -a -tags 'netgo static_build'
   ldflags: |
