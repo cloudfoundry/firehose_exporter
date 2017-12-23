@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/common/log"
 
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
 	"github.com/bosh-prometheus/firehose_exporter/utils"
@@ -39,7 +40,7 @@ func NewCounterEventsCollector(
 func (c CounterEventsCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, counterEvent := range c.metricsStore.GetCounterEvents() {
 		metricName := utils.NormalizeName(counterEvent.Origin) + "_" + utils.NormalizeName(counterEvent.Name) + "_total"
-		ch <- prometheus.MustNewConstMetric(
+		tcm, err := prometheus.NewConstMetric(
 			prometheus.NewDesc(
 				prometheus.BuildFQName(c.namespace, counter_events_subsystem, metricName),
 				fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", utils.NormalizeNameDesc(counterEvent.Name), utils.NormalizeOriginDesc(counterEvent.Origin)),
@@ -54,9 +55,14 @@ func (c CounterEventsCollector) Collect(ch chan<- prometheus.Metric) {
 			counterEvent.Index,
 			counterEvent.IP,
 		)
+		if err != nil {
+			log.Errorf("Counter Event `%s` from `%s` discarded: %s", counterEvent.Name, counterEvent.Origin, err)
+			continue
+		}
+		ch <- tcm
 
 		metricName = utils.NormalizeName(counterEvent.Origin) + "_" + utils.NormalizeName(counterEvent.Name) + "_delta"
-		ch <- prometheus.MustNewConstMetric(
+		dcm, err := prometheus.NewConstMetric(
 			prometheus.NewDesc(
 				prometheus.BuildFQName(c.namespace, counter_events_subsystem, metricName),
 				fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event from '%s'.", utils.NormalizeNameDesc(counterEvent.Name), utils.NormalizeOriginDesc(counterEvent.Origin)),
@@ -71,6 +77,11 @@ func (c CounterEventsCollector) Collect(ch chan<- prometheus.Metric) {
 			counterEvent.Index,
 			counterEvent.IP,
 		)
+		if err != nil {
+			log.Errorf("Counter Event `%s` from `%s` discarded: %s", counterEvent.Name, counterEvent.Origin, err)
+			continue
+		}
+		ch <- dcm
 	}
 }
 

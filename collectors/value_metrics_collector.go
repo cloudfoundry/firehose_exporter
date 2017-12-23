@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/common/log"
 
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
 	"github.com/bosh-prometheus/firehose_exporter/utils"
@@ -39,7 +40,7 @@ func NewValueMetricsCollector(
 func (c ValueMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, valueMetric := range c.metricsStore.GetValueMetrics() {
 		metricName := utils.NormalizeName(valueMetric.Origin) + "_" + utils.NormalizeName(valueMetric.Name)
-		ch <- prometheus.MustNewConstMetric(
+		vm, err := prometheus.NewConstMetric(
 			prometheus.NewDesc(
 				prometheus.BuildFQName(c.namespace, value_metrics_subsystem, metricName),
 				fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", utils.NormalizeNameDesc(valueMetric.Name), utils.NormalizeOriginDesc(valueMetric.Origin)),
@@ -55,6 +56,11 @@ func (c ValueMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 			valueMetric.IP,
 			valueMetric.Unit,
 		)
+		if err != nil {
+			log.Errorf("Value Metric `%s` from `%s` discarded: %s", valueMetric.Name, valueMetric.Origin, err)
+			continue
+		}
+		ch <- vm
 	}
 }
 
