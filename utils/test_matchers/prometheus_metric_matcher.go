@@ -16,12 +16,14 @@ func PrometheusMetric(expected prometheus.Metric) types.GomegaMatcher {
 	expected.Write(expectedMetric)
 
 	return &PrometheusMetricMatcher{
-		Expected: expectedMetric,
+		Desc:   expected.Desc(),
+		Metric: expectedMetric,
 	}
 }
 
 type PrometheusMetricMatcher struct {
-	Expected *dto.Metric
+	Desc   *prometheus.Desc
+	Metric *dto.Metric
 }
 
 func (matcher *PrometheusMetricMatcher) Match(actual interface{}) (success bool, err error) {
@@ -33,7 +35,11 @@ func (matcher *PrometheusMetricMatcher) Match(actual interface{}) (success bool,
 	actualMetric := &dto.Metric{}
 	metric.Write(actualMetric)
 
-	return reflect.DeepEqual(actualMetric.String(), matcher.Expected.String()), nil
+	if !reflect.DeepEqual(metric.Desc().String(), matcher.Desc.String()) {
+		return false, nil
+	}
+
+	return reflect.DeepEqual(actualMetric.String(), matcher.Metric.String()), nil
 }
 
 func (matcher *PrometheusMetricMatcher) FailureMessage(actual interface{}) (message string) {
@@ -41,12 +47,16 @@ func (matcher *PrometheusMetricMatcher) FailureMessage(actual interface{}) (mess
 	if ok {
 		actualMetric := &dto.Metric{}
 		metric.Write(actualMetric)
-		return format.Message(actualMetric.String(), "to equal", matcher.Expected.String())
+		return format.Message(
+			fmt.Sprintf("\n%s\nMetric{%s}", metric.Desc().String(), actualMetric.String()),
+			"to equal",
+			fmt.Sprintf("\n%s\nMetric{%s}", matcher.Desc.String(), matcher.Metric.String()),
+		)
 	}
 
-	return format.Message(actual, "to equal", matcher.Expected)
+	return format.Message(actual, "to equal", matcher)
 }
 
 func (matcher *PrometheusMetricMatcher) NegatedFailureMessage(actual interface{}) (message string) {
-	return format.Message(actual, "not to equal", matcher.Expected)
+	return format.Message(actual, "not to equal", matcher)
 }
