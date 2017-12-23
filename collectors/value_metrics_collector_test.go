@@ -70,23 +70,28 @@ var _ = Describe("ValueMetricsCollector", func() {
 
 	Describe("Collect", func() {
 		var (
-			origin               = "fake.origin"
-			originNameNormalized = "fake_origin"
-			originDescNormalized = "fake-origin"
-			boshDeployment       = "fake-deployment-name"
-			boshJob              = "fake-job-name"
-			boshIndex            = "0"
-			boshIP               = "1.2.3.4"
+			boshDeployment = "fake-deployment-name"
+			boshJob        = "fake-job-name"
+			boshIndex      = "0"
+			boshIP         = "1.2.3.4"
 
-			valueMetric1Name           = "FakeValueMetric1"
-			valueMetric1NameNormalized = "fake_value_metric_1"
-			valueMetric1Value          = float64(2000)
-			valueMetric1Unit           = "kb"
+			valueMetric1Origin               = "fake.origin"
+			valueMetric1OriginNameNormalized = "fake_origin"
+			valueMetric1OriginDescNormalized = "fake-origin"
+			valueMetric1Name                 = "FakeValueMetric1"
+			valueMetric1NameNormalized       = "fake_value_metric_1"
+			valueMetric1DescNormalized       = "FakeValueMetric1"
+			valueMetric1Value                = float64(2000)
+			valueMetric1Unit                 = "kb"
 
-			valueMetric2Name           = "FakeValueMetric2"
-			valueMetric2NameNormalized = "fake_value_metric_2"
-			valueMetric2Value          = float64(15)
-			valueMetric2Unit           = "count"
+			valueMetric2Origin               = "p.fake.origin"
+			valueMetric2OriginNameNormalized = "p_fake_origin"
+			valueMetric2OriginDescNormalized = "p-fake-origin"
+			valueMetric2Name                 = "/p.fake/ValueMetric2"
+			valueMetric2NameNormalized       = "p_fake_value_metric_2"
+			valueMetric2DescNormalized       = "/p-fake/ValueMetric2"
+			valueMetric2Value                = float64(15)
+			valueMetric2Unit                 = "count"
 
 			valueMetricsChan chan prometheus.Metric
 			valueMetric1     prometheus.Metric
@@ -96,7 +101,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 		BeforeEach(func() {
 			metricsStore.AddMetric(
 				&events.Envelope{
-					Origin:     proto.String(origin),
+					Origin:     proto.String(valueMetric1Origin),
 					EventType:  events.Envelope_ValueMetric.Enum(),
 					Timestamp:  proto.Int64(time.Now().Unix() * 1000),
 					Deployment: proto.String(boshDeployment),
@@ -113,7 +118,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 
 			metricsStore.AddMetric(
 				&events.Envelope{
-					Origin:     proto.String(origin),
+					Origin:     proto.String(valueMetric2Origin),
 					EventType:  events.Envelope_ValueMetric.Enum(),
 					Timestamp:  proto.Int64(time.Now().Unix() * 1000),
 					Deployment: proto.String(boshDeployment),
@@ -132,14 +137,14 @@ var _ = Describe("ValueMetricsCollector", func() {
 
 			valueMetric1 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
-					prometheus.BuildFQName(namespace, "value_metric", originNameNormalized+"_"+valueMetric1NameNormalized),
-					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric1Name, originDescNormalized),
+					prometheus.BuildFQName(namespace, "value_metric", valueMetric1OriginNameNormalized+"_"+valueMetric1NameNormalized),
+					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric1DescNormalized, valueMetric1OriginDescNormalized),
 					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit"},
 					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
 				valueMetric1Value,
-				origin,
+				valueMetric1Origin,
 				boshDeployment,
 				boshJob,
 				boshIndex,
@@ -149,14 +154,14 @@ var _ = Describe("ValueMetricsCollector", func() {
 
 			valueMetric2 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
-					prometheus.BuildFQName(namespace, "value_metric", originNameNormalized+"_"+valueMetric2NameNormalized),
-					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric2Name, originDescNormalized),
+					prometheus.BuildFQName(namespace, "value_metric", valueMetric2OriginNameNormalized+"_"+valueMetric2NameNormalized),
+					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric2DescNormalized, valueMetric2OriginDescNormalized),
 					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit"},
 					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
 				valueMetric2Value,
-				origin,
+				valueMetric2Origin,
 				boshDeployment,
 				boshJob,
 				boshIndex,

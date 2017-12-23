@@ -26,6 +26,14 @@ func NormalizeName(name string) string {
 	return strings.Join(normalizedName, "_")
 }
 
-func NormalizeDesc(desc string) string {
+func NormalizeNameDesc(desc string) string {
+	if strings.HasPrefix(desc, "/p.") {
+		return "/p-" + desc[3:len(desc)]
+	}
+
+	return desc
+}
+
+func NormalizeOriginDesc(desc string) string {
 	return strings.Replace(desc, ".", "-", -1)
 }

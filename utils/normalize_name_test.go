@@ -13,8 +13,14 @@ var _ = Describe("NormalizeName", func() {
 	})
 })
 
-var _ = Describe("NormalizeDesc", func() {
+var _ = Describe("NormalizeNameDesc", func() {
+	It("normalizes a name description", func() {
+		Expect(NormalizeNameDesc("/p.This_is_-_a-MetricName.Example/with:0totals")).To(Equal("/p-This_is_-_a-MetricName.Example/with:0totals"))
+	})
+})
+
+var _ = Describe("NormalizeOriginDesc", func() {
 	It("normalizes a description", func() {
-		Expect(NormalizeDesc("This_is-a.Desc.Example")).To(Equal("This_is-a-Desc-Example"))
+		Expect(NormalizeOriginDesc("This_is-a.Desc.Example")).To(Equal("This_is-a-Desc-Example"))
 	})
 })
