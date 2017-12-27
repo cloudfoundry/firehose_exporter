@@ -1,7 +1,6 @@
 package firehosenozzle_test
 
 import (
-	"flag"
 	"fmt"
 	"strings"
 	"time"
@@ -17,12 +16,13 @@ import (
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/gogo/protobuf/proto"
 	"github.com/gorilla/websocket"
+	"github.com/prometheus/common/log"
 
 	. "github.com/bosh-prometheus/firehose_exporter/firehosenozzle"
 )
 
 func init() {
-	flag.Set("log.level", "fatal")
+	log.Base().SetLevel("fatal")
 }
 
 var _ = Describe("FirehoseNozzle", func() {
