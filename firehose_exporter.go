@@ -1,17 +1,14 @@
 package main
 
 import (
-	"flag"
-	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
+	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/bosh-prometheus/firehose_exporter/collectors"
 	"github.com/bosh-prometheus/firehose_exporter/filters"
@@ -21,189 +18,97 @@ import (
 )
 
 var (
-	uaaUrl = flag.String(
-		"uaa.url", "",
-		"Cloud Foundry UAA URL ($FIREHOSE_EXPORTER_UAA_URL).",
-	)
+	uaaUrl = kingpin.Flag(
+		"uaa.url", "Cloud Foundry UAA URL ($FIREHOSE_EXPORTER_UAA_URL)",
+	).Envar("FIREHOSE_EXPORTER_UAA_URL").Required().String()
 
-	uaaClientID = flag.String(
-		"uaa.client-id", "",
-		"Cloud Foundry UAA Client ID ($FIREHOSE_EXPORTER_UAA_CLIENT_ID).",
-	)
+	uaaClientID = kingpin.Flag(
+		"uaa.client-id", "Cloud Foundry UAA Client ID ($FIREHOSE_EXPORTER_UAA_CLIENT_ID)",
+	).Envar("FIREHOSE_EXPORTER_UAA_CLIENT_ID").Required().String()
 
-	uaaClientSecret = flag.String(
-		"uaa.client-secret", "",
-		"Cloud Foundry UAA Client Secret ($FIREHOSE_EXPORTER_UAA_CLIENT_SECRET).",
-	)
+	uaaClientSecret = kingpin.Flag(
+		"uaa.client-secret", "Cloud Foundry UAA Client Secret ($FIREHOSE_EXPORTER_UAA_CLIENT_SECRET)",
+	).Envar("FIREHOSE_EXPORTER_UAA_CLIENT_SECRET").Required().String()
 
-	dopplerUrl = flag.String(
-		"doppler.url", "",
-		"Cloud Foundry Doppler URL ($FIREHOSE_EXPORTER_DOPPLER_URL).",
-	)
+	dopplerUrl = kingpin.Flag(
+		"doppler.url", "Cloud Foundry Doppler URL ($FIREHOSE_EXPORTER_DOPPLER_URL)",
+	).Envar("FIREHOSE_EXPORTER_DOPPLER_URL").Required().String()
 
-	dopplerSubscriptionID = flag.String(
-		"doppler.subscription-id", "prometheus",
-		"Cloud Foundry Doppler Subscription ID ($FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID).",
-	)
+	dopplerSubscriptionID = kingpin.Flag(
+		"doppler.subscription-id", "Cloud Foundry Doppler Subscription ID ($FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID)",
+	).Envar("FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID").Default("prometheus").String()
 
-	dopplerIdleTimeout = flag.Duration(
-		"doppler.idle-timeout", 0,
-		"Cloud Foundry Doppler Idle Timeout duration ($FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT).",
-	)
+	dopplerIdleTimeout = kingpin.Flag(
+		"doppler.idle-timeout", "Cloud Foundry Doppler Idle Timeout duration ($FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT)",
+	).Envar("FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT").Default("0").Duration()
 
-	dopplerMinRetryDelay = flag.Duration(
-		"doppler.min-retry-delay", 0,
-		"Cloud Foundry Doppler min retry delay duration ($FIREHOSE_EXPORTER_DOPPLER_MIN_RETRY_DELAY).",
-	)
+	dopplerMinRetryDelay = kingpin.Flag(
+		"doppler.min-retry-delay", "Cloud Foundry Doppler min retry delay duration ($FIREHOSE_EXPORTER_DOPPLER_MIN_RETRY_DELAY)",
+	).Envar("FIREHOSE_EXPORTER_DOPPLER_MIN_RETRY_DELAY").Default("0").Duration()
 
-	dopplerMaxRetryDelay = flag.Duration(
-		"doppler.max-retry-delay", 0,
-		"Cloud Foundry Doppler max retry delay duration ($FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_DELAY).",
-	)
+	dopplerMaxRetryDelay = kingpin.Flag(
+		"doppler.max-retry-delay", "Cloud Foundry Doppler max retry delay duration ($FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_DELAY)",
+	).Envar("FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_DELAY").Default("0").Duration()
 
-	dopplerMaxRetryCount = flag.Int(
-		"doppler.max-retry-count", 0,
-		"Cloud Foundry Doppler max retry count ($FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_COUNT).",
-	)
+	dopplerMaxRetryCount = kingpin.Flag(
+		"doppler.max-retry-count", "Cloud Foundry Doppler max retry count ($FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_COUNT)",
+	).Envar("FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_COUNT").Default("0").Int()
 
-	dopplerMetricExpiration = flag.Duration(
-		"doppler.metric-expiration", 5*time.Minute,
-		"How long a Cloud Foundry Doppler metric is valid ($FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION).",
-	)
+	dopplerMetricExpiration = kingpin.Flag(
+		"doppler.metric-expiration", "How long a Cloud Foundry Doppler metric is valid ($FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION)",
+	).Envar("FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION").Default("5m").Duration()
 
-	filterDeployments = flag.String(
-		"filter.deployments", "",
-		"Comma separated deployments to filter ($FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS)",
-	)
+	filterDeployments = kingpin.Flag(
+		"filter.deployments", "Comma separated deployments to filter ($FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS)",
+	).Envar("FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS").Default("").String()
 
-	filterEvents = flag.String(
-		"filter.events", "",
-		"Comma separated events to filter (ContainerMetric,CounterEvent,ValueMetric) ($FIREHOSE_EXPORTER_FILTER_EVENTS).",
-	)
+	filterEvents = kingpin.Flag(
+		"filter.events", "Comma separated events to filter (ContainerMetric,CounterEvent,ValueMetric) ($FIREHOSE_EXPORTER_FILTER_EVENTS)",
+	).Envar("FIREHOSE_EXPORTER_FILTER_EVENTS").Default("").String()
 
-	metricsNamespace = flag.String(
-		"metrics.namespace", "firehose",
-		"Metrics Namespace ($FIREHOSE_EXPORTER_METRICS_NAMESPACE).",
-	)
+	metricsNamespace = kingpin.Flag(
+		"metrics.namespace", "Metrics Namespace ($FIREHOSE_EXPORTER_METRICS_NAMESPACE)",
+	).Envar("FIREHOSE_EXPORTER_METRICS_NAMESPACE").Default("firehose").String()
 
-	metricsEnvironment = flag.String(
-		"metrics.environment", "",
-		"Environment label to be attached to metrics ($FIREHOSE_EXPORTER_METRICS_ENVIRONMENT).",
-	)
+	metricsEnvironment = kingpin.Flag(
+		"metrics.environment", "Environment label to be attached to metrics ($FIREHOSE_EXPORTER_METRICS_ENVIRONMENT)",
+	).Envar("FIREHOSE_EXPORTER_METRICS_ENVIRONMENT").Required().String()
 
-	metricsCleanupInterval = flag.Duration(
-		"metrics.cleanup-interval", 2*time.Minute,
-		"Metrics clean up interval ($FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL).",
-	)
+	metricsCleanupInterval = kingpin.Flag(
+		"metrics.cleanup-interval", "Metrics clean up interval ($FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL)",
+	).Envar("FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL").Default("2m").Duration()
 
-	showVersion = flag.Bool(
-		"version", false,
-		"Print version information.",
-	)
+	skipSSLValidation = kingpin.Flag(
+		"skip-ssl-verify", "Disable SSL Verify ($FIREHOSE_EXPORTER_SKIP_SSL_VERIFY)",
+	).Envar("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY").Default("false").Bool()
 
-	skipSSLValidation = flag.Bool(
-		"skip-ssl-verify", false,
-		"Disable SSL Verify ($FIREHOSE_EXPORTER_SKIP_SSL_VERIFY).",
-	)
+	listenAddress = kingpin.Flag(
+		"web.listen-address", "Address to listen on for web interface and telemetry ($FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS)",
+	).Envar("FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS").Default(":9186").String()
 
-	listenAddress = flag.String(
-		"web.listen-address", ":9186",
-		"Address to listen on for web interface and telemetry ($FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS).",
-	)
+	metricsPath = kingpin.Flag(
+		"web.telemetry-path", "Path under which to expose Prometheus metrics ($FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH)",
+	).Envar("FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH").Default("/metrics").String()
 
-	metricsPath = flag.String(
-		"web.telemetry-path", "/metrics",
-		"Path under which to expose Prometheus metrics ($FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH).",
-	)
+	authUsername = kingpin.Flag(
+		"web.auth.username", "Username for web interface basic auth ($FIREHOSE_EXPORTER_WEB_AUTH_USERNAME)",
+	).Envar("FIREHOSE_EXPORTER_WEB_AUTH_USERNAME").String()
 
-	authUsername = flag.String(
-		"web.auth.username", "",
-		"Username for web interface basic auth ($FIREHOSE_EXPORTER_WEB_AUTH_USERNAME).",
-	)
+	authPassword = kingpin.Flag(
+		"web.auth.password", "Password for web interface basic auth ($FIREHOSE_EXPORTER_WEB_AUTH_PASSWORD)",
+	).Envar("FIREHOSE_EXPORTER_WEB_AUTH_PASSWORD").String()
 
-	authPassword = flag.String(
-		"web.auth.password", "",
-		"Password for web interface basic auth ($FIREHOSE_EXPORTER_WEB_AUTH_PASSWORD).",
-	)
+	tlsCertFile = kingpin.Flag(
+		"web.tls.cert_file", "Path to a file that contains the TLS certificate (PEM format). If the certificate is signed by a certificate authority, the file should be the concatenation of the server's certificate, any intermediates, and the CA's certificate ($FIREHOSE_EXPORTER_WEB_TLS_CERTFILE)",
+	).Envar("FIREHOSE_EXPORTER_WEB_TLS_CERTFILE").ExistingFile()
 
-	tlsCertFile = flag.String(
-		"web.tls.cert_file", "",
-		"Path to a file that contains the TLS certificate (PEM format). If the certificate is signed by a certificate authority, the file should be the concatenation of the server's certificate, any intermediates, and the CA's certificate ($FIREHOSE_EXPORTER_WEB_TLS_CERTFILE).",
-	)
-
-	tlsKeyFile = flag.String(
-		"web.tls.key_file", "",
-		"Path to a file that contains the TLS private key (PEM format) ($FIREHOSE_EXPORTER_WEB_TLS_KEYFILE).",
-	)
+	tlsKeyFile = kingpin.Flag(
+		"web.tls.key_file", "Path to a file that contains the TLS private key (PEM format) ($FIREHOSE_EXPORTER_WEB_TLS_KEYFILE)",
+	).Envar("FIREHOSE_EXPORTER_WEB_TLS_KEYFILE").ExistingFile()
 )
 
 func init() {
 	prometheus.MustRegister(version.NewCollector(*metricsNamespace))
-}
-
-func overrideFlagsWithEnvVars() {
-	overrideWithEnvVar("FIREHOSE_EXPORTER_UAA_URL", uaaUrl)
-	overrideWithEnvVar("FIREHOSE_EXPORTER_UAA_CLIENT_ID", uaaClientID)
-	overrideWithEnvVar("FIREHOSE_EXPORTER_UAA_CLIENT_SECRET", uaaClientSecret)
-	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_URL", dopplerUrl)
-	overrideWithEnvVar("FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID", dopplerSubscriptionID)
-	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT", dopplerIdleTimeout)
-	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_MIN_RETRY_DELAY", dopplerMinRetryDelay)
-	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_DELAY", dopplerMaxRetryDelay)
-	overrideWithEnvInt("FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_COUNT", dopplerMaxRetryCount)
-	overrideWithEnvDuration("FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION", dopplerMetricExpiration)
-	overrideWithEnvVar("FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS", filterDeployments)
-	overrideWithEnvVar("FIREHOSE_EXPORTER_FILTER_EVENTS", filterEvents)
-	overrideWithEnvVar("FIREHOSE_EXPORTER_METRICS_NAMESPACE", metricsNamespace)
-	overrideWithEnvVar("FIREHOSE_EXPORTER_METRICS_ENVIRONMENT", metricsEnvironment)
-	overrideWithEnvDuration("FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL", metricsCleanupInterval)
-	overrideWithEnvBool("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY", skipSSLValidation)
-	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS", listenAddress)
-	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_TELEMETRY_PATH", metricsPath)
-	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_AUTH_USERNAME", authUsername)
-	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_AUTH_PASSWORD", authPassword)
-	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_TLS_CERTFILE", tlsCertFile)
-	overrideWithEnvVar("FIREHOSE_EXPORTER_WEB_TLS_KEYFILE", tlsKeyFile)
-}
-
-func overrideWithEnvVar(name string, value *string) {
-	envValue := os.Getenv(name)
-	if envValue != "" {
-		*value = envValue
-	}
-}
-
-func overrideWithEnvInt(name string, value *int) {
-	envValue := os.Getenv(name)
-	if envValue != "" {
-		intValue, err := strconv.Atoi(envValue)
-		if err != nil {
-			log.Fatalf("Invalid `%s`: %s", name, err)
-		}
-		*value = int(intValue)
-	}
-}
-
-func overrideWithEnvDuration(name string, value *time.Duration) {
-	envValue := os.Getenv(name)
-	if envValue != "" {
-		var err error
-		*value, err = time.ParseDuration(envValue)
-		if err != nil {
-			log.Fatalf("Invalid `%s`: %s", name, err)
-		}
-	}
-}
-
-func overrideWithEnvBool(name string, value *bool) {
-	envValue := os.Getenv(name)
-	if envValue != "" {
-		var err error
-		*value, err = strconv.ParseBool(envValue)
-		if err != nil {
-			log.Fatalf("Invalid `%s`: %s", name, err)
-		}
-	}
 }
 
 type basicAuthHandler struct {
@@ -239,13 +144,10 @@ func prometheusHandler() http.Handler {
 }
 
 func main() {
-	flag.Parse()
-	overrideFlagsWithEnvVars()
-
-	if *showVersion {
-		fmt.Fprintln(os.Stdout, version.Print("firehose_exporter"))
-		os.Exit(0)
-	}
+	log.AddFlags(kingpin.CommandLine)
+	kingpin.Version(version.Print("firehose_exporter"))
+	kingpin.HelpFlag.Short('h')
+	kingpin.Parse()
 
 	log.Infoln("Starting firehose_exporter", version.Info())
 	log.Infoln("Build context", version.BuildContext())

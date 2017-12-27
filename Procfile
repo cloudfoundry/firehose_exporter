@@ -1,1 +1,1 @@
-web: firehose_exporter -web.listen-address=":$PORT"
+web: firehose_exporter --web.listen-address=":$PORT"

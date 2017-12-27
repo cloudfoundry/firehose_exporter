@@ -87,7 +87,7 @@ uaac client add prometheus-firehose \
 | `filter.deployments`<br />`FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS` | No | | Comma separated deployments to filter |
 | `filter.events`<br />`FIREHOSE_EXPORTER_FILTER_EVENTS` | No | | Comma separated events to filter. If not set, all events will be enabled (`ContainerMetric`, `CounterEvent`, `HttpStartStop`, `ValueMetric`) |
 | `metrics.namespace`<br />`FIREHOSE_EXPORTER_METRICS_NAMESPACE` | No | `firehose` | Metrics Namespace |
-| `metrics.environment`<br />`FIREHOSE_EXPORTER_METRICS_ENVIRONMENT` | No | | Environment label to be attached to metrics |
+| `metrics.environment`<br />`FIREHOSE_EXPORTER_METRICS_ENVIRONMENT` | Yes | | Environment label to be attached to metrics |
 | `metrics.cleanup-interval`<br />`FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL` | No | `2 minutes` | Metrics clean up interval |
 | `skip-ssl-verify`<br />`FIREHOSE_EXPORTER_SKIP_SSL_VERIFY` | No | `false` | Disable SSL Verify |
 | `web.listen-address`<br />`FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS` | No | `:9186` | Address to listen on for web interface and telemetry |
