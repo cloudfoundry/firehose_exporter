@@ -203,47 +203,47 @@ var _ = Describe("HttpStartStopCollector", func() {
 		})
 
 		It("returns a response_size_bytes metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(responseSizeBytesMetric.MetricVec.WithLabelValues(
+			Eventually(descriptions).Should(Receive(Equal(responseSizeBytesMetric.WithLabelValues(
 				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
 				httpStartStopScheme,
 				httpStartStopHost,
-			).Desc())))
+			).(prometheus.Summary).Desc())))
 		})
 
 		It("returns a last_request_timestamp metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(lastRequestTimestampMetric.MetricVec.WithLabelValues(
+			Eventually(descriptions).Should(Receive(Equal(lastRequestTimestampMetric.WithLabelValues(
 				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
 				httpStartStopScheme,
 				httpStartStopHost,
-			).Desc())))
+			).(prometheus.Gauge).Desc())))
 		})
 
 		It("returns a client_request_duration_seconds metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(clientRequestDurationSecondsMetric.MetricVec.WithLabelValues(
+			Eventually(descriptions).Should(Receive(Equal(clientRequestDurationSecondsMetric.WithLabelValues(
 				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
 				httpStartStopScheme,
 				httpStartStopHost,
-			).Desc())))
+			).(prometheus.Summary).Desc())))
 		})
 
 		It("returns a server_request_duration_seconds metric description", func() {
-			Eventually(descriptions).Should(Receive(Equal(serverRequestDurationSecondsMetric.MetricVec.WithLabelValues(
+			Eventually(descriptions).Should(Receive(Equal(serverRequestDurationSecondsMetric.WithLabelValues(
 				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
 				httpStartStopScheme,
 				httpStartStopHost,
-			).Desc())))
+			).(prometheus.Summary).Desc())))
 		})
 	})
 
@@ -326,47 +326,47 @@ var _ = Describe("HttpStartStopCollector", func() {
 		})
 
 		It("returns a response_size_bytes metric", func() {
-			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(responseSizeBytesMetric.MetricVec.WithLabelValues(
+			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(responseSizeBytesMetric.WithLabelValues(
 				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
 				httpStartStopScheme,
 				httpStartStopHost,
-			))))
+			).(prometheus.Summary))))
 		})
 
 		It("returns a last_request_timestamp metric", func() {
-			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(lastRequestTimestampMetric.MetricVec.WithLabelValues(
+			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(lastRequestTimestampMetric.WithLabelValues(
 				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
 				httpStartStopScheme,
 				httpStartStopHost,
-			))))
+			).(prometheus.Gauge))))
 		})
 
 		It("returns a client_request_duration_seconds metric", func() {
-			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(clientRequestDurationSecondsMetric.MetricVec.WithLabelValues(
+			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(clientRequestDurationSecondsMetric.WithLabelValues(
 				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
 				httpStartStopScheme,
 				httpStartStopHost,
-			))))
+			).(prometheus.Summary))))
 		})
 
 		It("returns a server_request_duration_seconds metric", func() {
-			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(serverRequestDurationSecondsMetric.MetricVec.WithLabelValues(
+			Eventually(httpStartStopMetricsChan).Should(Receive(PrometheusMetric(serverRequestDurationSecondsMetric.WithLabelValues(
 				boshDeployment,
 				httpStartStopApplicationId,
 				httpStartStopInstanceId,
 				httpStartStopMethod,
 				httpStartStopScheme,
 				httpStartStopHost,
-			))))
+			).(prometheus.Summary))))
 		})
 
 		Context("when there is no http start stop metrics", func() {
