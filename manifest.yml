@@ -3,6 +3,7 @@ applications:
   - name: firehose-exporter
     buildpack: go_buildpack
     env:
+      GOPACKAGENAME: github.com/bosh-prometheus/firehose_exporter
       FIREHOSE_EXPORTER_UAA_URL: "Your UAA URL"
       FIREHOSE_EXPORTER_UAA_CLIENT_ID: "Your UAA Client ID"
       FIREHOSE_EXPORTER_UAA_CLIENT_SECRET: "Your UAA Client Secret"
