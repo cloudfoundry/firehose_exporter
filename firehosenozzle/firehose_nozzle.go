@@ -54,12 +54,13 @@ func New(
 	}
 }
 
-func (n *FirehoseNozzle) Start() error {
+// Start processes both errors and messages until both channels are closed
+// It then closes the underlying consumer.
+func (n *FirehoseNozzle) Start() {
 	log.Info("Starting Firehose Nozzle...")
+	defer log.Info("Firehose Nozzle shutting down...")
 	n.consumeFirehose()
-	err := n.parseEnvelopes()
-	log.Info("Firehose Nozzle shutting down...")
-	return err
+	n.parseEnvelopes()
 }
 
 func (n *FirehoseNozzle) consumeFirehose() {
@@ -85,17 +86,26 @@ func (n *FirehoseNozzle) consumeFirehose() {
 	n.messages, n.errs = n.consumer.FilteredFirehose(n.subscriptionID, "", consumer.Metrics)
 }
 
-func (n *FirehoseNozzle) parseEnvelopes() error {
-	for {
+// parseEnvelopes will read and process both errs and messages, until
+// both are closed, at which time it will close the consumer and return
+func (n *FirehoseNozzle) parseEnvelopes() {
+	defer n.consumer.Close()
+
+	for messages, errs := n.messages, n.errs; messages != nil || errs != nil; {
 		select {
-		case envelope := <-n.messages:
+		case envelope, ok := <-messages:
+			if !ok {
+				messages = nil
+				continue
+			}
 			n.handleMessage(envelope)
 			n.metricsStore.AddMetric(envelope)
-		case err := <-n.errs:
-			retryError := n.handleError(err)
-			if !retryError {
-				return err
+		case err, ok := <-errs:
+			if !ok {
+				errs = nil
+				continue
 			}
+			n.handleError(err)
 		}
 	}
 }
@@ -107,7 +117,7 @@ func (n *FirehoseNozzle) handleMessage(envelope *events.Envelope) {
 	}
 }
 
-func (n *FirehoseNozzle) handleError(err error) bool {
+func (n *FirehoseNozzle) handleError(err error) {
 	log.Errorf("Error while reading from the Firehose: %v", err)
 
 	switch err.(type) {
@@ -120,13 +130,7 @@ func (n *FirehoseNozzle) handleError(err error) bool {
 				n.metricsStore.AlertSlowConsumerError()
 			}
 		}
-		return true
 	}
-
-	log.Info("Closing connection with Firehose...")
-	n.consumer.Close()
-
-	return false
 }
 
 type DebugPrinter struct{}

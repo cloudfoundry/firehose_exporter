@@ -193,7 +193,8 @@ func main() {
 		metricsStore,
 	)
 	go func() {
-		log.Fatal(nozzle.Start())
+		nozzle.Start()
+		os.Exit(1)
 	}()
 
 	internalMetricsCollector := collectors.NewInternalMetricsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
