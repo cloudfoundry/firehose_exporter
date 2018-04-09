@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -111,6 +112,12 @@ func init() {
 	prometheus.MustRegister(version.NewCollector(*metricsNamespace))
 }
 
+type logger struct{}
+
+func (l logger) Println(v ...interface{}) {
+	log.Error(v)
+}
+
 type basicAuthHandler struct {
 	handler  http.HandlerFunc
 	username string
@@ -130,11 +137,20 @@ func (h *basicAuthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func prometheusHandler() http.Handler {
-	handler := prometheus.Handler()
+	handler := promhttp.InstrumentMetricHandler(
+		prometheus.DefaultRegisterer,
+		promhttp.HandlerFor(
+			prometheus.DefaultGatherer,
+			promhttp.HandlerOpts{
+				ErrorLog:      logger{},
+				ErrorHandling: promhttp.ContinueOnError,
+			},
+		),
+	)
 
 	if *authUsername != "" && *authPassword != "" {
 		handler = &basicAuthHandler{
-			handler:  prometheus.Handler().ServeHTTP,
+			handler:  handler.ServeHTTP,
 			username: *authUsername,
 			password: *authPassword,
 		}
