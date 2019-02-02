@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	safeNameRE = regexp.MustCompile(`[^a-zA-Z0-9_]*$`)
+	safeNameRE = regexp.MustCompile(`[^0-9A-Za-z]*$`)
 )
 
 func NormalizeName(name string) string {
