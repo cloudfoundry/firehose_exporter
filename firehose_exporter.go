@@ -9,7 +9,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
-	"gopkg.in/alecthomas/kingpin.v2"
+	kingpin "gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/bosh-prometheus/firehose_exporter/collectors"
 	"github.com/bosh-prometheus/firehose_exporter/filters"
@@ -115,7 +115,7 @@ func init() {
 type logger struct{}
 
 func (l logger) Println(v ...interface{}) {
-	log.Error(v)
+	log.Error(v...)
 }
 
 type basicAuthHandler struct {
