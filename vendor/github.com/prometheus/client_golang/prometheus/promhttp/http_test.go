@@ -103,7 +103,7 @@ func TestHandlerErrorHandling(t *testing.T) {
 	})
 	wantMsg := `error gathering metrics: error collecting metric Desc{fqName: "invalid_metric", help: "not helpful", constLabels: {}, variableLabels: []}: collect error
 `
-	wantErrorBody := `An error has occurred during metrics gathering:
+	wantErrorBody := `An error has occurred while serving metrics:
 
 error collecting metric Desc{fqName: "invalid_metric", help: "not helpful", constLabels: {}, variableLabels: []}: collect error
 `
@@ -121,7 +121,7 @@ the_count 0
 		t.Errorf("got HTTP status code %d, want %d", got, want)
 	}
 	if got := logBuf.String(); got != wantMsg {
-		t.Errorf("got log message:\n%s\nwant log mesage:\n%s\n", got, wantMsg)
+		t.Errorf("got log message:\n%s\nwant log message:\n%s\n", got, wantMsg)
 	}
 	if got := writer.Body.String(); got != wantErrorBody {
 		t.Errorf("got body:\n%s\nwant body:\n%s\n", got, wantErrorBody)
