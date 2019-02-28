@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"github.com/bosh-prometheus/firehose_exporter/authclient"
+	"github.com/cloudfoundry-incubator/uaago"
 	"net/http"
 	"os"
 	"strings"
@@ -9,13 +12,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
+	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/bosh-prometheus/firehose_exporter/collectors"
 	"github.com/bosh-prometheus/firehose_exporter/filters"
 	"github.com/bosh-prometheus/firehose_exporter/firehosenozzle"
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	"github.com/bosh-prometheus/firehose_exporter/uaatokenrefresher"
 )
 
 var (
@@ -31,29 +33,9 @@ var (
 		"uaa.client-secret", "Cloud Foundry UAA Client Secret ($FIREHOSE_EXPORTER_UAA_CLIENT_SECRET)",
 	).Envar("FIREHOSE_EXPORTER_UAA_CLIENT_SECRET").Required().String()
 
-	dopplerUrl = kingpin.Flag(
-		"doppler.url", "Cloud Foundry Doppler URL ($FIREHOSE_EXPORTER_DOPPLER_URL)",
-	).Envar("FIREHOSE_EXPORTER_DOPPLER_URL").Required().String()
-
 	dopplerSubscriptionID = kingpin.Flag(
 		"doppler.subscription-id", "Cloud Foundry Doppler Subscription ID ($FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID)",
 	).Envar("FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID").Default("prometheus").String()
-
-	dopplerIdleTimeout = kingpin.Flag(
-		"doppler.idle-timeout", "Cloud Foundry Doppler Idle Timeout duration ($FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT)",
-	).Envar("FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT").Default("0").Duration()
-
-	dopplerMinRetryDelay = kingpin.Flag(
-		"doppler.min-retry-delay", "Cloud Foundry Doppler min retry delay duration ($FIREHOSE_EXPORTER_DOPPLER_MIN_RETRY_DELAY)",
-	).Envar("FIREHOSE_EXPORTER_DOPPLER_MIN_RETRY_DELAY").Default("0").Duration()
-
-	dopplerMaxRetryDelay = kingpin.Flag(
-		"doppler.max-retry-delay", "Cloud Foundry Doppler max retry delay duration ($FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_DELAY)",
-	).Envar("FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_DELAY").Default("0").Duration()
-
-	dopplerMaxRetryCount = kingpin.Flag(
-		"doppler.max-retry-count", "Cloud Foundry Doppler max retry count ($FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_COUNT)",
-	).Envar("FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_COUNT").Default("0").Int()
 
 	dopplerMetricExpiration = kingpin.Flag(
 		"doppler.metric-expiration", "How long a Cloud Foundry Doppler metric is valid ($FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION)",
@@ -66,6 +48,10 @@ var (
 	filterEvents = kingpin.Flag(
 		"filter.events", "Comma separated events to filter (ContainerMetric,CounterEvent,ValueMetric) ($FIREHOSE_EXPORTER_FILTER_EVENTS)",
 	).Envar("FIREHOSE_EXPORTER_FILTER_EVENTS").Default("").String()
+
+	logStreamUrl = kingpin.Flag(
+		"logstream.url", "Cloud Foundry Log Stream ($FIREHOSE_EXPORTER_LOGSTREAM_URL)",
+	).Envar("FIREHOSE_EXPORTER_LOGSTREAM_URL").Required().String()
 
 	metricsNamespace = kingpin.Flag(
 		"metrics.namespace", "Metrics Namespace ($FIREHOSE_EXPORTER_METRICS_NAMESPACE)",
@@ -168,17 +154,6 @@ func main() {
 	log.Infoln("Starting firehose_exporter", version.Info())
 	log.Infoln("Build context", version.BuildContext())
 
-	authTokenRefresher, err := uaatokenrefresher.New(
-		*uaaUrl,
-		*uaaClientID,
-		*uaaClientSecret,
-		*skipSSLValidation,
-	)
-	if err != nil {
-		log.Errorf("Error creating UAA client: %s", err.Error())
-		os.Exit(1)
-	}
-
 	var deployments []string
 	if *filterDeployments != "" {
 		deployments = strings.Split(*filterDeployments, ",")
@@ -197,16 +172,19 @@ func main() {
 
 	metricsStore := metrics.NewStore(*dopplerMetricExpiration, *metricsCleanupInterval, deploymentFilter, eventFilter)
 
+	uaa, err := uaago.NewClient(*uaaUrl)
+	if err != nil {
+		log.Errorln(fmt.Sprint("Failed connecting to Get token from UAA..", err), "")
+	}
+
+	ac := authclient.NewHttp(uaa, *uaaClientID, *uaaClientSecret, *skipSSLValidation)
+
 	nozzle := firehosenozzle.New(
-		*dopplerUrl,
+		*logStreamUrl,
 		*skipSSLValidation,
 		*dopplerSubscriptionID,
-		*dopplerIdleTimeout,
-		*dopplerMinRetryDelay,
-		*dopplerMaxRetryDelay,
-		*dopplerMaxRetryCount,
-		authTokenRefresher,
 		metricsStore,
+		ac,
 	)
 	go func() {
 		nozzle.Start()

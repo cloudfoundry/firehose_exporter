@@ -7,5 +7,5 @@ applications:
       FIREHOSE_EXPORTER_UAA_URL: "Your UAA URL"
       FIREHOSE_EXPORTER_UAA_CLIENT_ID: "Your UAA Client ID"
       FIREHOSE_EXPORTER_UAA_CLIENT_SECRET: "Your UAA Client Secret"
-      FIREHOSE_EXPORTER_DOPPLER_URL: "Your Doppler URL"
+      FIREHOSE_EXPORTER_LOGSTREAM_URL: "Your Log Stream URL"
       FIREHOSE_EXPORTER_METRICS_ENVIRONMENT: "Environment label to be attached to metrics"

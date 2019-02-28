@@ -77,7 +77,6 @@ uaac client add prometheus-firehose \
 | `uaa.url`<br />`FIREHOSE_EXPORTER_UAA_URL` | Yes | | Cloud Foundry UAA URL |
 | `uaa.client-id`<br />`FIREHOSE_EXPORTER_UAA_CLIENT_ID` | Yes | | Cloud Foundry UAA Client ID |
 | `uaa.client-secret`<br />`FIREHOSE_EXPORTER_UAA_CLIENT_SECRET` | Yes | | Cloud Foundry UAA Client Secret |
-| `doppler.url`<br />`FIREHOSE_EXPORTER_DOPPLER_URL` | Yes | | Cloud Foundry Doppler URL |
 | `doppler.subscription-id`<br />`FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID` | No | `prometheus` | Cloud Foundry Doppler Subscription ID |
 | `doppler.idle-timeout`<br />`FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT` | No | | Cloud Foundry Doppler Idle Timeout duration |
 | `doppler.min-retry-delay`<br />`FIREHOSE_EXPORTER_DOPPLER_MIN_RETRY_DELAY` | No | | Cloud Foundry Doppler min retry delay duration |
@@ -86,6 +85,7 @@ uaac client add prometheus-firehose \
 | `doppler.metric-expiration`<br />`FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION` | No | `5 minutes` | How long Cloud Foundry metrics received from the Firehose are valid |
 | `filter.deployments`<br />`FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS` | No | | Comma separated deployments to filter |
 | `filter.events`<br />`FIREHOSE_EXPORTER_FILTER_EVENTS` | No | | Comma separated events to filter. If not set, all events will be enabled (`ContainerMetric`, `CounterEvent`, `HttpStartStop`, `ValueMetric`) |
+| `logstream.url`<br />`FIREHOSE_EXPORTER_LOGSTREAM_URL` | Yes | | Cloud Foundry Log Stream URL |
 | `metrics.namespace`<br />`FIREHOSE_EXPORTER_METRICS_NAMESPACE` | No | `firehose` | Metrics Namespace |
 | `metrics.environment`<br />`FIREHOSE_EXPORTER_METRICS_ENVIRONMENT` | Yes | | Environment label to be attached to metrics |
 | `metrics.cleanup-interval`<br />`FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL` | No | `2 minutes` | Metrics clean up interval |

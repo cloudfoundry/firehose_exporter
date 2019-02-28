@@ -1,15 +1,14 @@
 package fakes
 
 import (
+	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
+	"fmt"
+	"github.com/golang/protobuf/jsonpb"
+	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"sync"
-	"time"
-
-	"github.com/cloudfoundry/sonde-go/events"
-	"github.com/gogo/protobuf/proto"
-	"github.com/gorilla/websocket"
 )
 
 type FakeFirehose struct {
@@ -21,14 +20,17 @@ type FakeFirehose struct {
 	lastAuthorization string
 	requested         bool
 
-	events       []events.Envelope
+	events       chan *loggregator_v2.Envelope
 	closeMessage []byte
+	doneChan     chan struct{}
 }
 
 func NewFakeFirehose(validToken string) *FakeFirehose {
 	return &FakeFirehose{
 		validToken:   validToken,
 		closeMessage: websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
+		events:       make(chan *loggregator_v2.Envelope, 100),
+		doneChan:     make(chan struct{}),
 	}
 }
 
@@ -38,6 +40,7 @@ func (f *FakeFirehose) Start() {
 }
 
 func (f *FakeFirehose) Close() {
+	close(f.doneChan)
 	f.server.Close()
 }
 
@@ -57,22 +60,13 @@ func (f *FakeFirehose) Requested() bool {
 	return f.requested
 }
 
-func (f *FakeFirehose) AddEvent(event events.Envelope) {
-	f.lock.Lock()
-	defer f.lock.Unlock()
-	f.events = append(f.events, event)
-}
-
-func (f *FakeFirehose) SetCloseMessage(message []byte) {
-	f.lock.Lock()
-	defer f.lock.Unlock()
-	f.closeMessage = make([]byte, len(message))
-	copy(f.closeMessage, message)
+func (f *FakeFirehose) AddEvent(event *loggregator_v2.Envelope) {
+	f.events <- event
 }
 
 func (f *FakeFirehose) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	f.lock.Lock()
-	defer f.lock.Unlock()
+
 
 	f.lastAuthorization = r.Header.Get("Authorization")
 	f.requested = true
@@ -84,20 +78,38 @@ func (f *FakeFirehose) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	upgrader := websocket.Upgrader{
-		CheckOrigin: func(*http.Request) bool { return true },
+	f.lock.Unlock()
+
+	flusher, ok := rw.(http.Flusher)
+	if !ok {
+		http.Error(rw, "Streaming unsupported!", http.StatusInternalServerError)
+		return
 	}
 
-	ws, _ := upgrader.Upgrade(rw, r, nil)
+	rw.Header().Set("Content-Type", "text/event-stream")
+	rw.Header().Set("Cache-Control", "no-cache")
+	rw.Header().Set("Connection", "keep-alive")
+	rw.Header().Set("Access-Control-Allow-Origin", "*")
 
-	defer ws.Close()
-	defer ws.WriteControl(websocket.CloseMessage, f.closeMessage, time.Time{})
+	m := jsonpb.Marshaler{}
+	for {
+		select {
+		case envelope := <-f.events:
+			s, err := m.MarshalToString(&loggregator_v2.EnvelopeBatch{
+				Batch: []*loggregator_v2.Envelope{
+					envelope,
+				},
+			})
+			if err != nil {
+				panic(err)
+			}
 
-	for _, envelope := range f.events {
-		buffer, _ := proto.Marshal(&envelope)
-		err := ws.WriteMessage(websocket.BinaryMessage, buffer)
-		if err != nil {
-			panic(err)
+			_, _ = fmt.Fprintf(rw, "data: %s\n\n", s)
+			// Flush the data immediatly instead of buffering it for later.
+			flusher.Flush()
+
+		case <-f.doneChan:
+			return
 		}
 	}
 }
