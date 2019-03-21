@@ -1,11 +1,11 @@
-package firehosenozzle_test
+package logstream_test
 
 import (
 	"code.cloudfoundry.org/go-loggregator"
 	"code.cloudfoundry.org/go-loggregator/conversion"
 	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
 	"context"
-	"github.com/bosh-prometheus/firehose_exporter/firehosenozzle"
+	"github.com/bosh-prometheus/firehose_exporter/logstream"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -29,7 +29,7 @@ var _ = Describe("V2adapter", func() {
 		stubStreamer := newStubStreamer()
 		stubStreamer.envs = []*loggregator_v2.Envelope{v2Env}
 
-		firehoseAdapter := firehosenozzle.NewV2Adapter(stubStreamer)
+		firehoseAdapter := logstream.NewV2Adapter(stubStreamer)
 		messages := firehoseAdapter.Firehose("test-subscription")
 
 		expected := conversion.ToV1(v2Env)
@@ -72,7 +72,7 @@ var _ = Describe("V2adapter", func() {
 		stubStreamer := newStubStreamer()
 		stubStreamer.envs = []*loggregator_v2.Envelope{v2Env}
 
-		firehoseAdapter := firehosenozzle.NewV2Adapter(stubStreamer)
+		firehoseAdapter := logstream.NewV2Adapter(stubStreamer)
 		messages := firehoseAdapter.Firehose("test-subscription")
 
 		expected := conversion.ToV1(v2Env)

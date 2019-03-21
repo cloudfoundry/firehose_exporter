@@ -1,4 +1,4 @@
-package firehosenozzle_test
+package logstream_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -9,5 +9,5 @@ import (
 
 func TestFirehoseNozzle(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "FirehoseNozzle Suite")
+	RunSpecs(t, "LogStream Suite")
 }

@@ -1,4 +1,4 @@
-package firehosenozzle
+package logstream
 
 import (
 	"code.cloudfoundry.org/go-loggregator"

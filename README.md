@@ -85,7 +85,8 @@ uaac client add prometheus-firehose \
 | `doppler.metric-expiration`<br />`FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION` | No | `5 minutes` | How long Cloud Foundry metrics received from the Firehose are valid |
 | `filter.deployments`<br />`FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS` | No | | Comma separated deployments to filter |
 | `filter.events`<br />`FIREHOSE_EXPORTER_FILTER_EVENTS` | No | | Comma separated events to filter. If not set, all events will be enabled (`ContainerMetric`, `CounterEvent`, `HttpStartStop`, `ValueMetric`) |
-| `logstream.url`<br />`FIREHOSE_EXPORTER_LOGSTREAM_URL` | Yes | | Cloud Foundry Log Stream URL |
+| `logging.url`<br />`FIREHOSE_EXPORTER_LOGGING_URL` | Yes | | Cloud Foundry Log Stream URL |
+| `logging.use-legacy-firehose`<br />`USE_LEGACY_FIREHOSE` | No | False | Whether to use the legacy firehose |
 | `metrics.namespace`<br />`FIREHOSE_EXPORTER_METRICS_NAMESPACE` | No | `firehose` | Metrics Namespace |
 | `metrics.environment`<br />`FIREHOSE_EXPORTER_METRICS_ENVIRONMENT` | Yes | | Environment label to be attached to metrics |
 | `metrics.cleanup-interval`<br />`FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL` | No | `2 minutes` | Metrics clean up interval |

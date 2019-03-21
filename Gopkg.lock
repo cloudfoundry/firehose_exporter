@@ -65,6 +65,19 @@
   revision = "be6a0cef0130f933079e4c958abac60fadea0c85"
 
 [[projects]]
+  digest = "1:3384adff914832a52ced39dff6c4f7c9919a842eb0d53fd7167679b0cbef3750"
+  name = "github.com/cloudfoundry/noaa"
+  packages = [
+    ".",
+    "consumer",
+    "consumer/internal",
+    "errors",
+  ]
+  pruneopts = ""
+  revision = "a1d4a94e2be6711111893c59538976d07ef7ea98"
+  version = "v2.1.0"
+
+[[projects]]
   branch = "master"
   digest = "1:5ff61607a711d2b27bc683eb56b83d536a7ba7f2822d779288c013c2f0dbd515"
   name = "github.com/cloudfoundry/sonde-go"
@@ -403,6 +416,8 @@
     "code.cloudfoundry.org/go-loggregator/conversion",
     "code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2",
     "github.com/cloudfoundry-incubator/uaago",
+    "github.com/cloudfoundry/noaa/consumer",
+    "github.com/cloudfoundry/noaa/errors",
     "github.com/cloudfoundry/sonde-go/events",
     "github.com/fatih/camelcase",
     "github.com/gogo/protobuf/proto",
