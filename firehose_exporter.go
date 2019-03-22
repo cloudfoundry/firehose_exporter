@@ -35,10 +35,6 @@ var (
 		"uaa.client-secret", "Cloud Foundry UAA Client Secret ($FIREHOSE_EXPORTER_UAA_CLIENT_SECRET)",
 	).Envar("FIREHOSE_EXPORTER_UAA_CLIENT_SECRET").Required().String()
 
-	dopplerUrl = kingpin.Flag(
-		"doppler.url", "Cloud Foundry Doppler URL ($FIREHOSE_EXPORTER_DOPPLER_URL)",
-	).Envar("FIREHOSE_EXPORTER_DOPPLER_URL").Required().String()
-
 	dopplerSubscriptionID = kingpin.Flag(
 		"doppler.subscription-id", "Cloud Foundry Doppler Subscription ID ($FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID)",
 	).Envar("FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID").Default("prometheus").String()
@@ -271,7 +267,7 @@ func startLegacyFirehose(metricsStore *metrics.Store) {
 		os.Exit(1)
 	}
 	nozzle := firehosenozzle.New(
-		*dopplerUrl,
+		*loggingURL,
 		*skipSSLValidation,
 		*dopplerSubscriptionID,
 		*dopplerIdleTimeout,
