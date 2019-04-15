@@ -96,6 +96,12 @@ var _ = Describe("ValueMetricsCollector", func() {
 			valueMetricsChan chan prometheus.Metric
 			valueMetric1     prometheus.Metric
 			valueMetric2     prometheus.Metric
+
+			tag1Name  = "tag1"
+			tag1Value = "fakeTag1"
+
+			tag2Name  = "tag2"
+			tag2Value = "fakeTag2"
 		)
 
 		BeforeEach(func() {
@@ -112,6 +118,9 @@ var _ = Describe("ValueMetricsCollector", func() {
 						Name:  proto.String(valueMetric1Name),
 						Value: proto.Float64(valueMetric1Value),
 						Unit:  proto.String(valueMetric1Unit),
+					},
+					Tags: map[string]string{
+						tag1Name: tag1Value,
 					},
 				},
 			)
@@ -130,6 +139,9 @@ var _ = Describe("ValueMetricsCollector", func() {
 						Value: proto.Float64(valueMetric2Value),
 						Unit:  proto.String(valueMetric2Unit),
 					},
+					Tags: map[string]string{
+						tag2Name: tag2Value,
+					},
 				},
 			)
 
@@ -139,7 +151,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "value_metric", valueMetric1OriginNameNormalized+"_"+valueMetric1NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric1DescNormalized, valueMetric1OriginDescNormalized),
-					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit"},
+					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit", tag1Name},
 					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
@@ -150,13 +162,14 @@ var _ = Describe("ValueMetricsCollector", func() {
 				boshIndex,
 				boshIP,
 				valueMetric1Unit,
+				tag1Value,
 			)
 
 			valueMetric2 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "value_metric", valueMetric2OriginNameNormalized+"_"+valueMetric2NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric2DescNormalized, valueMetric2OriginDescNormalized),
-					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit"},
+					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit", tag2Name},
 					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
@@ -167,6 +180,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 				boshIndex,
 				boshIP,
 				valueMetric2Unit,
+				tag2Value,
 			)
 		})
 
