@@ -40,22 +40,27 @@ func NewValueMetricsCollector(
 func (c ValueMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, valueMetric := range c.metricsStore.GetValueMetrics() {
 		metricName := utils.NormalizeName(valueMetric.Origin) + "_" + utils.NormalizeName(valueMetric.Name)
+
+		constLabels := []string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit"}
+		labelValues := []string{valueMetric.Origin, valueMetric.Deployment, valueMetric.Job, valueMetric.Index, valueMetric.IP, valueMetric.Unit}
+
+		for k, v := range valueMetric.Tags {
+			constLabels = append(constLabels, k)
+			labelValues = append(labelValues, v)
+		}
+
 		vm, err := prometheus.NewConstMetric(
 			prometheus.NewDesc(
 				prometheus.BuildFQName(c.namespace, value_metrics_subsystem, metricName),
 				fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", utils.NormalizeNameDesc(valueMetric.Name), utils.NormalizeOriginDesc(valueMetric.Origin)),
-				[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit"},
+				constLabels,
 				prometheus.Labels{"environment": c.environment},
 			),
 			prometheus.GaugeValue,
 			float64(valueMetric.Value),
-			valueMetric.Origin,
-			valueMetric.Deployment,
-			valueMetric.Job,
-			valueMetric.Index,
-			valueMetric.IP,
-			valueMetric.Unit,
+			labelValues...,
 		)
+
 		if err != nil {
 			log.Errorf("Value Metric `%s` from `%s` discarded: %s", valueMetric.Name, valueMetric.Origin, err)
 			continue
