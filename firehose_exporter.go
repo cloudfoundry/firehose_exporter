@@ -1,6 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"github.com/bosh-prometheus/firehose_exporter/authclient"
+	"github.com/bosh-prometheus/firehose_exporter/logstream"
+	"github.com/bosh-prometheus/firehose_exporter/uaatokenrefresher"
+	"github.com/cloudfoundry-incubator/uaago"
 	"net/http"
 	"os"
 	"strings"
@@ -9,13 +14,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
+	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/bosh-prometheus/firehose_exporter/collectors"
 	"github.com/bosh-prometheus/firehose_exporter/filters"
 	"github.com/bosh-prometheus/firehose_exporter/firehosenozzle"
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	"github.com/bosh-prometheus/firehose_exporter/uaatokenrefresher"
 )
 
 var (
@@ -30,10 +34,6 @@ var (
 	uaaClientSecret = kingpin.Flag(
 		"uaa.client-secret", "Cloud Foundry UAA Client Secret ($FIREHOSE_EXPORTER_UAA_CLIENT_SECRET)",
 	).Envar("FIREHOSE_EXPORTER_UAA_CLIENT_SECRET").Required().String()
-
-	dopplerUrl = kingpin.Flag(
-		"doppler.url", "Cloud Foundry Doppler URL ($FIREHOSE_EXPORTER_DOPPLER_URL)",
-	).Envar("FIREHOSE_EXPORTER_DOPPLER_URL").Required().String()
 
 	dopplerSubscriptionID = kingpin.Flag(
 		"doppler.subscription-id", "Cloud Foundry Doppler Subscription ID ($FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID)",
@@ -66,6 +66,14 @@ var (
 	filterEvents = kingpin.Flag(
 		"filter.events", "Comma separated events to filter (ContainerMetric,CounterEvent,ValueMetric) ($FIREHOSE_EXPORTER_FILTER_EVENTS)",
 	).Envar("FIREHOSE_EXPORTER_FILTER_EVENTS").Default("").String()
+
+	loggingURL = kingpin.Flag(
+		"logging.url", "Cloud Foundry Logging endpoint ($FIREHOSE_EXPORTER_LOGGING_URL)",
+	).Envar("FIREHOSE_EXPORTER_LOGGING_URL").Required().String()
+
+	useLegacyFirehose = kingpin.Flag(
+		"logging.use-legacy-firehose", "Whether to use the v1 firehose rather than the RLP ($USE_LEGACY_FIREHOSE)",
+	).Envar("USE_LEGACY_FIREHOSE").Bool()
 
 	metricsNamespace = kingpin.Flag(
 		"metrics.namespace", "Metrics Namespace ($FIREHOSE_EXPORTER_METRICS_NAMESPACE)",
@@ -168,17 +176,6 @@ func main() {
 	log.Infoln("Starting firehose_exporter", version.Info())
 	log.Infoln("Build context", version.BuildContext())
 
-	authTokenRefresher, err := uaatokenrefresher.New(
-		*uaaUrl,
-		*uaaClientID,
-		*uaaClientSecret,
-		*skipSSLValidation,
-	)
-	if err != nil {
-		log.Errorf("Error creating UAA client: %s", err.Error())
-		os.Exit(1)
-	}
-
 	var deployments []string
 	if *filterDeployments != "" {
 		deployments = strings.Split(*filterDeployments, ",")
@@ -197,21 +194,11 @@ func main() {
 
 	metricsStore := metrics.NewStore(*dopplerMetricExpiration, *metricsCleanupInterval, deploymentFilter, eventFilter)
 
-	nozzle := firehosenozzle.New(
-		*dopplerUrl,
-		*skipSSLValidation,
-		*dopplerSubscriptionID,
-		*dopplerIdleTimeout,
-		*dopplerMinRetryDelay,
-		*dopplerMaxRetryDelay,
-		*dopplerMaxRetryCount,
-		authTokenRefresher,
-		metricsStore,
-	)
-	go func() {
-		nozzle.Start()
-		os.Exit(1)
-	}()
+	if *useLegacyFirehose {
+		startLegacyFirehose(metricsStore)
+	} else {
+		startLogStream(metricsStore)
+	}
 
 	internalMetricsCollector := collectors.NewInternalMetricsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
 	prometheus.MustRegister(internalMetricsCollector)
@@ -232,12 +219,12 @@ func main() {
 	http.Handle(*metricsPath, handler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
-             <head><title>Cloud Foundry Firehose Exporter</title></head>
-             <body>
-             <h1>Cloud Foundry Firehose Exporter</h1>
-             <p><a href='` + *metricsPath + `'>Metrics</a></p>
-             </body>
-             </html>`))
+				             <head><title>Cloud Foundry Firehose Exporter</title></head>
+				             <body>
+				             <h1>Cloud Foundry Firehose Exporter</h1>
+				             <p><a href='` + *metricsPath + `'>Metrics</a></p>
+				             </body>
+				             </html>`))
 	})
 
 	if *tlsCertFile != "" && *tlsKeyFile != "" {
@@ -247,4 +234,51 @@ func main() {
 		log.Infoln("Listening on", *listenAddress)
 		log.Fatal(http.ListenAndServe(*listenAddress, nil))
 	}
+}
+
+func startLogStream(metricsStore *metrics.Store) {
+	uaa, err := uaago.NewClient(*uaaUrl)
+	if err != nil {
+		log.Errorln(fmt.Sprint("Failed connecting to Get token from UAA..", err), "")
+	}
+	ac := authclient.NewHttp(uaa, *uaaClientID, *uaaClientSecret, *skipSSLValidation)
+	ls := logstream.New(
+		*loggingURL,
+		*skipSSLValidation,
+		*dopplerSubscriptionID,
+		metricsStore,
+		ac,
+	)
+	go func() {
+		ls.Start()
+		os.Exit(1)
+	}()
+}
+
+func startLegacyFirehose(metricsStore *metrics.Store) {
+	authTokenRefresher, err := uaatokenrefresher.New(
+		*uaaUrl,
+		*uaaClientID,
+		*uaaClientSecret,
+		*skipSSLValidation,
+	)
+	if err != nil {
+		log.Errorf("Error creating UAA client: %s", err.Error())
+		os.Exit(1)
+	}
+	nozzle := firehosenozzle.New(
+		*loggingURL,
+		*skipSSLValidation,
+		*dopplerSubscriptionID,
+		*dopplerIdleTimeout,
+		*dopplerMinRetryDelay,
+		*dopplerMaxRetryDelay,
+		*dopplerMaxRetryCount,
+		authTokenRefresher,
+		metricsStore,
+	)
+	go func() {
+		nozzle.Start()
+		os.Exit(1)
+	}()
 }
