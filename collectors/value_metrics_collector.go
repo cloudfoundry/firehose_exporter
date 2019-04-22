@@ -45,7 +45,7 @@ func (c ValueMetricsCollector) Collect(ch chan<- prometheus.Metric) {
 		labelValues := []string{valueMetric.Origin, valueMetric.Deployment, valueMetric.Job, valueMetric.Index, valueMetric.IP, valueMetric.Unit}
 
 		for k, v := range valueMetric.Tags {
-			constLabels = append(constLabels, k)
+			constLabels = append(constLabels, utils.NormalizeName(k))
 			labelValues = append(labelValues, v)
 		}
 

@@ -97,11 +97,13 @@ var _ = Describe("ValueMetricsCollector", func() {
 			valueMetric1     prometheus.Metric
 			valueMetric2     prometheus.Metric
 
-			tag1Name  = "tag1"
-			tag1Value = "fakeTag1"
+			tag1Name           = "tag1"
+			tag1NameNormalized = "tag_1"
+			tag1Value          = "fakeTag1"
 
-			tag2Name  = "tag2"
-			tag2Value = "fakeTag2"
+			tag2Name           = "tag-2"
+			tag2NameNormalized = "tag_2"
+			tag2Value          = "fakeTag2"
 		)
 
 		BeforeEach(func() {
@@ -151,7 +153,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "value_metric", valueMetric1OriginNameNormalized+"_"+valueMetric1NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric1DescNormalized, valueMetric1OriginDescNormalized),
-					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit", tag1Name},
+					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit", tag1NameNormalized},
 					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
@@ -169,7 +171,7 @@ var _ = Describe("ValueMetricsCollector", func() {
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "value_metric", valueMetric2OriginNameNormalized+"_"+valueMetric2NameNormalized),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' value metric from '%s'.", valueMetric2DescNormalized, valueMetric2OriginDescNormalized),
-					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit", tag2Name},
+					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", "unit", tag2NameNormalized},
 					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
