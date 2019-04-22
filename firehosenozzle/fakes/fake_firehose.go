@@ -1,15 +1,15 @@
 package fakes
 
 import (
-"log"
-"net/http"
-"net/http/httptest"
-"sync"
-"time"
+	"log"
+	"net/http"
+	"net/http/httptest"
+	"sync"
+	"time"
 
-"github.com/cloudfoundry/sonde-go/events"
-"github.com/gogo/protobuf/proto"
-"github.com/gorilla/websocket"
+	"github.com/cloudfoundry/sonde-go/events"
+	"github.com/gogo/protobuf/proto"
+	"github.com/gorilla/websocket"
 )
 
 type FakeFirehose struct {

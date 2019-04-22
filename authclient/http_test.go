@@ -10,13 +10,12 @@ import (
 )
 
 var _ = Describe("Http", func() {
-	It("inserts an auth header for any calls it makes", func (){
+	It("inserts an auth header for any calls it makes", func() {
 		var token string
-		h := http.HandlerFunc(func (w http.ResponseWriter, r *http.Request) {
+		h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			token = r.Header.Get("Authorization")
 		})
 		s := httptest.NewServer(h)
-
 
 		tf := newStubTokenFetcher()
 		tf.token = "test-token"
@@ -47,8 +46,8 @@ var _ = Describe("Http", func() {
 })
 
 type stubTokenFetcher struct {
-	token string
-	err error
+	token          string
+	err            error
 	skipCertVerify bool
 }
 

@@ -67,7 +67,6 @@ func (f *FakeLogStream) AddEvent(event *loggregator_v2.Envelope) {
 func (f *FakeLogStream) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	f.lock.Lock()
 
-
 	f.lastAuthorization = r.Header.Get("Authorization")
 	f.requested = true
 

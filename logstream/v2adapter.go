@@ -14,7 +14,7 @@ type Streamer interface {
 
 type V2Adapter struct {
 	streamer Streamer
-	cancel context.CancelFunc
+	cancel   context.CancelFunc
 }
 
 func NewV2Adapter(s Streamer) *V2Adapter {
