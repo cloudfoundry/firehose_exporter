@@ -241,7 +241,7 @@ var _ = Describe("PrometheusMetric", func() {
 			)
 			actualMetric.WithLabelValues(metricLabelValue).Observe(float64(1))
 
-			Expect(expectedMetric.WithLabelValues(metricLabelValue)).To(PrometheusMetric(actualMetric.WithLabelValues(metricLabelValue).(prometheus.Histogram)))
+			Expect(expectedMetric.WithLabelValues(metricLabelValue)).To(PrometheusMetric(actualMetric.WithLabelValues(metricLabelValue).(prometheus.Summary)))
 		})
 	})
 })
