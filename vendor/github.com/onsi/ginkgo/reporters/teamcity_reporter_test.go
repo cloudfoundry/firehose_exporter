@@ -3,19 +3,20 @@ package reporters_test
 import (
 	"bytes"
 	"fmt"
+	"time"
+
 	. "github.com/onsi/ginkgo"
 	"github.com/onsi/ginkgo/config"
 	"github.com/onsi/ginkgo/internal/codelocation"
 	"github.com/onsi/ginkgo/reporters"
 	"github.com/onsi/ginkgo/types"
 	. "github.com/onsi/gomega"
-	"time"
 )
 
 var _ = Describe("TeamCity Reporter", func() {
 	var (
 		buffer   bytes.Buffer
-		reporter Reporter
+		reporter *reporters.TeamCityReporter
 	)
 
 	BeforeEach(func() {
@@ -39,8 +40,12 @@ var _ = Describe("TeamCity Reporter", func() {
 			}
 			reporter.AfterSuiteDidRun(afterSuite)
 
+			// Set the ReportPassed config flag, in order to show captured output when tests have passed.
+			reporter.ReporterConfig.ReportPassed = true
+
 			spec := &types.SpecSummary{
 				ComponentTexts: []string{"[Top Level]", "A", "B", "C"},
+				CapturedOutput: "Test scenario...",
 				State:          types.SpecStatePassed,
 				RunTime:        5 * time.Second,
 			}
@@ -59,6 +64,7 @@ var _ = Describe("TeamCity Reporter", func() {
 			expected :=
 				"##teamcity[testSuiteStarted name='Foo|'s test suite']" +
 					"##teamcity[testStarted name='A B C']" +
+					"##teamcity[testPassed name='A B C' details='Test scenario...']" +
 					"##teamcity[testFinished name='A B C' duration='5000']" +
 					"##teamcity[testSuiteFinished name='Foo|'s test suite']"
 			Ω(actual).Should(Equal(expected))

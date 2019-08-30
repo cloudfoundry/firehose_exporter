@@ -20,59 +20,7 @@
 #  name = "github.com/x/y"
 #  version = "2.4.0"
 
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/cloudfoundry-incubator/uaago"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/cloudfoundry/sonde-go"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/fatih/camelcase"
-
-[[constraint]]
-  name = "github.com/gogo/protobuf"
-  version = "1.2.0"
-
-[[constraint]]
-  name = "github.com/gorilla/websocket"
-  version = "1.4.0"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/nu7hatch/gouuid"
-
-[[constraint]]
-  name = "github.com/onsi/ginkgo"
-  version = "1.4.0"
-
-[[constraint]]
-  name = "github.com/onsi/gomega"
-  version = "1.4.3"
-
-[[constraint]]
-  name = "github.com/patrickmn/go-cache"
-  version = "2.1.0"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/prometheus/client_golang"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/prometheus/client_model"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/prometheus/common"
-
-[[constraint]]
-  name = "code.cloudfoundry.org/go-loggregator"
-  version = "7.3.0"
-
-[[constraint]]
-  name = "github.com/cloudfoundry/noaa"
-  version = "2.1.0"
+# https://github.com/golang/dep/issues/1799
+[[override]]
+  name = "gopkg.in/fsnotify.v1"
+  source = "https://github.com/fsnotify/fsnotify.git"

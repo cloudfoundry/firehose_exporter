@@ -28,6 +28,7 @@ var _ = Describe("DefaultReporter", func() {
 			NoColor:           false,
 			SlowSpecThreshold: 0.1,
 			NoisyPendings:     false,
+			NoisySkippings:    false,
 			Verbose:           true,
 			FullTrace:         true,
 		}
@@ -35,9 +36,7 @@ var _ = Describe("DefaultReporter", func() {
 		reporter = reporters.NewDefaultReporter(reporterConfig, stenographer)
 	})
 
-	call := func(method string, args ...interface{}) st.FakeStenographerCall {
-		return st.NewFakeStenographerCall(method, args...)
-	}
+	call := st.NewFakeStenographerCall
 
 	Describe("SpecSuiteWillBegin", func() {
 		BeforeEach(func() {
@@ -236,9 +235,21 @@ var _ = Describe("DefaultReporter", func() {
 				})
 			})
 
-			Context("Otherwise", func() {
-				It("should announce the succesful spec", func() {
+			Context("When the spec is successful", func() {
+				It("should announce the successful spec", func() {
 					Ω(stenographer.Calls()[0]).Should(Equal(call("AnnounceSuccesfulSpec", spec)))
+				})
+
+				Context("When ReportPassed flag is set", func() {
+					BeforeEach(func() {
+						reporterConfig.ReportPassed = true
+						reporter = reporters.NewDefaultReporter(reporterConfig, stenographer)
+						spec.CapturedOutput = "test scenario"
+					})
+
+					It("should announce the captured output", func() {
+						Ω(stenographer.Calls()[1]).Should(Equal(call("AnnounceCapturedOutput", spec.CapturedOutput)))
+					})
 				})
 			})
 		})
@@ -258,8 +269,8 @@ var _ = Describe("DefaultReporter", func() {
 				spec.State = types.SpecStateSkipped
 			})
 
-			It("should announce the skipped spec", func() {
-				Ω(stenographer.Calls()[0]).Should(Equal(call("AnnounceSkippedSpec", spec, false, true)))
+			It("should announce the skipped spec, succinctly", func() {
+				Ω(stenographer.Calls()[0]).Should(Equal(call("AnnounceSkippedSpec", spec, true, true)))
 			})
 		})
 
@@ -311,6 +322,24 @@ var _ = Describe("DefaultReporter", func() {
 			})
 		})
 
+		Context("in noisy skippings mode", func() {
+			BeforeEach(func() {
+				reporterConfig.Succinct = false
+				reporterConfig.NoisySkippings = true
+				reporter = reporters.NewDefaultReporter(reporterConfig, stenographer)
+			})
+
+			Context("When the spec is skipped", func() {
+				BeforeEach(func() {
+					spec.State = types.SpecStateSkipped
+				})
+
+				It("should announce the skipped spec, noisily", func() {
+					Ω(stenographer.Calls()[0]).Should(Equal(call("AnnounceSkippedSpec", spec, false, true)))
+				})
+			})
+		})
+
 		Context("in succinct mode", func() {
 			BeforeEach(func() {
 				reporterConfig.Succinct = true
@@ -342,9 +371,21 @@ var _ = Describe("DefaultReporter", func() {
 					})
 				})
 
-				Context("Otherwise", func() {
-					It("should announce the succesful spec", func() {
+				Context("When the spec is successful", func() {
+					It("should announce the successful spec", func() {
 						Ω(stenographer.Calls()[0]).Should(Equal(call("AnnounceSuccesfulSpec", spec)))
+					})
+
+					Context("When ReportPassed flag is set", func() {
+						BeforeEach(func() {
+							reporterConfig.ReportPassed = true
+							reporter = reporters.NewDefaultReporter(reporterConfig, stenographer)
+							spec.CapturedOutput = "test scenario"
+						})
+
+						It("should announce the captured output", func() {
+							Ω(stenographer.Calls()[1]).Should(Equal(call("AnnounceCapturedOutput", spec.CapturedOutput)))
+						})
 					})
 				})
 			})
