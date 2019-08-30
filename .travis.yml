@@ -2,6 +2,9 @@ sudo: required
 
 language: go
 
+go:
+  - 1.12.x
+
 go_import_path: github.com/bosh-prometheus/firehose_exporter
 
 services:
