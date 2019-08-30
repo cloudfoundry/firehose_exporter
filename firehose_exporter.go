@@ -2,24 +2,24 @@ package main
 
 import (
 	"fmt"
-	"github.com/bosh-prometheus/firehose_exporter/authclient"
-	"github.com/bosh-prometheus/firehose_exporter/logstream"
-	"github.com/bosh-prometheus/firehose_exporter/uaatokenrefresher"
-	"github.com/cloudfoundry-incubator/uaago"
 	"net/http"
 	"os"
 	"strings"
 
+	"github.com/cloudfoundry-incubator/uaago"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/log"
 	"github.com/prometheus/common/version"
 	"gopkg.in/alecthomas/kingpin.v2"
 
+	"github.com/bosh-prometheus/firehose_exporter/authclient"
 	"github.com/bosh-prometheus/firehose_exporter/collectors"
 	"github.com/bosh-prometheus/firehose_exporter/filters"
 	"github.com/bosh-prometheus/firehose_exporter/firehosenozzle"
+	"github.com/bosh-prometheus/firehose_exporter/logstream"
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
+	"github.com/bosh-prometheus/firehose_exporter/uaatokenrefresher"
 )
 
 var (
