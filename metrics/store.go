@@ -2,6 +2,8 @@ package metrics
 
 import (
 	"bytes"
+	"fmt"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -370,8 +372,32 @@ func (s *Store) metricKey(envelope *events.Envelope) string {
 	case events.Envelope_HttpStartStop:
 		buffer.WriteString(envelope.GetHttpStartStop().GetRequestId().String())
 	case events.Envelope_ValueMetric:
-		buffer.WriteString(envelope.GetValueMetric().GetName())
+		buffer.WriteString(generateMetricName(envelope))
 	}
 
 	return buffer.String()
+}
+
+// Issue:
+// 		https://github.com/bosh-prometheus/firehose_exporter/issues/47
+// Solution:
+// 1. Check if the metric being emitted comes from the container of the app
+// the way we are going to do that is by checking if the origin has a uuid
+// which means its from the container
+// 2. Once detected that is from the app container, then add a little more extra info
+// on the metric name like tags, just to differentiate the metrics and emit all of them
+func generateMetricName(envelope *events.Envelope) string {
+	name := envelope.GetValueMetric().GetName()
+	uuidRegex := "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$"
+	regexp := regexp.MustCompile(uuidRegex)
+	isItValidUuid := regexp.MatchString(*envelope.Origin)
+	if isItValidUuid {
+		if envelope.Tags != nil {
+			for _, tagValue := range envelope.Tags {
+				name = name + tagValue
+			}
+		}
+		return name
+	}
+	return name
 }
