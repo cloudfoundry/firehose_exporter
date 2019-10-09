@@ -2,7 +2,6 @@ package metrics
 
 import (
 	"bytes"
-	"fmt"
 	"regexp"
 	"strconv"
 	"time"
