@@ -393,7 +393,7 @@ func generateMetricName(envelope *events.Envelope) string {
 	if isItValidUuid {
 		if envelope.Tags != nil {
 			for _, tagValue := range envelope.Tags {
-				name = name + tagValue
+				name = name + utils.NormalizeName(tagValue)
 			}
 		}
 		return name
