@@ -367,11 +367,11 @@ func (s *Store) metricKey(envelope *events.Envelope) string {
 		buffer.WriteString(envelope.GetContainerMetric().GetApplicationId())
 		buffer.WriteString(strconv.Itoa(int(envelope.GetContainerMetric().GetInstanceIndex())))
 	case events.Envelope_CounterEvent:
-		buffer.WriteString(envelope.GetCounterEvent().GetName())
+		buffer.WriteString(generateMetricName(envelope, "CounterEvent"))
 	case events.Envelope_HttpStartStop:
 		buffer.WriteString(envelope.GetHttpStartStop().GetRequestId().String())
 	case events.Envelope_ValueMetric:
-		buffer.WriteString(generateMetricName(envelope))
+		buffer.WriteString(generateMetricName(envelope, "ValueMetric"))
 	}
 
 	return buffer.String()
@@ -385,11 +385,16 @@ func (s *Store) metricKey(envelope *events.Envelope) string {
 // which means its from the container
 // 2. Once detected that is from the app container, then add a little more extra info
 // on the metric name like tags, just to differentiate the metrics and emit all of them
-func generateMetricName(envelope *events.Envelope) string {
-	name := envelope.GetValueMetric().GetName()
+func generateMetricName(envelope *events.Envelope, whichType string) string {
+	var name string
+	if whichType == "ValueMetric" {
+		name = envelope.GetValueMetric().GetName()
+	} else {
+		name = envelope.GetCounterEvent().GetName()
+	}
 	uuidRegex := "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$"
-	regexp := regexp.MustCompile(uuidRegex)
-	isItValidUuid := regexp.MatchString(*envelope.Origin)
+	reg := regexp.MustCompile(uuidRegex)
+	isItValidUuid := reg.MatchString(*envelope.Origin)
 	if isItValidUuid {
 		if envelope.Tags != nil {
 			for _, tagValue := range envelope.Tags {
