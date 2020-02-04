@@ -40,20 +40,25 @@ func NewCounterEventsCollector(
 func (c CounterEventsCollector) Collect(ch chan<- prometheus.Metric) {
 	for _, counterEvent := range c.metricsStore.GetCounterEvents() {
 		metricName := utils.NormalizeName(counterEvent.Origin) + "_" + utils.NormalizeName(counterEvent.Name) + "_total"
+		
+		constLabels := []string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"}
+		labelValues := []string{counterEvent.Origin, counterEvent.Deployment, counterEvent.Job, counterEvent.Index, counterEvent.IP}
+
+		for k, v := range counterEvent.Tags {
+			constLabels = append(constLabels, k)
+			labelValues = append(labelValues, v)
+		}
+		
 		tcm, err := prometheus.NewConstMetric(
 			prometheus.NewDesc(
 				prometheus.BuildFQName(c.namespace, counter_events_subsystem, metricName),
 				fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", utils.NormalizeNameDesc(counterEvent.Name), utils.NormalizeOriginDesc(counterEvent.Origin)),
-				[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
+				constLabels,
 				prometheus.Labels{"environment": c.environment},
 			),
 			prometheus.CounterValue,
 			float64(counterEvent.Total),
-			counterEvent.Origin,
-			counterEvent.Deployment,
-			counterEvent.Job,
-			counterEvent.Index,
-			counterEvent.IP,
+			labelValues...,
 		)
 		if err != nil {
 			log.Errorf("Counter Event `%s` from `%s` discarded: %s", counterEvent.Name, counterEvent.Origin, err)
