@@ -98,11 +98,13 @@ var _ = Describe("CounterEventsCollector", func() {
 			deltaCounterEvent1 prometheus.Metric
 			totalCounterEvent2 prometheus.Metric
 			deltaCounterEvent2 prometheus.Metric
-			
+
 			tag1Name  = "tag1"
+			tag1NameNormalized = "tag_1"
 			tag1Value = "fakeTag1"
 
 			tag2Name  = "tag2"
+			tag2NameNormalized = "tag_2"
 			tag2Value = "fakeTag2"
 		)
 
@@ -153,7 +155,7 @@ var _ = Describe("CounterEventsCollector", func() {
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", counterEvent1OriginNameNormalized+"_"+counterEvent1NameNormalized+"_total"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", counterEvent1DescNormalized, counterEvent1OriginDescNormalized),
-					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", tag1Name},
+					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", tag1NameNormalized},
 					prometheus.Labels{"environment": environment},
 				),
 				prometheus.CounterValue,
@@ -170,7 +172,7 @@ var _ = Describe("CounterEventsCollector", func() {
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", counterEvent1OriginNameNormalized+"_"+counterEvent1NameNormalized+"_delta"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event from '%s'.", counterEvent1DescNormalized, counterEvent1OriginDescNormalized),
-					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", tag1Name},
+					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", tag1NameNormalized},
 					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
@@ -187,7 +189,7 @@ var _ = Describe("CounterEventsCollector", func() {
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", counterEvent2OriginNameNormalized+"_"+counterEvent2NameNormalized+"_total"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", counterEvent2DescNormalized, counterEvent2OriginDescNormalized),
-					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", tag2Name},
+					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", tag2NameNormalized},
 					prometheus.Labels{"environment": environment},
 				),
 				prometheus.CounterValue,
@@ -204,7 +206,7 @@ var _ = Describe("CounterEventsCollector", func() {
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", counterEvent2OriginNameNormalized+"_"+counterEvent2NameNormalized+"_delta"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event from '%s'.", counterEvent2DescNormalized, counterEvent2OriginDescNormalized),
-					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", tag2Name},
+					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", tag2NameNormalized},
 					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
