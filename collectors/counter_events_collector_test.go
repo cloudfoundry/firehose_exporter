@@ -98,6 +98,14 @@ var _ = Describe("CounterEventsCollector", func() {
 			deltaCounterEvent1 prometheus.Metric
 			totalCounterEvent2 prometheus.Metric
 			deltaCounterEvent2 prometheus.Metric
+
+			tag1Name           = "tag1"
+			tag1NameNormalized = "tag1"
+			tag1Value          = "fakeTag1"
+
+			tag2Name           = "tag2"
+			tag2NameNormalized = "tag2"
+			tag2Value          = "fakeTag2"
 		)
 
 		BeforeEach(func() {
@@ -114,6 +122,9 @@ var _ = Describe("CounterEventsCollector", func() {
 						Name:  proto.String(counterEvent1Name),
 						Delta: proto.Uint64(counterEvent1Delta),
 						Total: proto.Uint64(counterEvent1Total),
+					},
+					Tags: map[string]string{
+						tag1Name: tag1Value,
 					},
 				},
 			)
@@ -132,6 +143,9 @@ var _ = Describe("CounterEventsCollector", func() {
 						Delta: proto.Uint64(counterEvent2Delta),
 						Total: proto.Uint64(counterEvent2Total),
 					},
+					Tags: map[string]string{
+						tag2Name: tag2Value,
+					},
 				},
 			)
 
@@ -141,7 +155,7 @@ var _ = Describe("CounterEventsCollector", func() {
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", counterEvent1OriginNameNormalized+"_"+counterEvent1NameNormalized+"_total"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", counterEvent1DescNormalized, counterEvent1OriginDescNormalized),
-					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
+					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", tag1NameNormalized},
 					prometheus.Labels{"environment": environment},
 				),
 				prometheus.CounterValue,
@@ -151,13 +165,14 @@ var _ = Describe("CounterEventsCollector", func() {
 				boshJob,
 				boshIndex,
 				boshIP,
+				tag1Value,
 			)
 
 			deltaCounterEvent1 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", counterEvent1OriginNameNormalized+"_"+counterEvent1NameNormalized+"_delta"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event from '%s'.", counterEvent1DescNormalized, counterEvent1OriginDescNormalized),
-					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
+					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", tag1NameNormalized},
 					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
@@ -167,13 +182,14 @@ var _ = Describe("CounterEventsCollector", func() {
 				boshJob,
 				boshIndex,
 				boshIP,
+				tag1Value,
 			)
 
 			totalCounterEvent2 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", counterEvent2OriginNameNormalized+"_"+counterEvent2NameNormalized+"_total"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' total counter event from '%s'.", counterEvent2DescNormalized, counterEvent2OriginDescNormalized),
-					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
+					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", tag2NameNormalized},
 					prometheus.Labels{"environment": environment},
 				),
 				prometheus.CounterValue,
@@ -183,13 +199,14 @@ var _ = Describe("CounterEventsCollector", func() {
 				boshJob,
 				boshIndex,
 				boshIP,
+				tag2Value,
 			)
 
 			deltaCounterEvent2 = prometheus.MustNewConstMetric(
 				prometheus.NewDesc(
 					prometheus.BuildFQName(namespace, "counter_event", counterEvent2OriginNameNormalized+"_"+counterEvent2NameNormalized+"_delta"),
 					fmt.Sprintf("Cloud Foundry Firehose '%s' delta counter event from '%s'.", counterEvent2DescNormalized, counterEvent2OriginDescNormalized),
-					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip"},
+					[]string{"origin", "bosh_deployment", "bosh_job_name", "bosh_job_id", "bosh_job_ip", tag2NameNormalized},
 					prometheus.Labels{"environment": environment},
 				),
 				prometheus.GaugeValue,
@@ -199,6 +216,7 @@ var _ = Describe("CounterEventsCollector", func() {
 				boshJob,
 				boshIndex,
 				boshIP,
+				tag2Value,
 			)
 		})
 
