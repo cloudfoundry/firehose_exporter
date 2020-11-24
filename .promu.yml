@@ -1,10 +1,13 @@
 verbose: false
 go:
   cgo: false
+  version: 1.15
 repository:
   path: github.com/bosh-prometheus/firehose_exporter
 build:
-  flags: -a -tags 'netgo static_build'
+  binaries:
+    - name: firehose_exporter
+  flags: -mod=vendor -a -tags 'netgo static_build'
   ldflags: |
     -X {{repoPath}}/vendor/github.com/prometheus/common/version.Version={{.Version}}
     -X {{repoPath}}/vendor/github.com/prometheus/common/version.Revision={{.Revision}}
@@ -17,7 +20,6 @@ tarball:
     - NOTICE
 crossbuild:
   platforms:
-    - darwin/386
     - darwin/amd64
     - linux/386
     - linux/amd64
