@@ -1,95 +1,84 @@
 package main
 
 import (
-	"fmt"
+	"expvar"
 	"net/http"
-	"os"
+	"net/http/pprof"
 	"strings"
+	"time"
 
-	"github.com/cloudfoundry-incubator/uaago"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/prometheus/common/log"
-	"github.com/prometheus/common/version"
-	"gopkg.in/alecthomas/kingpin.v2"
-
-	"github.com/bosh-prometheus/firehose_exporter/authclient"
+	"code.cloudfoundry.org/go-loggregator"
 	"github.com/bosh-prometheus/firehose_exporter/collectors"
-	"github.com/bosh-prometheus/firehose_exporter/filters"
-	"github.com/bosh-prometheus/firehose_exporter/firehosenozzle"
-	"github.com/bosh-prometheus/firehose_exporter/logstream"
+	"github.com/bosh-prometheus/firehose_exporter/metricmaker"
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	"github.com/bosh-prometheus/firehose_exporter/uaatokenrefresher"
+	"github.com/bosh-prometheus/firehose_exporter/nozzle"
+	"github.com/prometheus/common/version"
+	log "github.com/sirupsen/logrus"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
-	uaaUrl = kingpin.Flag(
-		"uaa.url", "Cloud Foundry UAA URL ($FIREHOSE_EXPORTER_UAA_URL)",
-	).Envar("FIREHOSE_EXPORTER_UAA_URL").Required().String()
+	retroCompatDisable = kingpin.Flag("retro_compat.disable", "Disable retro compatibility",
+	).Envar("FIREHOSE_EXPORTER_RETRO_COMPAT_DISABLE").Default("false").Bool()
 
-	uaaClientID = kingpin.Flag(
-		"uaa.client-id", "Cloud Foundry UAA Client ID ($FIREHOSE_EXPORTER_UAA_CLIENT_ID)",
-	).Envar("FIREHOSE_EXPORTER_UAA_CLIENT_ID").Required().String()
+	enableRetroCompatDelta = kingpin.Flag("retro_compat.enable_delta", "Enable retro compatibility delta in counter",
+	).Envar("FIREHOSE_EXPORTER_RETRO_COMPAT_ENABLE_DELTA").Default("false").Bool()
 
-	uaaClientSecret = kingpin.Flag(
-		"uaa.client-secret", "Cloud Foundry UAA Client Secret ($FIREHOSE_EXPORTER_UAA_CLIENT_SECRET)",
-	).Envar("FIREHOSE_EXPORTER_UAA_CLIENT_SECRET").Required().String()
+	loggingURL = kingpin.Flag(
+		"logging.url", "Cloud Foundry Logging endpoint ($FIREHOSE_EXPORTER_LOGGING_URL)",
+	).Envar("FIREHOSE_EXPORTER_LOGGING_URL").Required().String()
 
-	dopplerSubscriptionID = kingpin.Flag(
-		"doppler.subscription-id", "Cloud Foundry Doppler Subscription ID ($FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID)",
-	).Envar("FIREHOSE_EXPORTER_DOPPLER_SUBSCRIPTION_ID").Default("prometheus").String()
+	loggingTLSCa = kingpin.Flag(
+		"logging.tls.ca", "Path to ca cert to connect to rlp",
+	).Envar("FIREHOSE_EXPORTER_LOGGING_TLS_CA").Default("").String()
 
-	dopplerIdleTimeout = kingpin.Flag(
-		"doppler.idle-timeout", "Cloud Foundry Doppler Idle Timeout duration ($FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT)",
-	).Envar("FIREHOSE_EXPORTER_DOPPLER_IDLE_TIMEOUT").Default("0").Duration()
+	loggingTLSCert = kingpin.Flag(
+		"logging.tls.cert", "Path to cert to connect to rlp in mtls",
+	).Envar("FIREHOSE_EXPORTER_LOGGING_TLS_CERT").Default("").String()
 
-	dopplerMinRetryDelay = kingpin.Flag(
-		"doppler.min-retry-delay", "Cloud Foundry Doppler min retry delay duration ($FIREHOSE_EXPORTER_DOPPLER_MIN_RETRY_DELAY)",
-	).Envar("FIREHOSE_EXPORTER_DOPPLER_MIN_RETRY_DELAY").Default("0").Duration()
+	loggingTLSKey = kingpin.Flag(
+		"logging.tls.key", "Path to key to connect to rlp in mtls",
+	).Envar("FIREHOSE_EXPORTER_LOGGING_TLS_KEY").Default("").String()
 
-	dopplerMaxRetryDelay = kingpin.Flag(
-		"doppler.max-retry-delay", "Cloud Foundry Doppler max retry delay duration ($FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_DELAY)",
-	).Envar("FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_DELAY").Default("0").Duration()
+	metricsNamespace = kingpin.Flag(
+		"metrics.namespace", "Metrics Namespace ($FIREHOSE_EXPORTER_METRICS_NAMESPACE)",
+	).Envar("FIREHOSE_EXPORTER_METRICS_NAMESPACE").Default("firehose").String()
 
-	dopplerMaxRetryCount = kingpin.Flag(
-		"doppler.max-retry-count", "Cloud Foundry Doppler max retry count ($FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_COUNT)",
-	).Envar("FIREHOSE_EXPORTER_DOPPLER_MAX_RETRY_COUNT").Default("0").Int()
+	metricsBatchSize = kingpin.Flag(
+		"metrics.batch_size", "Batch size for nozzle envelop buffer ($FIREHOSE_EXPORTER_METRICS_NAMESPACE)",
+	).Envar("FIREHOSE_EXPORTER_METRICS_BATCH_SIZE").Default("-1").Int()
 
-	dopplerMetricExpiration = kingpin.Flag(
-		"doppler.metric-expiration", "How long a Cloud Foundry Doppler metric is valid ($FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION)",
-	).Envar("FIREHOSE_EXPORTER_DOPPLER_METRIC_EXPIRATION").Default("5m").Duration()
+	metricsShardId = kingpin.Flag(
+		"metrics.shard_id", "The sharding group name to use for egress from RLP ($FIREHOSE_EXPORTER_SHARD_ID)",
+	).Envar("FIREHOSE_EXPORTER_SHARD_ID").Default("firehose_exporter").String()
+
+	metricsNodeIndex = kingpin.Flag(
+		"metrics.node_index", "Node index to use ($FIREHOSE_EXPORTER_NODE_INDEX)",
+	).Envar("FIREHOSE_EXPORTER_NODE_INDEX").Default("0").Int()
+
+	metricsTimerRollup = kingpin.Flag(
+		"metrics.timer_rollup_buffer_size", "The number of envelopes that will be allowed to be buffered while timer metric aggregations are running ($FIREHOSE_EXPORTER_TIMER_ROLLUP_BUFFER_SIZE)",
+	).Envar("FIREHOSE_EXPORTER_TIMER_ROLLUP_BUFFER_SIZE").Default("16384").Uint()
+
+	metricsEnvironment = kingpin.Flag(
+		"metrics.environment", "Environment label to be attached to metrics ($FIREHOSE_EXPORTER_METRICS_ENVIRONMENT)",
+	).Envar("FIREHOSE_EXPORTER_METRICS_ENVIRONMENT").Required().String()
+
+	metricExpiration = kingpin.Flag(
+		"metrics.expiration", "How long a Cloud Foundry metric is valid ($FIREHOSE_EXPORTER_METRICS_EXPIRATION)",
+	).Envar("FIREHOSE_EXPORTER_METRICS_EXPIRATION").Default("10m").Duration()
+
+	skipSSLValidation = kingpin.Flag(
+		"skip-ssl-verify", "Disable SSL Verify ($FIREHOSE_EXPORTER_SKIP_SSL_VERIFY)",
+	).Envar("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY").Default("false").Bool()
 
 	filterDeployments = kingpin.Flag(
 		"filter.deployments", "Comma separated deployments to filter ($FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS)",
 	).Envar("FIREHOSE_EXPORTER_FILTER_DEPLOYMENTS").Default("").String()
 
 	filterEvents = kingpin.Flag(
-		"filter.events", "Comma separated events to filter (ContainerMetric,CounterEvent,ValueMetric) ($FIREHOSE_EXPORTER_FILTER_EVENTS)",
+		"filter.events", "Comma separated events to filter (ContainerMetric,CounterEvent,ValueMetric,Http) ($FIREHOSE_EXPORTER_FILTER_EVENTS)",
 	).Envar("FIREHOSE_EXPORTER_FILTER_EVENTS").Default("").String()
-
-	loggingURL = kingpin.Flag(
-		"logging.url", "Cloud Foundry Logging endpoint ($FIREHOSE_EXPORTER_LOGGING_URL)",
-	).Envar("FIREHOSE_EXPORTER_LOGGING_URL").Required().String()
-
-	useLegacyFirehose = kingpin.Flag(
-		"logging.use-legacy-firehose", "Whether to use the v1 firehose rather than the RLP ($USE_LEGACY_FIREHOSE)",
-	).Envar("USE_LEGACY_FIREHOSE").Bool()
-
-	metricsNamespace = kingpin.Flag(
-		"metrics.namespace", "Metrics Namespace ($FIREHOSE_EXPORTER_METRICS_NAMESPACE)",
-	).Envar("FIREHOSE_EXPORTER_METRICS_NAMESPACE").Default("firehose").String()
-
-	metricsEnvironment = kingpin.Flag(
-		"metrics.environment", "Environment label to be attached to metrics ($FIREHOSE_EXPORTER_METRICS_ENVIRONMENT)",
-	).Envar("FIREHOSE_EXPORTER_METRICS_ENVIRONMENT").Required().String()
-
-	metricsCleanupInterval = kingpin.Flag(
-		"metrics.cleanup-interval", "Metrics clean up interval ($FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL)",
-	).Envar("FIREHOSE_EXPORTER_METRICS_CLEANUP_INTERVAL").Default("2m").Duration()
-
-	skipSSLValidation = kingpin.Flag(
-		"skip-ssl-verify", "Disable SSL Verify ($FIREHOSE_EXPORTER_SKIP_SSL_VERIFY)",
-	).Envar("FIREHOSE_EXPORTER_SKIP_SSL_VERIFY").Default("false").Bool()
 
 	listenAddress = kingpin.Flag(
 		"web.listen-address", "Address to listen on for web interface and telemetry ($FIREHOSE_EXPORTER_WEB_LISTEN_ADDRESS)",
@@ -114,17 +103,16 @@ var (
 	tlsKeyFile = kingpin.Flag(
 		"web.tls.key_file", "Path to a file that contains the TLS private key (PEM format) ($FIREHOSE_EXPORTER_WEB_TLS_KEYFILE)",
 	).Envar("FIREHOSE_EXPORTER_WEB_TLS_KEYFILE").ExistingFile()
+
+	enableProfiler = kingpin.Flag("profiler.enable", "Enable pprof profiling on app on /debug/pprof",
+	).Envar("FIREHOSE_EXPORTER_ENABLE_PROFILER").Default("false").Bool()
+
+	logLevel = kingpin.Flag("log.level", "Only log messages with the given severity or above. Valid levels: [debug, info, warn, error, fatal]",
+	).Envar("FIREHOSE_EXPORTER_LOG_LEVEL").Default("info").String()
+
+	logInJson = kingpin.Flag("log.in_json", "Log in json",
+	).Envar("FIREHOSE_EXPORTER_LOG_IN_JSON").Default("false").Bool()
 )
-
-func init() {
-	prometheus.MustRegister(version.NewCollector(*metricsNamespace))
-}
-
-type logger struct{}
-
-func (l logger) Println(v ...interface{}) {
-	log.Error(v...)
-}
 
 type basicAuthHandler struct {
 	handler  http.HandlerFunc
@@ -144,80 +132,123 @@ func (h *basicAuthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func prometheusHandler() http.Handler {
-	handler := promhttp.InstrumentMetricHandler(
-		prometheus.DefaultRegisterer,
-		promhttp.HandlerFor(
-			prometheus.DefaultGatherer,
-			promhttp.HandlerOpts{
-				ErrorLog:      logger{},
-				ErrorHandling: promhttp.ContinueOnError,
-			},
-		),
-	)
+func initLog() {
+	logLvl, err := log.ParseLevel(*logLevel)
+	if err != nil {
+		log.Panic(err.Error())
+	}
+	log.SetLevel(logLvl)
+	if *logInJson {
+		log.SetFormatter(&log.JSONFormatter{})
+	}
+}
 
-	if *authUsername != "" && *authPassword != "" {
-		handler = &basicAuthHandler{
-			handler:  handler.ServeHTTP,
-			username: *authUsername,
-			password: *authPassword,
-		}
+func initMetricMaker() {
+	metricmaker.SetEnableEnvelopCounterDelta(*enableRetroCompatDelta)
+	metricmaker.PrependMetricConverter(metricmaker.AddNamespace(*metricsNamespace))
+	metricmaker.PrependMetricConverter(metricmaker.InjectMapLabel(map[string]string{
+		"environment": *metricsEnvironment,
+	}))
+	if !*retroCompatDisable {
+		metricmaker.PrependMetricConverter(metricmaker.RetroCompatMetricNames)
+	} else {
+		metricmaker.PrependMetricConverter(metricmaker.SuffixCounterWithTotal)
 	}
 
-	return handler
+}
+
+func MakeStreamer() (*loggregator.EnvelopeStreamConnector, error) {
+	loggregatorTLSConfig, err := loggregator.NewEgressTLSConfig(*loggingTLSCa, *loggingTLSCert, *loggingTLSKey)
+	if err != nil {
+		return nil, err
+	}
+
+	loggregatorTLSConfig.InsecureSkipVerify = *skipSSLValidation
+	return loggregator.NewEnvelopeStreamConnector(
+		*loggingURL,
+		loggregatorTLSConfig,
+		loggregator.WithEnvelopeStreamLogger(log.StandardLogger()),
+		loggregator.WithEnvelopeStreamBuffer(10000, func(missed int) {
+			log.Infof("dropped %d envelope batches", missed)
+		}),
+	), nil
 }
 
 func main() {
-	log.AddFlags(kingpin.CommandLine)
 	kingpin.Version(version.Print("firehose_exporter"))
 	kingpin.HelpFlag.Short('h')
 	kingpin.Parse()
 
-	log.Infoln("Starting firehose_exporter", version.Info())
-	log.Infoln("Build context", version.BuildContext())
+	initLog()
+	initMetricMaker()
 
-	var deployments []string
-	if *filterDeployments != "" {
-		deployments = strings.Split(*filterDeployments, ",")
+	log.Info("Starting firehose_exporter", version.Info())
+	log.Info("Build context", version.BuildContext())
+
+	var pointBuffer chan []*metrics.RawMetric
+	if *metricsBatchSize <= 0 {
+		pointBuffer = make(chan []*metrics.RawMetric)
+	} else {
+		pointBuffer = make(chan []*metrics.RawMetric, *metricsBatchSize)
 	}
-	deploymentFilter := filters.NewDeploymentFilter(deployments)
+
+	streamer, err := MakeStreamer()
+	if err != nil {
+		log.Panicf("Could not create streamer: %s", err.Error())
+	}
 
 	var events []string
 	if *filterEvents != "" {
 		events = strings.Split(*filterEvents, ",")
 	}
-	eventFilter, err := filters.NewEventFilter(events)
-	if err != nil {
-		log.Error(err)
-		os.Exit(1)
+
+	var deployments []string
+	if *filterDeployments != "" {
+		deployments = strings.Split(*filterDeployments, ",")
 	}
 
-	metricsStore := metrics.NewStore(*dopplerMetricExpiration, *metricsCleanupInterval, deploymentFilter, eventFilter)
+	im := metrics.NewInternalMetrics(*metricsNamespace, *metricsEnvironment)
+	nozz := nozzle.NewNozzle(
+		streamer,
+		*metricsShardId,
+		*metricsNodeIndex,
+		pointBuffer,
+		im,
+		nozzle.WithNozzleTimerRollup(
+			10*time.Second,
+			[]string{
+				"status_code", "app_name", "app_id", "space_name",
+				"space_id", "organization_name", "organization_id",
+				"process_id", "process_instance_id", "process_type",
+				"instance_id", "method", "scheme", "host",
+			},
+			[]string{
+				"app_name", "app_id", "space_name", "space_id",
+				"organization_name", "organization_id", "process_id",
+				"process_instance_id", "process_type", "instance_id",
+				"method", "scheme", "host",
+			},
+		),
+		nozzle.WithNozzleTimerRollupBufferSize(*metricsTimerRollup),
+		nozzle.WithFilterSelector(nozzle.NewFilterSelector(events...)),
+		nozzle.WithFilterDeployment(nozzle.NewFilterDeployment(deployments...)),
+	)
+	collector := collectors.NewRawMetricsCollector(pointBuffer, *metricExpiration)
+	nozz.Start()
+	collector.Start()
 
-	if *useLegacyFirehose {
-		startLegacyFirehose(metricsStore)
-	} else {
-		startLogStream(metricsStore)
+	router := http.NewServeMux()
+	router.Handle(*metricsPath, prometheusHandler(collector))
+
+	if *enableProfiler {
+		router.HandleFunc("/debug/pprof/", pprof.Index)
+		router.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		router.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		router.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		router.HandleFunc("/debug/pprof/trace", pprof.Trace)
+		router.Handle("/debug/vars", expvar.Handler())
 	}
-
-	internalMetricsCollector := collectors.NewInternalMetricsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
-	prometheus.MustRegister(internalMetricsCollector)
-
-	containerMetricsCollector := collectors.NewContainerMetricsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
-	prometheus.MustRegister(containerMetricsCollector)
-
-	counterEventsCollector := collectors.NewCounterEventsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
-	prometheus.MustRegister(counterEventsCollector)
-
-	httpStartStopCollector := collectors.NewHttpStartStopCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
-	prometheus.MustRegister(httpStartStopCollector)
-
-	valueMetricsCollector := collectors.NewValueMetricsCollector(*metricsNamespace, *metricsEnvironment, metricsStore)
-	prometheus.MustRegister(valueMetricsCollector)
-
-	handler := prometheusHandler()
-	http.Handle(*metricsPath, handler)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
 				             <head><title>Cloud Foundry Firehose Exporter</title></head>
 				             <body>
@@ -229,56 +260,23 @@ func main() {
 
 	if *tlsCertFile != "" && *tlsKeyFile != "" {
 		log.Infoln("Listening TLS on", *listenAddress)
-		log.Fatal(http.ListenAndServeTLS(*listenAddress, *tlsCertFile, *tlsKeyFile, nil))
+		log.Fatal(http.ListenAndServeTLS(*listenAddress, *tlsCertFile, *tlsKeyFile, router))
 	} else {
 		log.Infoln("Listening on", *listenAddress)
-		log.Fatal(http.ListenAndServe(*listenAddress, nil))
+		log.Fatal(http.ListenAndServe(*listenAddress, router))
 	}
 }
 
-func startLogStream(metricsStore *metrics.Store) {
-	uaa, err := uaago.NewClient(*uaaUrl)
-	if err != nil {
-		log.Errorln(fmt.Sprint("Failed connecting to Get token from UAA..", err), "")
-	}
-	ac := authclient.NewHttp(uaa, *uaaClientID, *uaaClientSecret, *skipSSLValidation)
-	ls := logstream.New(
-		*loggingURL,
-		*skipSSLValidation,
-		*dopplerSubscriptionID,
-		metricsStore,
-		ac,
-	)
-	go func() {
-		ls.Start()
-		os.Exit(1)
-	}()
-}
+func prometheusHandler(collector *collectors.RawMetricsCollector) http.Handler {
+	var handler http.Handler = http.HandlerFunc(collector.RenderExpFmt)
 
-func startLegacyFirehose(metricsStore *metrics.Store) {
-	authTokenRefresher, err := uaatokenrefresher.New(
-		*uaaUrl,
-		*uaaClientID,
-		*uaaClientSecret,
-		*skipSSLValidation,
-	)
-	if err != nil {
-		log.Errorf("Error creating UAA client: %s", err.Error())
-		os.Exit(1)
+	if *authUsername != "" && *authPassword != "" {
+		handler = &basicAuthHandler{
+			handler:  handler.ServeHTTP,
+			username: *authUsername,
+			password: *authPassword,
+		}
 	}
-	nozzle := firehosenozzle.New(
-		*loggingURL,
-		*skipSSLValidation,
-		*dopplerSubscriptionID,
-		*dopplerIdleTimeout,
-		*dopplerMinRetryDelay,
-		*dopplerMaxRetryDelay,
-		*dopplerMaxRetryCount,
-		authTokenRefresher,
-		metricsStore,
-	)
-	go func() {
-		nozzle.Start()
-		os.Exit(1)
-	}()
+
+	return handler
 }
