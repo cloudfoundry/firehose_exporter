@@ -5,3 +5,5 @@
 *.tar.gz
 *.test
 *-stamp
+*.ignore
+/CHANGELOG.md

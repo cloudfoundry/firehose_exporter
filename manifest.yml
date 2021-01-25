@@ -4,8 +4,5 @@ applications:
     buildpack: go_buildpack
     env:
       GOPACKAGENAME: github.com/bosh-prometheus/firehose_exporter
-      FIREHOSE_EXPORTER_UAA_URL: "Your UAA URL"
-      FIREHOSE_EXPORTER_UAA_CLIENT_ID: "Your UAA Client ID"
-      FIREHOSE_EXPORTER_UAA_CLIENT_SECRET: "Your UAA Client Secret"
-      FIREHOSE_EXPORTER_LOGGING_URL: "Your logging UR -- either log_stream or doppler"
+      FIREHOSE_EXPORTER_LOGGING_URL: "RLP url"
       FIREHOSE_EXPORTER_METRICS_ENVIRONMENT: "Environment label to be attached to metrics"
