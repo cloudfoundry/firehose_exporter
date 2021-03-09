@@ -271,4 +271,30 @@ var _ = Describe("summary Rollup", func() {
 		Expect(summaries[0].Count()).To(Equal(2))
 		Expect(transform.LabelPairsToLabelsMap(summaries[0].Points()[0].Metric().Label)).ToNot(HaveKey("excluded-tag"))
 	})
+
+	Context("CleanPeriodic", func() {
+		It("should clean metrics after amount of time", func() {
+			rollup := NewSummaryRollup(
+				"0",
+				nil,
+				SetSummaryCleaning(10*time.Millisecond, 50*time.Millisecond),
+			)
+
+			rollup.Record(
+				"source-id",
+				nil,
+				10,
+			)
+			rollup.Record(
+				"source-id",
+				nil,
+				5,
+			)
+
+			time.Sleep(100 * time.Millisecond)
+
+			summaries := extract(rollup.Rollup(0))
+			Expect(len(summaries)).To(Equal(0))
+		})
+	})
 })

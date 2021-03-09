@@ -271,4 +271,23 @@ var _ = Describe("Histogram Rollup", func() {
 		Expect(histograms[0].Count()).To(Equal(2))
 		Expect(transform.LabelPairsToLabelsMap(histograms[0].Points()[0].Metric().Label)).ToNot(HaveKey("excluded-tag"))
 	})
+
+	Context("CleanPeriodic", func() {
+
+		It("should clean metrics after amount of time", func() {
+			rollup := NewHistogramRollup(
+				"0",
+				nil,
+				SetHistogramCleaning(10*time.Millisecond, 50*time.Millisecond),
+			)
+			rollup.Record(
+				"source-id",
+				nil,
+				10*int64(time.Second),
+			)
+			time.Sleep(100 * time.Millisecond)
+			histograms := extract(rollup.Rollup(0))
+			Expect(len(histograms)).To(Equal(0))
+		})
+	})
 })
