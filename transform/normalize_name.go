@@ -1,33 +1,18 @@
 package transform
 
 import (
+	"github.com/iancoleman/strcase"
 	"regexp"
 	"strings"
-
-	"github.com/fatih/camelcase"
 )
 
 var (
-	safeNameRE = regexp.MustCompile(`[^0-9A-Za-z]*$`)
+	safeNameRE = regexp.MustCompile(`[^0-9A-Za-z]`)
 )
 
 func NormalizeName(name string) string {
-	var normalizedName []string
 
-	words := camelcase.Split(name)
-	for _, word := range words {
-		if word == "__" {
-			normalizedName = append(normalizedName, "")
-			continue
-		}
-		safeWord := strings.Trim(safeNameRE.ReplaceAllLiteralString(strings.Trim(word, "_"), "_"), "_")
-		lowerWord := strings.TrimSpace(strings.ToLower(safeWord))
-		if lowerWord != "" {
-			normalizedName = append(normalizedName, lowerWord)
-		}
-	}
-
-	return strings.Join(normalizedName, "_")
+	return strcase.ToSnake(safeNameRE.ReplaceAllLiteralString(name, "_"))
 }
 
 func NormalizeNameDesc(desc string) string {

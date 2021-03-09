@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"code.cloudfoundry.org/go-loggregator/rpc/loggregator_v2"
+	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
 	"github.com/bosh-prometheus/firehose_exporter/transform"
 	"github.com/gogo/protobuf/proto"
@@ -147,7 +147,6 @@ func getOriginFromMetric(metric *dto.Metric) string {
 }
 
 func prepareMetricFromEnvelop(envelope *loggregator_v2.Envelope) *dto.Metric {
-	labels := make([]*dto.LabelPair, 0)
 	labelValues := envelope.GetTags()
 	if labelValues == nil {
 		labelValues = make(map[string]string)
@@ -160,21 +159,27 @@ func prepareMetricFromEnvelop(envelope *loggregator_v2.Envelope) *dto.Metric {
 		labelValues["instance_id"] = envelope.GetInstanceId()
 	}
 
-	labelKeys := make([]string, 0)
 	for k := range labelValues {
 		if strings.HasPrefix(k, "__") {
-			continue
+			delete(labelValues, k)
 		}
-		labelKeys = append(labelKeys, k)
+	}
+
+	labelKeys := make([]string, len(labelValues))
+	i := 0
+	for k := range labelValues {
+		labelKeys[i] = k
+		i++
 	}
 
 	sort.Strings(labelKeys)
 
-	for _, k := range labelKeys {
-		labels = append(labels, &dto.LabelPair{
+	labels := make([]*dto.LabelPair, len(labelKeys))
+	for i, k := range labelKeys {
+		labels[i] = &dto.LabelPair{
 			Name:  proto.String(k),
 			Value: proto.String(labelValues[k]),
-		})
+		}
 	}
 	return &dto.Metric{
 		Label: labels,

@@ -5,6 +5,7 @@ import (
 	. "github.com/bosh-prometheus/firehose_exporter/nozzle/rollup"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"time"
 )
 
 var _ = Describe("Counter Rollup", func() {
@@ -61,7 +62,7 @@ var _ = Describe("Counter Rollup", func() {
 
 		points = extract(counterRollup.Rollup(1))
 		Expect(len(points)).To(Equal(1))
-		Expect(*points[0].Metric().Counter.Value).To(BeNumerically("==", 2))
+		Expect(*points[0].Metric().Counter.Value).To(BeNumerically("==", float64(2)))
 	})
 
 	It("returns separate counters for distinct source IDs", func() {
@@ -127,6 +128,25 @@ var _ = Describe("Counter Rollup", func() {
 
 		points := extract(counterRollup.Rollup(0))
 		Expect(len(points)).To(Equal(1))
-		Expect(*points[0].Metric().Counter.Value).To(BeNumerically("==", 2))
+		Expect(*points[0].Metric().Counter.Value).To(BeNumerically("==", float64(2)))
+	})
+
+	Context("CleanPeriodic", func() {
+		It("should clean metrics after amount of time", func() {
+			counterRollup := NewCounterRollup(
+				"0",
+				nil,
+				SetCounterCleaning(10*time.Millisecond, 50*time.Millisecond),
+			)
+
+			counterRollup.Record(
+				"source-id",
+				nil,
+				1,
+			)
+			time.Sleep(100 * time.Millisecond)
+			points := extract(counterRollup.Rollup(0))
+			Expect(len(points)).To(Equal(0))
+		})
 	})
 })

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"code.cloudfoundry.org/go-loggregator"
+	"code.cloudfoundry.org/go-loggregator/v8"
 	"github.com/bosh-prometheus/firehose_exporter/collectors"
 	"github.com/bosh-prometheus/firehose_exporter/metricmaker"
 	"github.com/bosh-prometheus/firehose_exporter/metrics"

@@ -36,8 +36,8 @@ func LabelPairsToLabelsMap(labelPair []*dto.LabelPair) map[string]string {
 	return m
 }
 
-func PlaceConstLabelInLabelPair(labels []*dto.LabelPair, constKey string, required bool, possibleKeysOrigin ...string) []*dto.LabelPair {
-	possibleKeysOrigin = append([]string{constKey}, possibleKeysOrigin...)
+func PlaceConstLabelInLabelPair(labels []*dto.LabelPair, constKey string, required bool, possibleKeyOrigin string) []*dto.LabelPair {
+	possibleKeysOrigin := []string{constKey, possibleKeyOrigin}
 	for _, keyOrigin := range possibleKeysOrigin {
 		for _, label := range labels {
 			if label.GetName() == keyOrigin {
