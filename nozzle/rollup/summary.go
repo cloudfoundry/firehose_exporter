@@ -109,10 +109,9 @@ func (r *summaryRollup) Rollup(timestamp int64) []*PointsBatch {
 			Points: []*metrics.RawMetric{metric},
 			Size:   metric.EstimateMetricSize(),
 		})
+		r.summariesInInterval.Delete(k)
 		return true
 	})
-
-	cleanSyncMap(r.summariesInInterval)
 
 	return batches
 }

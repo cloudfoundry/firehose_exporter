@@ -1,11 +1,9 @@
 package rollup
 
 import (
-	"strings"
-	"sync"
-
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
 	log "github.com/sirupsen/logrus"
+	"strings"
 )
 
 type PointsBatch struct {
@@ -48,11 +46,4 @@ func labelsFromKey(key, nodeIndex string, rollupTags []string) (map[string]strin
 	labels["node_index"] = nodeIndex
 
 	return labels, nil
-}
-
-func cleanSyncMap(m *sync.Map) {
-	m.Range(func(key interface{}, value interface{}) bool {
-		m.Delete(key)
-		return true
-	})
 }
