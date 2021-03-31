@@ -14,6 +14,7 @@ all: format build test
 deps:
 	@$(GO) get github.com/onsi/ginkgo/ginkgo
 	@$(GO) get github.com/onsi/gomega
+	$(GO) mod vendor
 
 format:
 	@echo ">> formatting code"
@@ -36,6 +37,7 @@ promu:
 	@GOOS=$(shell uname -s | tr A-Z a-z) \
 		GOARCH=$(subst x86_64,amd64,$(patsubst i%86,386,$(shell uname -m))) \
 		$(GO) get -u github.com/prometheus/promu
+		$(GO) mod vendor
 
 build: promu
 	@echo ">> building binaries"
