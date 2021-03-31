@@ -44,13 +44,13 @@ github.com/magefile/mage/mg
 github.com/magefile/mage/sh
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
-# github.com/nxadm/tail v1.4.4
+# github.com/nxadm/tail v1.4.8
 github.com/nxadm/tail
 github.com/nxadm/tail/ratelimiter
 github.com/nxadm/tail/util
 github.com/nxadm/tail/watch
 github.com/nxadm/tail/winfile
-# github.com/onsi/ginkgo v1.14.1
+# github.com/onsi/ginkgo v1.15.2
 ## explicit
 github.com/onsi/ginkgo
 github.com/onsi/ginkgo/config
@@ -119,7 +119,7 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/sys v0.0.0-20210309074719-68d13333faf2
+# golang.org/x/sys v0.0.0-20210330210617-4fbd30eecc44
 ## explicit
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
