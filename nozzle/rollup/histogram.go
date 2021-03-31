@@ -111,8 +111,7 @@ func (r *histogramRollup) Rollup(timestamp int64) []*PointsBatch {
 		})
 		return true
 	})
-
-	r.histogramsInInterval = &sync.Map{}
+	cleanSyncMap(r.histogramsInInterval)
 
 	return batches
 }

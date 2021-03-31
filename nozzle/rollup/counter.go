@@ -99,7 +99,7 @@ func (r *counterRollup) Rollup(timestamp int64) []*PointsBatch {
 		})
 		return true
 	})
-	r.countersInInterval = &sync.Map{}
+	cleanSyncMap(r.countersInInterval)
 
 	return batches
 }
