@@ -238,6 +238,18 @@ func (n *Nozzle) timerProcessor() {
 	for {
 		data := poller.Next()
 		envelope := *(*loggregator_v2.Envelope)(data)
+
+		if envelope.GetSourceId() == "gorouter" && strings.ToLower(envelope.Tags["peer_type"]) == "client" {
+			// gorouter reports both client and server timers for each request,
+			// only record server types
+			continue
+		}
+
+		// we skip metric with source_id with a guid (guid means an app) to avoid duplicate with metric from cf_app
+		if envelope.Tags["app_id"] == "" && len(envelope.GetSourceId()) == lenGuid && regexGuid.MatchString(envelope.GetSourceId()) {
+			continue
+		}
+
 		timer := envelope.GetTimer()
 		tags := envelope.Tags
 		tags["scheme"] = ""
@@ -308,18 +320,6 @@ func (n *Nozzle) captureGorouterHttpTimerMetricsForRollup(envelope *loggregator_
 	timer := envelope.GetTimer()
 
 	if timer.GetName() != metrics.GorouterHttpMetricName {
-		return
-	}
-
-	if envelope.GetSourceId() == "gorouter" && strings.ToLower(envelope.Tags["peer_type"]) == "client" {
-		// gorouter reports both client and server timers for each request,
-		// only record server types
-		return
-	}
-
-	_, hasAppID := envelope.GetTags()["app_id"]
-	// we skip metric with source_id with a guid (guid means an app) to avoid duplicate with metric from cf_app
-	if !hasAppID && len(envelope.GetSourceId()) == lenGuid && regexGuid.MatchString(envelope.GetSourceId()) {
 		return
 	}
 
