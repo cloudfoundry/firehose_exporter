@@ -3,6 +3,7 @@ package metricmaker_test
 import (
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	"github.com/bosh-prometheus/firehose_exporter/metricmaker"
+	"github.com/bosh-prometheus/firehose_exporter/metrics"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -118,6 +119,10 @@ var _ = Describe("MetricMaker", func() {
 				})
 
 				Expect(ms).To(HaveLen(2))
+				// force reorder
+				if ms[0].MetricName() != "my_metric_1" {
+					ms = []*metrics.RawMetric{ms[1], ms[0]}
+				}
 				Expect(ms[0].MetricName()).To(Equal("my_metric_1"))
 				Expect(ms[0].Origin()).To(Equal("my-origin"))
 				Expect(ms[1].MetricName()).To(Equal("my_metric_2"))
