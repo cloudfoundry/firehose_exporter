@@ -112,7 +112,7 @@ func (r *summaryRollup) Rollup(timestamp int64) []*PointsBatch {
 		return true
 	})
 
-	r.summariesInInterval = &sync.Map{}
+	cleanSyncMap(r.summariesInInterval)
 
 	return batches
 }
