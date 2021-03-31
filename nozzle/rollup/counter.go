@@ -97,9 +97,9 @@ func (r *counterRollup) Rollup(timestamp int64) []*PointsBatch {
 			Points: []*metrics.RawMetric{metric},
 			Size:   metric.EstimateMetricSize(),
 		})
+		r.countersInInterval.Delete(k)
 		return true
 	})
-	cleanSyncMap(r.countersInInterval)
 
 	return batches
 }

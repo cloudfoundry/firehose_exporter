@@ -109,9 +109,9 @@ func (r *histogramRollup) Rollup(timestamp int64) []*PointsBatch {
 			Points: []*metrics.RawMetric{metric},
 			Size:   metric.EstimateMetricSize(),
 		})
+		r.histogramsInInterval.Delete(k)
 		return true
 	})
-	cleanSyncMap(r.histogramsInInterval)
 
 	return batches
 }
