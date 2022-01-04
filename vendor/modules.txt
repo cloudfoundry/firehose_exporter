@@ -32,10 +32,6 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
-# github.com/google/go-github v17.0.0+incompatible
-## explicit
-# github.com/google/go-querystring v1.1.0
-## explicit
 # github.com/iancoleman/strcase v0.1.3
 ## explicit
 github.com/iancoleman/strcase
@@ -105,13 +101,9 @@ github.com/prometheus/common/version
 github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
 github.com/prometheus/procfs/internal/util
-# github.com/prometheus/promu v0.12.0
-## explicit
 # github.com/sirupsen/logrus v1.8.1
 ## explicit
 github.com/sirupsen/logrus
-# go.uber.org/atomic v1.8.0
-## explicit
 # golang.org/x/net v0.0.0-20210614182718-04defd469f4e
 ## explicit
 golang.org/x/net/context
@@ -124,8 +116,6 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/oauth2 v0.0.0-20210628180205-a41e5a781914
-## explicit
 # golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
 ## explicit
 golang.org/x/sys/internal/unsafeheader
@@ -152,8 +142,6 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# google.golang.org/appengine v1.6.7
-## explicit
 # google.golang.org/genproto v0.0.0-20210707164411-8c882eb9abba
 ## explicit
 google.golang.org/genproto/googleapis/rpc/status
