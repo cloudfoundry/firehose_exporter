@@ -12,12 +12,12 @@ code.cloudfoundry.org/tlsconfig
 # github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 github.com/alecthomas/template
 github.com/alecthomas/template/parse
-# github.com/alecthomas/units v0.0.0-20210208195552-ff826a37aa15
+# github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137
 ## explicit
 github.com/alecthomas/units
 # github.com/beorn7/perks v1.0.1
 github.com/beorn7/perks/quantile
-# github.com/cespare/xxhash/v2 v2.1.1
+# github.com/cespare/xxhash/v2 v2.1.2
 ## explicit
 github.com/cespare/xxhash/v2
 # github.com/fsnotify/fsnotify v1.4.9
@@ -90,13 +90,13 @@ github.com/prometheus/client_golang/prometheus/promauto
 # github.com/prometheus/client_model v0.2.0
 ## explicit
 github.com/prometheus/client_model/go
-# github.com/prometheus/common v0.29.0
+# github.com/prometheus/common v0.32.1
 ## explicit
 github.com/prometheus/common/expfmt
 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
 github.com/prometheus/common/model
 github.com/prometheus/common/version
-# github.com/prometheus/procfs v0.7.0
+# github.com/prometheus/procfs v0.7.3
 ## explicit
 github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
@@ -104,7 +104,7 @@ github.com/prometheus/procfs/internal/util
 # github.com/sirupsen/logrus v1.8.1
 ## explicit
 github.com/sirupsen/logrus
-# golang.org/x/net v0.0.0-20210614182718-04defd469f4e
+# golang.org/x/net v0.0.0-20211216030914-fe4d6282115f
 ## explicit
 golang.org/x/net/context
 golang.org/x/net/html
@@ -116,7 +116,7 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
+# golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e
 ## explicit
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
