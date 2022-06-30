@@ -3,7 +3,7 @@ go:
   cgo: false
   version: 1.15
 repository:
-  path: github.com/bosh-prometheus/firehose_exporter
+  path: github.com/orange-cloudfoundry/firehose_exporter
 build:
   binaries:
     - name: firehose_exporter
