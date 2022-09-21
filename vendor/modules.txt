@@ -1,4 +1,4 @@
-# code.cloudfoundry.org/go-diodes v0.0.0-20220601181242-ac2da19efd60
+# code.cloudfoundry.org/go-diodes v0.0.0-20220907221549-c08692410057
 ## explicit; go 1.18
 code.cloudfoundry.org/go-diodes
 # code.cloudfoundry.org/go-loggregator/v8 v8.0.5
@@ -9,8 +9,6 @@ code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2
 # code.cloudfoundry.org/tlsconfig v0.0.0-20220621140725-0e6fbd869921
 ## explicit; go 1.17
 code.cloudfoundry.org/tlsconfig
-# github.com/Masterminds/semver v1.5.0
-## explicit
 # github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 ## explicit
 github.com/alecthomas/template
@@ -38,10 +36,13 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
-# github.com/google/go-github/v25 v25.1.3
-## explicit
-# github.com/google/go-querystring v1.1.0
-## explicit; go 1.10
+# github.com/google/go-cmp v0.5.9
+## explicit; go 1.13
+github.com/google/go-cmp/cmp
+github.com/google/go-cmp/cmp/internal/diff
+github.com/google/go-cmp/cmp/internal/flags
+github.com/google/go-cmp/cmp/internal/function
+github.com/google/go-cmp/cmp/internal/value
 # github.com/iancoleman/strcase v0.2.0
 ## explicit; go 1.16
 github.com/iancoleman/strcase
@@ -79,7 +80,7 @@ github.com/onsi/ginkgo/reporters/stenographer
 github.com/onsi/ginkgo/reporters/stenographer/support/go-colorable
 github.com/onsi/ginkgo/reporters/stenographer/support/go-isatty
 github.com/onsi/ginkgo/types
-# github.com/onsi/gomega v1.19.0
+# github.com/onsi/gomega v1.20.2
 ## explicit; go 1.18
 github.com/onsi/gomega
 github.com/onsi/gomega/format
@@ -91,35 +92,29 @@ github.com/onsi/gomega/matchers/support/goraph/edge
 github.com/onsi/gomega/matchers/support/goraph/node
 github.com/onsi/gomega/matchers/support/goraph/util
 github.com/onsi/gomega/types
-# github.com/pkg/errors v0.9.1
-## explicit
-# github.com/prometheus/client_golang v1.12.2
-## explicit; go 1.13
+# github.com/prometheus/client_golang v1.13.0
+## explicit; go 1.17
 github.com/prometheus/client_golang/prometheus
 github.com/prometheus/client_golang/prometheus/internal
 github.com/prometheus/client_golang/prometheus/promauto
 # github.com/prometheus/client_model v0.2.0
 ## explicit; go 1.9
 github.com/prometheus/client_model/go
-# github.com/prometheus/common v0.35.0
+# github.com/prometheus/common v0.37.0
 ## explicit; go 1.16
 github.com/prometheus/common/expfmt
 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
 github.com/prometheus/common/model
 github.com/prometheus/common/version
-# github.com/prometheus/procfs v0.7.3
-## explicit; go 1.13
+# github.com/prometheus/procfs v0.8.0
+## explicit; go 1.17
 github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
 github.com/prometheus/procfs/internal/util
-# github.com/prometheus/promu v0.13.0
-## explicit; go 1.14
-# github.com/sirupsen/logrus v1.8.1
+# github.com/sirupsen/logrus v1.9.0
 ## explicit; go 1.13
 github.com/sirupsen/logrus
-# go.uber.org/atomic v1.9.0
-## explicit; go 1.13
-# golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e
+# golang.org/x/net v0.0.0-20220920203100-d0c6ba3f52d9
 ## explicit; go 1.17
 golang.org/x/net/context
 golang.org/x/net/html
@@ -131,9 +126,7 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/oauth2 v0.0.0-20220630143837-2104d58473e0
-## explicit; go 1.17
-# golang.org/x/sys v0.0.0-20220627191245-f75cf1eec38b
+# golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8
 ## explicit; go 1.17
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
@@ -160,13 +153,11 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# google.golang.org/appengine v1.6.7
-## explicit; go 1.11
-# google.golang.org/genproto v0.0.0-20220628213854-d9e0b6570c03
-## explicit; go 1.15
+# google.golang.org/genproto v0.0.0-20220920201722-2b89144ce006
+## explicit; go 1.19
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.47.0
-## explicit; go 1.14
+# google.golang.org/grpc v1.49.0
+## explicit; go 1.17
 google.golang.org/grpc
 google.golang.org/grpc/attributes
 google.golang.org/grpc/backoff
@@ -215,7 +206,7 @@ google.golang.org/grpc/serviceconfig
 google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
-# google.golang.org/protobuf v1.28.0
+# google.golang.org/protobuf v1.28.1
 ## explicit; go 1.11
 google.golang.org/protobuf/encoding/protojson
 google.golang.org/protobuf/encoding/prototext
@@ -255,6 +246,6 @@ gopkg.in/alecthomas/kingpin.v2
 # gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7
 ## explicit
 gopkg.in/tomb.v1
-# gopkg.in/yaml.v2 v2.4.0
-## explicit; go 1.15
-gopkg.in/yaml.v2
+# gopkg.in/yaml.v3 v3.0.1
+## explicit
+gopkg.in/yaml.v3
