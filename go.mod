@@ -1,6 +1,6 @@
 module github.com/bosh-prometheus/firehose_exporter
 
-go 1.19
+go 1.20
 
 require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20221212174934-b8cb650f2489
