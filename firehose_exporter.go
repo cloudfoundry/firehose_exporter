@@ -14,7 +14,7 @@ import (
 	"github.com/bosh-prometheus/firehose_exporter/nozzle"
 	"github.com/prometheus/common/version"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/alecthomas/kingpin.v2"
+    "github.com/alecthomas/kingpin/v2"
 )
 
 var (
