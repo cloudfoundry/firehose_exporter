@@ -1,9 +1,3 @@
-/.build
-/.release
-/.tarballs
+/dist
 /firehose_exporter
 *.tar.gz
-*.test
-*-stamp
-*.ignore
-/CHANGELOG.md
