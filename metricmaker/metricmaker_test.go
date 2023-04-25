@@ -105,11 +105,11 @@ var _ = Describe("MetricMaker", func() {
 					Message: &loggregator_v2.Envelope_Gauge{
 						Gauge: &loggregator_v2.Gauge{
 							Metrics: map[string]*loggregator_v2.GaugeValue{
-								"my_metric_1": &loggregator_v2.GaugeValue{
+								"my_metric_1": {
 									Unit:  "bytes",
 									Value: 1,
 								},
-								"my_metric_2": &loggregator_v2.GaugeValue{
+								"my_metric_2": {
 									Unit:  "bytes",
 									Value: 1,
 								},

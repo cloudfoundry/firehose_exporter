@@ -13,13 +13,17 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+const (
+	HTTPResponseName = "http_response_size_bytes"
+)
+
 type summary struct {
 	points []*metrics.RawMetric
 }
 
 func (h *summary) Count() int {
 	for _, p := range h.points {
-		if p.MetricName() == "http_response_size_bytes" {
+		if p.MetricName() == HTTPResponseName {
 			return int(*p.Metric().Summary.SampleCount)
 		}
 	}
@@ -29,7 +33,7 @@ func (h *summary) Count() int {
 
 func (h *summary) Sum() int {
 	for _, p := range h.points {
-		if p.MetricName() == "http_response_size_bytes" {
+		if p.MetricName() == HTTPResponseName {
 			return int(*p.Metric().Summary.SampleSum)
 		}
 	}
@@ -43,7 +47,7 @@ func (h *summary) Points() []*metrics.RawMetric {
 
 func (h *summary) Bucket(le string) *dto.Summary {
 	for _, p := range h.points {
-		if p.MetricName() != "http_response_size_bytes" {
+		if p.MetricName() != HTTPResponseName {
 			continue
 		}
 		for _, label := range p.Metric().Label {
@@ -62,9 +66,7 @@ var _ = Describe("summary Rollup", func() {
 
 		for _, b := range batches {
 			h := &summary{}
-			for _, p := range b.Points {
-				h.points = append(h.points, p)
-			}
+			h.points = append(h.points, b.Points...)
 			summaries = append(summaries, h)
 		}
 

@@ -20,8 +20,8 @@ type InternalMetrics struct {
 	LastCounterEventReceivedTimestamp    prometheus.Gauge
 	TotalValueMetricsReceived            prometheus.Counter
 	LastValueMetricReceivedTimestamp     prometheus.Gauge
-	TotalHttpMetricsReceived             prometheus.Counter
-	LastHttpMetricReceivedTimestamp      prometheus.Gauge
+	TotalHTTPMetricsReceived             prometheus.Counter
+	LastHTTPMetricReceivedTimestamp      prometheus.Gauge
 }
 
 func NewInternalMetrics(namespace string, environment string) *InternalMetrics {
@@ -109,7 +109,7 @@ func NewInternalMetrics(namespace string, environment string) *InternalMetrics {
 		},
 	)
 
-	im.TotalHttpMetricsReceived = promauto.NewCounter(
+	im.TotalHTTPMetricsReceived = promauto.NewCounter(
 		prometheus.CounterOpts{
 			Namespace:   namespace,
 			Subsystem:   "",
@@ -118,7 +118,7 @@ func NewInternalMetrics(namespace string, environment string) *InternalMetrics {
 			ConstLabels: prometheus.Labels{"environment": environment},
 		},
 	)
-	im.LastHttpMetricReceivedTimestamp = promauto.NewGauge(
+	im.LastHTTPMetricReceivedTimestamp = promauto.NewGauge(
 		prometheus.GaugeOpts{
 			Namespace:   namespace,
 			Subsystem:   "",

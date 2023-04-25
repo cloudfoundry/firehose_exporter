@@ -8,21 +8,19 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/go-loggregator/v8"
+	"github.com/alecthomas/kingpin/v2"
 	"github.com/bosh-prometheus/firehose_exporter/collectors"
 	"github.com/bosh-prometheus/firehose_exporter/metricmaker"
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
 	"github.com/bosh-prometheus/firehose_exporter/nozzle"
 	"github.com/prometheus/common/version"
 	log "github.com/sirupsen/logrus"
-	"github.com/alecthomas/kingpin/v2"
 )
 
 var (
-	retroCompatDisable = kingpin.Flag("retro_compat.disable", "Disable retro compatibility",
-	).Envar("FIREHOSE_EXPORTER_RETRO_COMPAT_DISABLE").Default("false").Bool()
+	retroCompatDisable = kingpin.Flag("retro_compat.disable", "Disable retro compatibility").Envar("FIREHOSE_EXPORTER_RETRO_COMPAT_DISABLE").Default("false").Bool()
 
-	enableRetroCompatDelta = kingpin.Flag("retro_compat.enable_delta", "Enable retro compatibility delta in counter",
-	).Envar("FIREHOSE_EXPORTER_RETRO_COMPAT_ENABLE_DELTA").Default("false").Bool()
+	enableRetroCompatDelta = kingpin.Flag("retro_compat.enable_delta", "Enable retro compatibility delta in counter").Envar("FIREHOSE_EXPORTER_RETRO_COMPAT_ENABLE_DELTA").Default("false").Bool()
 
 	loggingURL = kingpin.Flag(
 		"logging.url", "Cloud Foundry Logging endpoint ($FIREHOSE_EXPORTER_LOGGING_URL)",
@@ -48,7 +46,7 @@ var (
 		"metrics.batch_size", "Batch size for nozzle envelop buffer ($FIREHOSE_EXPORTER_METRICS_NAMESPACE)",
 	).Envar("FIREHOSE_EXPORTER_METRICS_BATCH_SIZE").Default("-1").Int()
 
-	metricsShardId = kingpin.Flag(
+	metricsShardID = kingpin.Flag(
 		"metrics.shard_id", "The sharding group name to use for egress from RLP ($FIREHOSE_EXPORTER_SHARD_ID)",
 	).Envar("FIREHOSE_EXPORTER_SHARD_ID").Default("firehose_exporter").String()
 
@@ -104,14 +102,11 @@ var (
 		"web.tls.key_file", "Path to a file that contains the TLS private key (PEM format) ($FIREHOSE_EXPORTER_WEB_TLS_KEYFILE)",
 	).Envar("FIREHOSE_EXPORTER_WEB_TLS_KEYFILE").ExistingFile()
 
-	enableProfiler = kingpin.Flag("profiler.enable", "Enable pprof profiling on app on /debug/pprof",
-	).Envar("FIREHOSE_EXPORTER_ENABLE_PROFILER").Default("false").Bool()
+	enableProfiler = kingpin.Flag("profiler.enable", "Enable pprof profiling on app on /debug/pprof").Envar("FIREHOSE_EXPORTER_ENABLE_PROFILER").Default("false").Bool()
 
-	logLevel = kingpin.Flag("log.level", "Only log messages with the given severity or above. Valid levels: [debug, info, warn, error, fatal]",
-	).Envar("FIREHOSE_EXPORTER_LOG_LEVEL").Default("info").String()
+	logLevel = kingpin.Flag("log.level", "Only log messages with the given severity or above. Valid levels: [debug, info, warn, error, fatal]").Envar("FIREHOSE_EXPORTER_LOG_LEVEL").Default("info").String()
 
-	logInJson = kingpin.Flag("log.in_json", "Log in json",
-	).Envar("FIREHOSE_EXPORTER_LOG_IN_JSON").Default("false").Bool()
+	logInJSON = kingpin.Flag("log.in_json", "Log in json").Envar("FIREHOSE_EXPORTER_LOG_IN_JSON").Default("false").Bool()
 )
 
 type basicAuthHandler struct {
@@ -129,7 +124,6 @@ func (h *basicAuthHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.handler(w, r)
-	return
 }
 
 func initLog() {
@@ -138,7 +132,7 @@ func initLog() {
 		log.Panic(err.Error())
 	}
 	log.SetLevel(logLvl)
-	if *logInJson {
+	if *logInJSON {
 		log.SetFormatter(&log.JSONFormatter{})
 	}
 }
@@ -154,7 +148,6 @@ func initMetricMaker() {
 	} else {
 		metricmaker.PrependMetricConverter(metricmaker.SuffixCounterWithTotal)
 	}
-
 }
 
 func MakeStreamer() (*loggregator.EnvelopeStreamConnector, error) {
@@ -210,7 +203,7 @@ func main() {
 	im := metrics.NewInternalMetrics(*metricsNamespace, *metricsEnvironment)
 	nozz := nozzle.NewNozzle(
 		streamer,
-		*metricsShardId,
+		*metricsShardID,
 		*metricsNodeIndex,
 		pointBuffer,
 		im,
@@ -249,7 +242,7 @@ func main() {
 		router.Handle("/debug/vars", expvar.Handler())
 	}
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(`<html>
+		_, _ = w.Write([]byte(`<html>
 				             <head><title>Cloud Foundry Firehose Exporter</title></head>
 				             <body>
 				             <h1>Cloud Foundry Firehose Exporter</h1>
@@ -258,13 +251,21 @@ func main() {
 				             </html>`))
 	})
 
+	server := &http.Server{
+		Addr:              *listenAddress,
+		ReadTimeout:       time.Second * 5,
+		ReadHeaderTimeout: time.Second * 10,
+	}
+
 	if *tlsCertFile != "" && *tlsKeyFile != "" {
 		log.Infoln("Listening TLS on", *listenAddress)
-		log.Fatal(http.ListenAndServeTLS(*listenAddress, *tlsCertFile, *tlsKeyFile, router))
+		err = server.ListenAndServeTLS(*tlsCertFile, *tlsKeyFile)
 	} else {
 		log.Infoln("Listening on", *listenAddress)
-		log.Fatal(http.ListenAndServe(*listenAddress, router))
+		err = server.ListenAndServe()
 	}
+
+	log.Fatal(err)
 }
 
 func prometheusHandler(collector *collectors.RawMetricsCollector) http.Handler {

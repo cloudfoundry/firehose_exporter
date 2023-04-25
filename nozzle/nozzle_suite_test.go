@@ -23,10 +23,11 @@ func TestNozzle(t *testing.T) {
 	RunSpecs(t, "Nozzle Suite")
 }
 
-func addEnvelope(total uint64, name, sourceId string, c *spyStreamConnector) {
+// nolint:unparam
+func addEnvelope(total uint64, name, sourceID string, c *spyStreamConnector) {
 	c.envelopes <- []*loggregator_v2.Envelope{
 		{
-			SourceId: sourceId,
+			SourceId: sourceID,
 			Tags:     map[string]string{},
 			Message: &loggregator_v2.Envelope_Counter{
 				Counter: &loggregator_v2.Counter{Name: name, Total: total},
@@ -36,9 +37,9 @@ func addEnvelope(total uint64, name, sourceId string, c *spyStreamConnector) {
 }
 
 type spyStreamConnector struct {
-	mu        sync.Mutex
-	requests_ []*loggregator_v2.EgressBatchRequest
-	envelopes chan []*loggregator_v2.Envelope
+	mu               sync.Mutex
+	internalRequests []*loggregator_v2.EgressBatchRequest
+	envelopes        chan []*loggregator_v2.Envelope
 }
 
 func newSpyStreamConnector() *spyStreamConnector {
@@ -50,11 +51,10 @@ func newSpyStreamConnector() *spyStreamConnector {
 func (s *spyStreamConnector) Stream(_ context.Context, req *loggregator_v2.EgressBatchRequest) loggregator.EnvelopeStream {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.requests_ = append(s.requests_, req)
+	s.internalRequests = append(s.internalRequests, req)
 
 	return func() []*loggregator_v2.Envelope {
 		select {
-
 		case ee := <-s.envelopes:
 			finalEnvelopes := make([]*loggregator_v2.Envelope, 0)
 			for _, e := range ee {
@@ -83,8 +83,8 @@ func (s *spyStreamConnector) requests() []*loggregator_v2.EgressBatchRequest {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	reqs := make([]*loggregator_v2.EgressBatchRequest, len(s.requests_))
-	copy(reqs, s.requests_)
+	reqs := make([]*loggregator_v2.EgressBatchRequest, len(s.internalRequests))
+	copy(reqs, s.internalRequests)
 
 	return reqs
 }

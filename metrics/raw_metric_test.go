@@ -69,8 +69,8 @@ var _ = Describe("RawMetric", func() {
 				}),
 			})
 
-			Expect(m1.Id()).To(Equal(m2.Id()))
-			Expect(m1.Id()).ToNot(Equal(m3.Id()))
+			Expect(m1.ID()).To(Equal(m2.ID()))
+			Expect(m1.ID()).ToNot(Equal(m3.ID()))
 		})
 	})
 })

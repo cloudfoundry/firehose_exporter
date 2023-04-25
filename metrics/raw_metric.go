@@ -121,7 +121,7 @@ func (r *RawMetric) EstimateMetricSize() (size int) {
 	return size
 }
 
-func (r *RawMetric) Id() uint64 {
+func (r *RawMetric) ID() uint64 {
 	if r.id != 0 {
 		return r.id
 	}
@@ -131,8 +131,8 @@ func (r *RawMetric) Id() uint64 {
 		if label.GetName() == model.MetricNameLabel {
 			continue
 		}
-		xxh.WriteString("$" + label.GetName() + "$" + label.GetValue())
-		xxh.Write(separatorByteSlice)
+		_, _ = xxh.WriteString("$" + label.GetName() + "$" + label.GetValue())
+		_, _ = xxh.Write(separatorByteSlice)
 	}
 	r.id = xxh.Sum64()
 	return r.id

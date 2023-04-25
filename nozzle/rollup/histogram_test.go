@@ -13,13 +13,17 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+const (
+	HTTPDurationName = "http_duration_seconds"
+)
+
 type histogram struct {
 	points []*metrics.RawMetric
 }
 
 func (h *histogram) Count() int {
 	for _, p := range h.points {
-		if p.MetricName() == "http_duration_seconds" {
+		if p.MetricName() == HTTPDurationName {
 			return int(*p.Metric().Histogram.SampleCount)
 		}
 	}
@@ -29,7 +33,7 @@ func (h *histogram) Count() int {
 
 func (h *histogram) Sum() int {
 	for _, p := range h.points {
-		if p.MetricName() == "http_duration_seconds" {
+		if p.MetricName() == HTTPDurationName {
 			return int(*p.Metric().Histogram.SampleSum)
 		}
 	}
@@ -43,7 +47,7 @@ func (h *histogram) Points() []*metrics.RawMetric {
 
 func (h *histogram) Bucket(le string) *dto.Histogram {
 	for _, p := range h.points {
-		if p.MetricName() != "http_duration_seconds" {
+		if p.MetricName() != HTTPDurationName {
 			continue
 		}
 		for _, label := range p.Metric().Label {
@@ -62,9 +66,7 @@ var _ = Describe("Histogram Rollup", func() {
 
 		for _, b := range batches {
 			h := &histogram{}
-			for _, p := range b.Points {
-				h.points = append(h.points, p)
-			}
+			h.points = append(h.points, b.Points...)
 			histograms = append(histograms, h)
 		}
 

@@ -1,15 +1,20 @@
 package rollup
 
 import (
+	"sync"
+	"time"
+
 	"github.com/bosh-prometheus/firehose_exporter/metricmaker"
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
 	"github.com/bosh-prometheus/firehose_exporter/transform"
 	"github.com/gogo/protobuf/proto"
-	"sync"
-	"time"
 )
 
-type counterRollup struct {
+var (
+	OriginCfApp = "cf_app"
+)
+
+type CounterRollup struct {
 	nodeIndex          string
 	rollupTags         []string
 	countersInInterval *sync.Map
@@ -20,17 +25,17 @@ type counterRollup struct {
 	cleanPeriodicDuration time.Duration
 }
 
-type CounterOpt func(r *counterRollup)
+type CounterOpt func(r *CounterRollup)
 
 func SetCounterCleaning(metricExpireIn time.Duration, cleanPeriodicDuration time.Duration) CounterOpt {
-	return func(r *counterRollup) {
+	return func(r *CounterRollup) {
 		r.metricExpireIn = metricExpireIn
 		r.cleanPeriodicDuration = cleanPeriodicDuration
 	}
 }
 
-func NewCounterRollup(nodeIndex string, rollupTags []string, opts ...CounterOpt) *counterRollup {
-	cr := &counterRollup{
+func NewCounterRollup(nodeIndex string, rollupTags []string, opts ...CounterOpt) *CounterRollup {
+	cr := &CounterRollup{
 		nodeIndex:             nodeIndex,
 		rollupTags:            rollupTags,
 		countersInInterval:    &sync.Map{},
@@ -46,7 +51,7 @@ func NewCounterRollup(nodeIndex string, rollupTags []string, opts ...CounterOpt)
 	return cr
 }
 
-func (r *counterRollup) CleanPeriodic() {
+func (r *CounterRollup) CleanPeriodic() {
 	for {
 		time.Sleep(r.cleanPeriodicDuration)
 		now := time.Now()
@@ -66,8 +71,8 @@ func (r *counterRollup) CleanPeriodic() {
 	}
 }
 
-func (r *counterRollup) Record(sourceId string, tags map[string]string, value int64) {
-	key := keyFromTags(r.rollupTags, sourceId, tags)
+func (r *CounterRollup) Record(sourceID string, tags map[string]string, value int64) {
+	key := keyFromTags(r.rollupTags, sourceID, tags)
 
 	r.countersInInterval.Store(key, struct{}{})
 
@@ -79,19 +84,16 @@ func (r *counterRollup) Record(sourceId string, tags map[string]string, value in
 	r.keyCleaningTime.Store(key, time.Now())
 }
 
-func (r *counterRollup) Rollup(timestamp int64) []*PointsBatch {
+func (r *CounterRollup) Rollup(timestamp int64) []*PointsBatch {
 	var batches []*PointsBatch
 
 	r.countersInInterval.Range(func(k, _ interface{}) bool {
-		labels, err := labelsFromKey(k.(string), r.nodeIndex, r.rollupTags)
-		if err != nil {
-			return true
-		}
+		labels := labelsFromKey(k.(string), r.nodeIndex, r.rollupTags)
 		if _, ok := labels["app_id"]; ok {
-			labels["origin"] = "cf_app"
+			labels["origin"] = OriginCfApp
 		}
 		value, _ := r.counters.Load(k)
-		metric := metricmaker.NewRawMetricCounter(metrics.GorouterHttpCounterMetricName, labels, float64(value.(int64)))
+		metric := metricmaker.NewRawMetricCounter(metrics.GorouterHTTPCounterMetricName, labels, float64(value.(int64)))
 		metric.Metric().TimestampMs = proto.Int64(transform.NanosecondsToMilliseconds(timestamp))
 		batches = append(batches, &PointsBatch{
 			Points: []*metrics.RawMetric{metric},

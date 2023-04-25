@@ -9,13 +9,13 @@ import (
 type FilterSelectorType int32
 
 const (
-	FilterSelectorType_CONTAINER_METRIC FilterSelectorType = 0
-	FilterSelectorType_COUNTER_EVENT    FilterSelectorType = 1
-	FilterSelectorType_HTTP_START_STOP  FilterSelectorType = 2
-	FilterSelectorType_VALUE_METRIC     FilterSelectorType = 3
+	FilterSelectorTypeContainerMetric FilterSelectorType = 0
+	FilterSelectorTypeCounterEvent    FilterSelectorType = 1
+	FilterSelectorTypeHTTPStartStop   FilterSelectorType = 2
+	FilterSelectorTypeValueMetric     FilterSelectorType = 3
 )
 
-var FilterSelectorType_value = map[string]int32{
+var FilterSelectorTypeValue = map[string]int32{
 	"containermetric": 0,
 	"counterevent":    1,
 	"httpstartstop":   2,
@@ -60,7 +60,7 @@ func (f FilterSelector) ValueMetricDisabled() bool {
 	return f.valueMetricDisabled
 }
 
-func (f FilterSelector) HttpStartStopDisabled() bool {
+func (f FilterSelector) HTTPStartStopDisabled() bool {
 	return f.httpStartStopDisabled
 }
 
@@ -79,13 +79,13 @@ func (f FilterSelector) AllGaugeDisabled() bool {
 func (f *FilterSelector) Filters(filterSelectorTypes ...FilterSelectorType) {
 	for _, filterSelectorType := range filterSelectorTypes {
 		switch filterSelectorType {
-		case FilterSelectorType_CONTAINER_METRIC:
+		case FilterSelectorTypeContainerMetric:
 			f.containerMetricDisabled = false
-		case FilterSelectorType_COUNTER_EVENT:
+		case FilterSelectorTypeCounterEvent:
 			f.counterEventDisabled = false
-		case FilterSelectorType_HTTP_START_STOP:
+		case FilterSelectorTypeHTTPStartStop:
 			f.httpStartStopDisabled = false
-		case FilterSelectorType_VALUE_METRIC:
+		case FilterSelectorTypeValueMetric:
 			f.valueMetricDisabled = false
 		}
 	}
@@ -94,7 +94,7 @@ func (f *FilterSelector) Filters(filterSelectorTypes ...FilterSelectorType) {
 func (f *FilterSelector) FiltersByNames(filterSelectorNames ...string) {
 	filterSelectorTypes := make([]FilterSelectorType, 0)
 	for _, filterSelectorName := range filterSelectorNames {
-		if selectorType, ok := FilterSelectorType_value[strings.ToLower(filterSelectorName)]; ok {
+		if selectorType, ok := FilterSelectorTypeValue[strings.ToLower(filterSelectorName)]; ok {
 			filterSelectorTypes = append(filterSelectorTypes, FilterSelectorType(selectorType))
 		}
 	}
@@ -117,7 +117,7 @@ func (f *FilterSelector) ToSelectorTypes() []*loggregator_v2.Selector {
 			},
 		})
 	}
-	if !f.HttpStartStopDisabled() {
+	if !f.HTTPStartStopDisabled() {
 		selectors = append(selectors, &loggregator_v2.Selector{
 			Message: &loggregator_v2.Selector_Timer{
 				Timer: &loggregator_v2.TimerSelector{},

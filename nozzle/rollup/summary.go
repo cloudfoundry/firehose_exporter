@@ -1,17 +1,18 @@
 package rollup
 
 import (
+	"sync"
+	"time"
+
 	"github.com/bosh-prometheus/firehose_exporter/metricmaker"
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
 	"github.com/bosh-prometheus/firehose_exporter/transform"
 	"github.com/gogo/protobuf/proto"
 	"github.com/prometheus/client_golang/prometheus"
 	dto "github.com/prometheus/client_model/go"
-	"sync"
-	"time"
 )
 
-type summaryRollup struct {
+type SummaryRollup struct {
 	nodeIndex           string
 	rollupTags          []string
 	summariesInInterval *sync.Map
@@ -22,17 +23,17 @@ type summaryRollup struct {
 	cleanPeriodicDuration time.Duration
 }
 
-type SummaryOpt func(r *summaryRollup)
+type SummaryOpt func(r *SummaryRollup)
 
 func SetSummaryCleaning(metricExpireIn time.Duration, cleanPeriodicDuration time.Duration) SummaryOpt {
-	return func(r *summaryRollup) {
+	return func(r *SummaryRollup) {
 		r.metricExpireIn = metricExpireIn
 		r.cleanPeriodicDuration = cleanPeriodicDuration
 	}
 }
 
-func NewSummaryRollup(nodeIndex string, rollupTags []string, opts ...SummaryOpt) *summaryRollup {
-	sr := &summaryRollup{
+func NewSummaryRollup(nodeIndex string, rollupTags []string, opts ...SummaryOpt) *SummaryRollup {
+	sr := &SummaryRollup{
 		nodeIndex:             nodeIndex,
 		rollupTags:            rollupTags,
 		summaries:             &sync.Map{},
@@ -50,13 +51,13 @@ func NewSummaryRollup(nodeIndex string, rollupTags []string, opts ...SummaryOpt)
 	return sr
 }
 
-func (r *summaryRollup) Record(sourceId string, tags map[string]string, value int64) {
-	key := keyFromTags(r.rollupTags, sourceId, tags)
+func (r *SummaryRollup) Record(sourceID string, tags map[string]string, value int64) {
+	key := keyFromTags(r.rollupTags, sourceID, tags)
 
 	summary, found := r.summaries.Load(key)
 	if !found {
 		summary = prometheus.NewSummary(prometheus.SummaryOpts{
-			Name:       metrics.GorouterHttpSummaryMetricName,
+			Name:       metrics.GorouterHTTPSummaryMetricName,
 			Objectives: map[float64]float64{0.2: 0.05, 0.5: 0.05, 0.75: 0.02, 0.95: 0.01},
 		})
 		r.summaries.Store(key, summary)
@@ -67,7 +68,7 @@ func (r *summaryRollup) Record(sourceId string, tags map[string]string, value in
 	r.keyCleaningTime.Store(key, time.Now())
 }
 
-func (r *summaryRollup) CleanPeriodic() {
+func (r *SummaryRollup) CleanPeriodic() {
 	for {
 		time.Sleep(r.cleanPeriodicDuration)
 		now := time.Now()
@@ -87,23 +88,20 @@ func (r *summaryRollup) CleanPeriodic() {
 	}
 }
 
-func (r *summaryRollup) Rollup(timestamp int64) []*PointsBatch {
+func (r *SummaryRollup) Rollup(timestamp int64) []*PointsBatch {
 	var batches []*PointsBatch
 
 	r.summariesInInterval.Range(func(k, _ interface{}) bool {
-		labels, err := labelsFromKey(k.(string), r.nodeIndex, r.rollupTags)
-		if err != nil {
-			return true
-		}
+		labels := labelsFromKey(k.(string), r.nodeIndex, r.rollupTags)
 		if _, ok := labels["app_id"]; ok {
-			labels["origin"] = "cf_app"
+			labels["origin"] = OriginCfApp
 		}
 		m := &dto.Metric{}
 		summary, _ := r.summaries.Load(k)
 		_ = summary.(prometheus.Summary).Write(m)
 		m.Label = transform.LabelsMapToLabelPairs(labels)
 
-		metric := metricmaker.NewRawMetricFromMetric(metrics.GorouterHttpSummaryMetricName, m)
+		metric := metricmaker.NewRawMetricFromMetric(metrics.GorouterHTTPSummaryMetricName, m)
 		metric.Metric().TimestampMs = proto.Int64(transform.NanosecondsToMilliseconds(timestamp))
 		batches = append(batches, &PointsBatch{
 			Points: []*metrics.RawMetric{metric},

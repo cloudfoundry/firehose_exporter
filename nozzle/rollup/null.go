@@ -1,15 +1,15 @@
 package rollup
 
-type nullRollup struct {
+type NullRollup struct {
 }
 
-func NewNullRollup() *nullRollup {
-	return &nullRollup{}
+func NewNullRollup() *NullRollup {
+	return &NullRollup{}
 }
 
-func (h *nullRollup) Record(string, map[string]string, int64) {
+func (h *NullRollup) Record(string, map[string]string, int64) {
 }
 
-func (h *nullRollup) Rollup(_ int64) []*PointsBatch {
+func (h *NullRollup) Rollup(_ int64) []*PointsBatch {
 	return []*PointsBatch{}
 }

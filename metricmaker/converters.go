@@ -33,7 +33,7 @@ func OrderAndSanitizeLabels(metric *metrics.RawMetric) {
 			continue
 		}
 		if strings.Contains(label.GetName(), "-") {
-			label.Name = proto.String(strings.Replace(label.GetName(), "-", "_", -1))
+			label.Name = proto.String(strings.ReplaceAll(label.GetName(), "-", "_"))
 		}
 		labels = append(labels, label)
 	}
