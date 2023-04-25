@@ -23,3 +23,4 @@ jobs:
           days-before-stale: 60
           days-before-close: 5
           exempt-all-pr-assignees: true
+          operations-per-run: 60
