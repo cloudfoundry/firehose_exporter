@@ -11,4 +11,3 @@ func TestMetricmaker(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Metricate Suite")
 }
-

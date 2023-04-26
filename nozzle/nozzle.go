@@ -21,19 +21,19 @@ import (
 
 const (
 	MaxBatchSizeInBytes = 32 * 1024
-	lenGuid             = 36
+	lenGUID             = 36
 )
 
-var regexGuid = regexp.MustCompile(`(\{){0,1}[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}(\}){0,1}`)
+var regexGUID = regexp.MustCompile(`(\{){0,1}[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}(\}){0,1}`)
 
 // Nozzle reads envelopes and writes points to firehose_exporter.
 type Nozzle struct {
 	internalMetrics *metrics.InternalMetrics
 
-	s             StreamConnector
-	shardId       string
-	nodeIndex     int
-	ingressBuffer *diodes.OneToOne
+	s              StreamConnector
+	shardIdshardID string
+	nodeIndex      int
+	ingressBuffer  *diodes.OneToOne
 
 	timerBuffer           *diodes.OneToOne
 	timerRollupBufferSize uint
@@ -55,11 +55,11 @@ type StreamConnector interface {
 }
 
 const (
-	BATCH_FLUSH_INTERVAL = 500 * time.Millisecond
+	BatchFlushInterval = 500 * time.Millisecond
 )
 
 func NewNozzle(c StreamConnector,
-	shardId string,
+	shardID string,
 	nodeIndex int,
 	pointBuffer chan []*metrics.RawMetric,
 	internalMetrics *metrics.InternalMetrics,
@@ -67,7 +67,7 @@ func NewNozzle(c StreamConnector,
 	n := &Nozzle{
 		internalMetrics:       internalMetrics,
 		s:                     c,
-		shardId:               shardId,
+		shardIdshardID:        shardID,
 		nodeIndex:             nodeIndex,
 		timerRollupBufferSize: 4096,
 		totalRollup:           rollup.NewNullRollup(),
@@ -122,7 +122,6 @@ func WithNozzleTimerRollup(interval time.Duration, totalResponseSizeRollupTags, 
 		nodeIndex := strconv.Itoa(n.nodeIndex)
 		n.totalRollup = rollup.NewCounterRollup(nodeIndex, totalResponseSizeRollupTags)
 		n.responseSizeRollup = rollup.NewSummaryRollup(nodeIndex, totalResponseSizeRollupTags)
-		// TODO: rename HistogramRollup
 		n.durationRollup = rollup.NewHistogramRollup(nodeIndex, durationRollupTags)
 	}
 }
@@ -130,7 +129,6 @@ func WithNozzleTimerRollup(interval time.Duration, totalResponseSizeRollupTags, 
 // Start() starts reading envelopes from the logs provider and writes them to
 // firehose_exporter.
 func (n *Nozzle) Start() {
-
 	rx := n.s.Stream(context.Background(), n.buildBatchReq())
 
 	go n.timerProcessor()
@@ -145,7 +143,7 @@ func (n *Nozzle) pointBatcher() {
 	poller := diodes.NewPoller(n.ingressBuffer)
 	points := make([]*metrics.RawMetric, 0)
 
-	t := time.NewTimer(BATCH_FLUSH_INTERVAL)
+	t := time.NewTimer(BatchFlushInterval)
 	for {
 		data, found := poller.TryNext()
 
@@ -161,7 +159,7 @@ func (n *Nozzle) pointBatcher() {
 			if len(points) > 0 {
 				points = n.writeToChannelOrDiscard(points)
 			}
-			t.Reset(BATCH_FLUSH_INTERVAL)
+			t.Reset(BatchFlushInterval)
 			size = 0
 		default:
 			// Do we care if one envelope produces multiple points, in which a
@@ -170,7 +168,7 @@ func (n *Nozzle) pointBatcher() {
 			// if len(points) >= BATCH_CHANNEL_SIZE {
 			if size >= MaxBatchSizeInBytes {
 				points = n.writeToChannelOrDiscard(points)
-				t.Reset(BATCH_FLUSH_INTERVAL)
+				t.Reset(BatchFlushInterval)
 				size = 0
 			}
 
@@ -195,9 +193,9 @@ func (n *Nozzle) writeToChannelOrDiscard(points []*metrics.RawMetric) []*metrics
 				n.internalMetrics.LastContainerMetricReceivedTimestamp.Set(float64(time.Now().Unix()))
 				continue
 			}
-			if utils.MetricIsHttpMetric(point) {
-				n.internalMetrics.TotalHttpMetricsReceived.Inc()
-				n.internalMetrics.LastHttpMetricReceivedTimestamp.Set(float64(time.Now().Unix()))
+			if utils.MetricIsHTTPMetric(point) {
+				n.internalMetrics.TotalHTTPMetricsReceived.Inc()
+				n.internalMetrics.LastHTTPMetricReceivedTimestamp.Set(float64(time.Now().Unix()))
 				continue
 			}
 			if *point.MetricType() == dto.MetricType_GAUGE {
@@ -221,7 +219,6 @@ func (n *Nozzle) writeToChannelOrDiscard(points []*metrics.RawMetric) []*metrics
 }
 
 func (n *Nozzle) envelopeReader(rx loggregator.EnvelopeStream) {
-
 	for {
 		envelopeBatch := rx()
 		for _, envelope := range envelopeBatch {
@@ -246,7 +243,7 @@ func (n *Nozzle) timerProcessor() {
 		}
 
 		// we skip metric with source_id with a guid (guid means an app) to avoid duplicate with metric from cf_app
-		if envelope.Tags["app_id"] == "" && len(envelope.GetSourceId()) == lenGuid && regexGuid.MatchString(envelope.GetSourceId()) {
+		if envelope.Tags["app_id"] == "" && len(envelope.GetSourceId()) == lenGUID && regexGUID.MatchString(envelope.GetSourceId()) {
 			continue
 		}
 
@@ -311,15 +308,15 @@ func (n *Nozzle) timerEmitter() {
 		}
 
 		if len(points) > 0 {
-			points = n.writeToChannelOrDiscard(points)
+			n.writeToChannelOrDiscard(points)
 		}
 	}
 }
 
-func (n *Nozzle) captureGorouterHttpTimerMetricsForRollup(envelope *loggregator_v2.Envelope) {
+func (n *Nozzle) captureGorouterHTTPTimerMetricsForRollup(envelope *loggregator_v2.Envelope) {
 	timer := envelope.GetTimer()
 
-	if timer.GetName() != metrics.GorouterHttpMetricName {
+	if timer.GetName() != metrics.GorouterHTTPMetricName {
 		return
 	}
 
@@ -348,7 +345,7 @@ func (n *Nozzle) convertEnvelopeToPoints(envelope *loggregator_v2.Envelope) []*m
 		envelope.GetGauge().Metrics = metricsGauge
 
 	case *loggregator_v2.Envelope_Timer:
-		n.captureGorouterHttpTimerMetricsForRollup(envelope)
+		n.captureGorouterHTTPTimerMetricsForRollup(envelope)
 		return []*metrics.RawMetric{}
 	}
 	return metricmaker.NewRawMetricsFromEnvelop(envelope)
@@ -356,7 +353,7 @@ func (n *Nozzle) convertEnvelopeToPoints(envelope *loggregator_v2.Envelope) []*m
 
 func (n *Nozzle) buildBatchReq() *loggregator_v2.EgressBatchRequest {
 	return &loggregator_v2.EgressBatchRequest{
-		ShardId:          n.shardId,
+		ShardId:          n.shardIdshardID,
 		UsePreferredTags: true,
 		Selectors:        n.filterSelector.ToSelectorTypes(),
 	}

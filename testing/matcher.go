@@ -27,6 +27,7 @@ type containPointsMatcher struct {
 	expected interface{}
 }
 
+// nolint:gocognit
 func (matcher *containPointsMatcher) Match(actual interface{}) (success bool, err error) {
 	expectedPoints := matcher.expected.([]*metrics.RawMetric)
 	points := actual.([]*metrics.RawMetric)
@@ -34,7 +35,6 @@ func (matcher *containPointsMatcher) Match(actual interface{}) (success bool, er
 
 	for _, point := range points {
 		for n, expectedPoint := range expectedPoints {
-
 			matchValue := false
 
 			if point.Metric().Counter != nil {

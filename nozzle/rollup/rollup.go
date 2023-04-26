@@ -1,9 +1,10 @@
 package rollup
 
 import (
+	"strings"
+
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
 	log "github.com/sirupsen/logrus"
-	"strings"
 )
 
 type PointsBatch struct {
@@ -12,12 +13,12 @@ type PointsBatch struct {
 }
 
 type Rollup interface {
-	Record(sourceId string, tags map[string]string, value int64)
+	Record(sourceID string, tags map[string]string, value int64)
 	Rollup(timestamp int64) []*PointsBatch
 }
 
-func keyFromTags(rollupTags []string, sourceId string, tags map[string]string) string {
-	filteredTags := []string{sourceId}
+func keyFromTags(rollupTags []string, sourceID string, tags map[string]string) string {
+	filteredTags := []string{sourceID}
 
 	for _, tag := range rollupTags {
 		filteredTags = append(filteredTags, tags[tag])
@@ -25,14 +26,14 @@ func keyFromTags(rollupTags []string, sourceId string, tags map[string]string) s
 	return strings.Join(filteredTags, "%%")
 }
 
-func labelsFromKey(key, nodeIndex string, rollupTags []string) (map[string]string, error) {
+func labelsFromKey(key, nodeIndex string, rollupTags []string) map[string]string {
 	keyParts := strings.Split(key, "%%")
 
 	if len(keyParts) != len(rollupTags)+1 {
 		log.WithField("reason", "skipping rollup metric").WithField("count", len(keyParts)).WithField("key", key).Info(
 			"skipping rollup metric",
 		)
-		return nil, nil
+		return nil
 	}
 
 	labels := make(map[string]string)
@@ -45,5 +46,5 @@ func labelsFromKey(key, nodeIndex string, rollupTags []string) (map[string]strin
 	labels["source_id"] = keyParts[0]
 	labels["node_index"] = nodeIndex
 
-	return labels, nil
+	return labels
 }

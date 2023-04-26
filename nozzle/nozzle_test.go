@@ -196,7 +196,7 @@ var _ = Describe("Nozzle", func() {
 					Message: &loggregator_v2.Envelope_Gauge{
 						Gauge: &loggregator_v2.Gauge{
 							Metrics: map[string]*loggregator_v2.GaugeValue{
-								"cpu": &loggregator_v2.GaugeValue{
+								"cpu": {
 									Unit:  "",
 									Value: 1,
 								},
@@ -211,7 +211,7 @@ var _ = Describe("Nozzle", func() {
 					Message: &loggregator_v2.Envelope_Gauge{
 						Gauge: &loggregator_v2.Gauge{
 							Metrics: map[string]*loggregator_v2.GaugeValue{
-								"a_gauge": &loggregator_v2.GaugeValue{
+								"a_gauge": {
 									Unit:  "",
 									Value: 1,
 								},
@@ -235,7 +235,7 @@ var _ = Describe("Nozzle", func() {
 		})
 		Describe("when selector CounterEvent", func() {
 			BeforeEach(func() {
-				filterSelector.Filters(FilterSelectorType_COUNTER_EVENT)
+				filterSelector.Filters(FilterSelectorTypeCounterEvent)
 			})
 			It("should only take counter metric", func() {
 				Eventually(metricStore.GetPoints).Should(HaveLen(1))
@@ -247,7 +247,7 @@ var _ = Describe("Nozzle", func() {
 		})
 		Describe("when selector ContainerMetric", func() {
 			BeforeEach(func() {
-				filterSelector.Filters(FilterSelectorType_CONTAINER_METRIC)
+				filterSelector.Filters(FilterSelectorTypeContainerMetric)
 			})
 			It("should only take container metric", func() {
 				Eventually(metricStore.GetPoints).Should(HaveLen(1))
@@ -259,7 +259,7 @@ var _ = Describe("Nozzle", func() {
 		})
 		Describe("when selector ValueMetric", func() {
 			BeforeEach(func() {
-				filterSelector.Filters(FilterSelectorType_VALUE_METRIC)
+				filterSelector.Filters(FilterSelectorTypeValueMetric)
 			})
 			It("should only take gauge metric which is not container metric", func() {
 				Eventually(metricStore.GetPoints).Should(HaveLen(1))
@@ -271,7 +271,7 @@ var _ = Describe("Nozzle", func() {
 		})
 		Describe("when selector Http", func() {
 			BeforeEach(func() {
-				filterSelector.Filters(FilterSelectorType_HTTP_START_STOP)
+				filterSelector.Filters(FilterSelectorTypeHTTPStartStop)
 			})
 			It("should only take timer metric", func() {
 				Eventually(metricStore.GetPoints).Should(HaveLen(2))
@@ -311,7 +311,7 @@ var _ = Describe("Nozzle", func() {
 					Message: &loggregator_v2.Envelope_Gauge{
 						Gauge: &loggregator_v2.Gauge{
 							Metrics: map[string]*loggregator_v2.GaugeValue{
-								"memory": &loggregator_v2.GaugeValue{
+								"memory": {
 									Unit:  "",
 									Value: 1,
 								},
@@ -328,7 +328,7 @@ var _ = Describe("Nozzle", func() {
 					Message: &loggregator_v2.Envelope_Gauge{
 						Gauge: &loggregator_v2.Gauge{
 							Metrics: map[string]*loggregator_v2.GaugeValue{
-								"cpu": &loggregator_v2.GaugeValue{
+								"cpu": {
 									Unit:  "",
 									Value: 1,
 								},

@@ -1,23 +1,20 @@
 package rollup_test
 
 import (
+	"time"
+
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
 	. "github.com/bosh-prometheus/firehose_exporter/nozzle/rollup"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"time"
 )
 
 var _ = Describe("Counter Rollup", func() {
 	extract := func(batches []*PointsBatch) []*metrics.RawMetric {
 		var points []*metrics.RawMetric
-
 		for _, b := range batches {
-			for _, p := range b.Points {
-				points = append(points, p)
-			}
+			points = append(points, b.Points...)
 		}
-
 		return points
 	}
 

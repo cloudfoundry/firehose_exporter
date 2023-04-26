@@ -1,0 +1,35 @@
+run:
+  timeout: 30m
+output:
+  format: line-number
+linters:
+  disable-all: false
+  enable:
+  - bodyclose
+  - depguard
+  - dogsled
+  #- dupl
+  - errcheck
+  - exportloopref
+  #- funlen
+  - gocognit
+  - goconst
+  - gocritic
+  - godox
+  - gofmt
+  - goimports
+  - gosec
+  - gosimple
+  - govet
+  - ineffassign
+  - misspell
+  - nakedret
+  - revive
+  - staticcheck
+  - stylecheck
+  - typecheck
+  - unconvert
+  - unparam
+  - unused
+  - whitespace
+  - reassign

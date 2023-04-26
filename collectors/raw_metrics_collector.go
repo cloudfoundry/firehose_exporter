@@ -2,17 +2,18 @@ package collectors
 
 import (
 	"compress/gzip"
+	"io"
+	"net/http"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
 	"github.com/gogo/protobuf/proto"
 	"github.com/prometheus/client_golang/prometheus"
 	dto "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
 	log "github.com/sirupsen/logrus"
-	"io"
-	"net/http"
-	"strings"
-	"sync"
-	"time"
 )
 
 var gzipPool = sync.Pool{
@@ -32,7 +33,6 @@ func NewRawMetricsCollector(
 	pointBuffer chan []*metrics.RawMetric,
 	metricExpireIn time.Duration,
 ) *RawMetricsCollector {
-
 	return &RawMetricsCollector{
 		pointBuffer:           pointBuffer,
 		metricStore:           &sync.Map{},
@@ -46,7 +46,7 @@ func (c *RawMetricsCollector) Collect() {
 		for _, point := range points {
 			smapMetric, _ := c.metricStore.LoadOrStore(point.MetricName(), &sync.Map{})
 			point.ExpireIn(c.metricExpireIn)
-			smapMetric.(*sync.Map).Store(point.Id(), point)
+			smapMetric.(*sync.Map).Store(point.ID(), point)
 		}
 	}
 }

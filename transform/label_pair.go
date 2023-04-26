@@ -48,7 +48,6 @@ func PlaceConstLabelInLabelPair(labels []*dto.LabelPair, constKey string, requir
 				return labels
 			}
 		}
-
 	}
 	if required {
 		labels = append(labels, &dto.LabelPair{

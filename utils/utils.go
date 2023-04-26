@@ -18,8 +18,8 @@ func MetricNameIsContainerMetric(metricName string) bool {
 		strings.HasSuffix(metricName, "_disk_quota")
 }
 
-func MetricIsHttpMetric(metric *metrics.RawMetric) bool {
-	return strings.Contains(metric.MetricName(), metrics.GorouterHttpSummaryMetricName) ||
-		strings.Contains(metric.MetricName(), metrics.GorouterHttpHistogramMetricName) ||
-		strings.Contains(metric.MetricName(), metrics.GorouterHttpCounterMetricName)
+func MetricIsHTTPMetric(metric *metrics.RawMetric) bool {
+	return strings.Contains(metric.MetricName(), metrics.GorouterHTTPSummaryMetricName) ||
+		strings.Contains(metric.MetricName(), metrics.GorouterHTTPHistogramMetricName) ||
+		strings.Contains(metric.MetricName(), metrics.GorouterHTTPCounterMetricName)
 }
