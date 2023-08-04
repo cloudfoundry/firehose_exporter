@@ -8,7 +8,7 @@ require (
 	github.com/alecthomas/kingpin/v2 v2.3.2
 	github.com/cespare/xxhash/v2 v2.2.0
 	github.com/gogo/protobuf v1.3.2
-	github.com/iancoleman/strcase v0.2.0
+	github.com/iancoleman/strcase v0.3.0
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.27.10
 	github.com/prometheus/client_golang v1.16.0
