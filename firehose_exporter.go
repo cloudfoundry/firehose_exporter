@@ -255,6 +255,7 @@ func main() {
 		Addr:              *listenAddress,
 		ReadTimeout:       time.Second * 5,
 		ReadHeaderTimeout: time.Second * 10,
+		Handler:           router,
 	}
 
 	if *tlsCertFile != "" && *tlsKeyFile != "" {
