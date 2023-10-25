@@ -4,6 +4,12 @@ run:
 output:
   format: line-number
 
+linters-settings:
+  revive:
+    rules:
+    - name: dot-imports
+      exclude: ["**/*_test.go"]
+
 linters:
   disable-all: false
   enable:
