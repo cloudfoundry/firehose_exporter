@@ -9,59 +9,59 @@ import (
 	"github.com/bosh-prometheus/firehose_exporter/testing"
 	"github.com/bosh-prometheus/firehose_exporter/transform"
 	"github.com/gogo/protobuf/proto"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 	dto "github.com/prometheus/client_model/go"
 
-	. "github.com/bosh-prometheus/firehose_exporter/nozzle"
+	"github.com/bosh-prometheus/firehose_exporter/nozzle"
 )
 
-var _ = Describe("Nozzle", func() {
+var _ = ginkgo.Describe("Nozzle", func() {
 	var (
 		streamConnector  *spyStreamConnector
-		nozzle           *Nozzle
+		noz              *nozzle.Nozzle
 		pointBuffer      chan []*metrics.RawMetric
 		metricStore      *MetricStoreTesting
-		filterSelector   *FilterSelector
-		filterDeployment *FilterDeployment
+		filterSelector   *nozzle.FilterSelector
+		filterDeployment *nozzle.FilterDeployment
 	)
 
-	BeforeEach(func() {
+	ginkgo.BeforeEach(func() {
 		pointBuffer = make(chan []*metrics.RawMetric)
 		metricStore = NewMetricStoreTesting(pointBuffer)
-		filterSelector = NewFilterSelector()
-		filterDeployment = NewFilterDeployment()
+		filterSelector = nozzle.NewFilterSelector()
+		filterDeployment = nozzle.NewFilterDeployment()
 		streamConnector = newSpyStreamConnector()
 
-		nozzle = NewNozzle(streamConnector, "firehose_exporter", 0,
+		noz = nozzle.NewNozzle(streamConnector, "firehose_exporter", 0,
 			pointBuffer,
 			internalMetric,
-			WithNozzleTimerRollup(
+			nozzle.WithNozzleTimerRollup(
 				100*time.Millisecond,
 				[]string{"tag1", "tag2", "status_code"},
 				[]string{"tag1", "tag2"},
 			),
-			WithFilterSelector(filterSelector),
-			WithFilterDeployment(filterDeployment),
+			nozzle.WithFilterSelector(filterSelector),
+			nozzle.WithFilterDeployment(filterDeployment),
 		)
 
 	})
 
-	JustBeforeEach(func() {
-		go nozzle.Start()
+	ginkgo.JustBeforeEach(func() {
+		go noz.Start()
 	})
 
-	It("connects and reads from a logs provider server", func() {
+	ginkgo.It("connects and reads from a logs provider server", func() {
 		addEnvelope(1, "memory", "some-source-id", streamConnector)
 		addEnvelope(2, "memory", "some-source-id", streamConnector)
 		addEnvelope(3, "memory", "some-source-id", streamConnector)
 
-		Eventually(streamConnector.requests).Should(HaveLen(1))
-		Expect(streamConnector.requests()[0].ShardId).To(Equal("firehose_exporter"))
-		Expect(streamConnector.requests()[0].UsePreferredTags).To(BeTrue())
-		Expect(streamConnector.requests()[0].Selectors).To(HaveLen(3))
+		gomega.Eventually(streamConnector.requests).Should(gomega.HaveLen(1))
+		gomega.Expect(streamConnector.requests()[0].ShardId).To(gomega.Equal("firehose_exporter"))
+		gomega.Expect(streamConnector.requests()[0].UsePreferredTags).To(gomega.BeTrue())
+		gomega.Expect(streamConnector.requests()[0].Selectors).To(gomega.HaveLen(3))
 
-		Expect(streamConnector.requests()[0].Selectors).To(ConsistOf(
+		gomega.Expect(streamConnector.requests()[0].Selectors).To(gomega.ConsistOf(
 			[]*loggregator_v2.Selector{
 				{
 					Message: &loggregator_v2.Selector_Gauge{
@@ -81,16 +81,16 @@ var _ = Describe("Nozzle", func() {
 			},
 		))
 
-		Eventually(streamConnector.envelopes).Should(HaveLen(0))
+		gomega.Eventually(streamConnector.envelopes).Should(gomega.HaveLen(0))
 	})
 
-	It("writes each envelope as a point to the firehose_exporter", func() {
+	ginkgo.It("writes each envelope as a point to the firehose_exporter", func() {
 		addEnvelope(1, "memory", "some-source-id", streamConnector)
 		addEnvelope(2, "memory", "some-source-id", streamConnector)
 		addEnvelope(3, "memory", "some-source-id", streamConnector)
 
-		Eventually(metricStore.GetPoints).Should(HaveLen(3))
-		Expect(metricStore.GetPoints()).To(testing.ContainPoints([]*metrics.RawMetric{
+		gomega.Eventually(metricStore.GetPoints).Should(gomega.HaveLen(3))
+		gomega.Expect(metricStore.GetPoints()).To(testing.ContainPoints([]*metrics.RawMetric{
 			metricmaker.NewRawMetricFromMetric("memory", &dto.Metric{
 				Label: transform.LabelsMapToLabelPairs(map[string]string{
 					"source_id": "some-source-id",
@@ -118,8 +118,8 @@ var _ = Describe("Nozzle", func() {
 		}))
 	})
 
-	Describe("when the envelope is a Counter", func() {
-		It("converts the envelope to a Point", func() {
+	ginkgo.Describe("when the envelope is a Counter", func() {
+		ginkgo.It("converts the envelope to a Point", func() {
 			streamConnector.envelopes <- []*loggregator_v2.Envelope{
 				{
 					Timestamp: 20,
@@ -134,15 +134,15 @@ var _ = Describe("Nozzle", func() {
 				},
 			}
 
-			Eventually(metricStore.GetPoints).Should(HaveLen(1))
+			gomega.Eventually(metricStore.GetPoints).Should(gomega.HaveLen(1))
 			point := metricStore.GetPoints()[0]
-			Expect(point.MetricName()).To(Equal("failures"))
-			Expect(point.Metric().Counter.GetValue()).To(Equal(float64(8)))
-			Expect(transform.LabelPairsToLabelsMap(point.Metric().Label)).To(HaveKeyWithValue("source_id", "source-id"))
+			gomega.Expect(point.MetricName()).To(gomega.Equal("failures"))
+			gomega.Expect(point.Metric().Counter.GetValue()).To(gomega.Equal(float64(8)))
+			gomega.Expect(transform.LabelPairsToLabelsMap(point.Metric().Label)).To(gomega.HaveKeyWithValue("source_id", "source-id"))
 		})
 	})
 
-	It("forwards all tags", func() {
+	ginkgo.It("forwards all tags", func() {
 		streamConnector.envelopes <- []*loggregator_v2.Envelope{
 			{
 				Timestamp: 20,
@@ -160,9 +160,9 @@ var _ = Describe("Nozzle", func() {
 			},
 		}
 
-		Eventually(metricStore.GetPoints).Should(HaveLen(1))
+		gomega.Eventually(metricStore.GetPoints).Should(gomega.HaveLen(1))
 
-		Expect(metricStore.GetPoints()).To(testing.ContainPoint(metricmaker.NewRawMetricFromMetric("counter", &dto.Metric{
+		gomega.Expect(metricStore.GetPoints()).To(testing.ContainPoint(metricmaker.NewRawMetricFromMetric("counter", &dto.Metric{
 			Label: transform.LabelsMapToLabelPairs(map[string]string{
 				"forwarded-tag-1": "forwarded value",
 				"forwarded-tag-2": "forwarded value",
@@ -174,8 +174,8 @@ var _ = Describe("Nozzle", func() {
 		})))
 	})
 
-	Context("filter selector", func() {
-		BeforeEach(func() {
+	ginkgo.Context("filter selector", func() {
+		ginkgo.BeforeEach(func() {
 			filterSelector.DisableAll()
 			streamConnector.envelopes <- []*loggregator_v2.Envelope{
 				{
@@ -233,60 +233,60 @@ var _ = Describe("Nozzle", func() {
 				},
 			}
 		})
-		Describe("when selector CounterEvent", func() {
-			BeforeEach(func() {
-				filterSelector.Filters(FilterSelectorTypeCounterEvent)
+		ginkgo.Describe("when selector CounterEvent", func() {
+			ginkgo.BeforeEach(func() {
+				filterSelector.Filters(nozzle.FilterSelectorTypeCounterEvent)
 			})
-			It("should only take counter metric", func() {
-				Eventually(metricStore.GetPoints).Should(HaveLen(1))
+			ginkgo.It("should only take counter metric", func() {
+				gomega.Eventually(metricStore.GetPoints).Should(gomega.HaveLen(1))
 				point := metricStore.GetPoints()[0]
-				Expect(point.MetricName()).To(Equal("failures"))
-				Expect(point.Metric().Counter.GetValue()).To(Equal(float64(8)))
-				Expect(transform.LabelPairsToLabelsMap(point.Metric().Label)).To(HaveKeyWithValue("source_id", "source-id"))
+				gomega.Expect(point.MetricName()).To(gomega.Equal("failures"))
+				gomega.Expect(point.Metric().Counter.GetValue()).To(gomega.Equal(float64(8)))
+				gomega.Expect(transform.LabelPairsToLabelsMap(point.Metric().Label)).To(gomega.HaveKeyWithValue("source_id", "source-id"))
 			})
 		})
-		Describe("when selector ContainerMetric", func() {
-			BeforeEach(func() {
-				filterSelector.Filters(FilterSelectorTypeContainerMetric)
+		ginkgo.Describe("when selector ContainerMetric", func() {
+			ginkgo.BeforeEach(func() {
+				filterSelector.Filters(nozzle.FilterSelectorTypeContainerMetric)
 			})
-			It("should only take container metric", func() {
-				Eventually(metricStore.GetPoints).Should(HaveLen(1))
+			ginkgo.It("should only take container metric", func() {
+				gomega.Eventually(metricStore.GetPoints).Should(gomega.HaveLen(1))
 				point := metricStore.GetPoints()[0]
-				Expect(point.MetricName()).To(Equal("cpu"))
-				Expect(point.Metric().Gauge.GetValue()).To(Equal(float64(1)))
-				Expect(transform.LabelPairsToLabelsMap(point.Metric().Label)).To(HaveKeyWithValue("source_id", "source-id"))
+				gomega.Expect(point.MetricName()).To(gomega.Equal("cpu"))
+				gomega.Expect(point.Metric().Gauge.GetValue()).To(gomega.Equal(float64(1)))
+				gomega.Expect(transform.LabelPairsToLabelsMap(point.Metric().Label)).To(gomega.HaveKeyWithValue("source_id", "source-id"))
 			})
 		})
-		Describe("when selector ValueMetric", func() {
-			BeforeEach(func() {
-				filterSelector.Filters(FilterSelectorTypeValueMetric)
+		ginkgo.Describe("when selector ValueMetric", func() {
+			ginkgo.BeforeEach(func() {
+				filterSelector.Filters(nozzle.FilterSelectorTypeValueMetric)
 			})
-			It("should only take gauge metric which is not container metric", func() {
-				Eventually(metricStore.GetPoints).Should(HaveLen(1))
+			ginkgo.It("should only take gauge metric which is not container metric", func() {
+				gomega.Eventually(metricStore.GetPoints).Should(gomega.HaveLen(1))
 				point := metricStore.GetPoints()[0]
-				Expect(point.MetricName()).To(Equal("a_gauge"))
-				Expect(point.Metric().Gauge.GetValue()).To(Equal(float64(1)))
-				Expect(transform.LabelPairsToLabelsMap(point.Metric().Label)).To(HaveKeyWithValue("source_id", "source-id"))
+				gomega.Expect(point.MetricName()).To(gomega.Equal("a_gauge"))
+				gomega.Expect(point.Metric().Gauge.GetValue()).To(gomega.Equal(float64(1)))
+				gomega.Expect(transform.LabelPairsToLabelsMap(point.Metric().Label)).To(gomega.HaveKeyWithValue("source_id", "source-id"))
 			})
 		})
-		Describe("when selector Http", func() {
-			BeforeEach(func() {
-				filterSelector.Filters(FilterSelectorTypeHTTPStartStop)
+		ginkgo.Describe("when selector Http", func() {
+			ginkgo.BeforeEach(func() {
+				filterSelector.Filters(nozzle.FilterSelectorTypeHTTPStartStop)
 			})
-			It("should only take timer metric", func() {
-				Eventually(metricStore.GetPoints).Should(HaveLen(2))
+			ginkgo.It("should only take timer metric", func() {
+				gomega.Eventually(metricStore.GetPoints).Should(gomega.HaveLen(2))
 				pointCounter := metricStore.GetPoints()[0]
-				Expect(pointCounter.MetricName()).To(Equal("http_total"))
-				Expect(pointCounter.Metric().Counter.GetValue()).To(Equal(float64(1)))
+				gomega.Expect(pointCounter.MetricName()).To(gomega.Equal("http_total"))
+				gomega.Expect(pointCounter.Metric().Counter.GetValue()).To(gomega.Equal(float64(1)))
 				pointHisto := metricStore.GetPoints()[1]
-				Expect(pointHisto.MetricName()).To(Equal("http_duration_seconds"))
-				Expect(pointHisto.Metric().Histogram).ToNot(BeNil())
+				gomega.Expect(pointHisto.MetricName()).To(gomega.Equal("http_duration_seconds"))
+				gomega.Expect(pointHisto.Metric().Histogram).ToNot(gomega.BeNil())
 			})
 		})
 	})
 
-	Context("filter deployment", func() {
-		BeforeEach(func() {
+	ginkgo.Context("filter deployment", func() {
+		ginkgo.BeforeEach(func() {
 			filterDeployment.SetDeployments("cf", "bosh")
 			streamConnector.envelopes <- []*loggregator_v2.Envelope{
 				{
@@ -339,17 +339,17 @@ var _ = Describe("Nozzle", func() {
 			}
 		})
 
-		It("should only take metrics from these deployments", func() {
-			Eventually(metricStore.GetPoints).Should(HaveLen(2))
+		ginkgo.It("should only take metrics from these deployments", func() {
+			gomega.Eventually(metricStore.GetPoints).Should(gomega.HaveLen(2))
 			point1 := metricStore.GetPoints()[0]
-			Expect(point1.MetricName()).To(Equal("failures"))
-			Expect(point1.Metric().Counter.GetValue()).To(Equal(float64(8)))
-			Expect(transform.LabelPairsToLabelsMap(point1.Metric().Label)).To(HaveKeyWithValue("source_id", "source-id"))
+			gomega.Expect(point1.MetricName()).To(gomega.Equal("failures"))
+			gomega.Expect(point1.Metric().Counter.GetValue()).To(gomega.Equal(float64(8)))
+			gomega.Expect(transform.LabelPairsToLabelsMap(point1.Metric().Label)).To(gomega.HaveKeyWithValue("source_id", "source-id"))
 
 			point2 := metricStore.GetPoints()[1]
-			Expect(point2.MetricName()).To(Equal("memory"))
-			Expect(point2.Metric().Gauge.GetValue()).To(Equal(float64(1)))
-			Expect(transform.LabelPairsToLabelsMap(point2.Metric().Label)).To(HaveKeyWithValue("source_id", "source-id"))
+			gomega.Expect(point2.MetricName()).To(gomega.Equal("memory"))
+			gomega.Expect(point2.Metric().Gauge.GetValue()).To(gomega.Equal(float64(1)))
+			gomega.Expect(transform.LabelPairsToLabelsMap(point2.Metric().Label)).To(gomega.HaveKeyWithValue("source_id", "source-id"))
 		})
 	})
 })

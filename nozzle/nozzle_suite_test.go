@@ -10,17 +10,17 @@ import (
 	"code.cloudfoundry.org/go-loggregator/v8"
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 )
 
 var internalMetric = metrics.NewInternalMetrics("firehose", "test")
 
 func TestNozzle(t *testing.T) {
-	log.SetOutput(GinkgoWriter)
+	log.SetOutput(ginkgo.GinkgoWriter)
 
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Nozzle Suite")
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	ginkgo.RunSpecs(t, "Nozzle Suite")
 }
 
 // nolint:unparam

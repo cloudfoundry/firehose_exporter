@@ -4,43 +4,43 @@ import (
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
 	"github.com/bosh-prometheus/firehose_exporter/metricmaker"
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 )
 
-var _ = Describe("MetricMaker", func() {
-	BeforeEach(func() {
+var _ = ginkgo.Describe("MetricMaker", func() {
+	ginkgo.BeforeEach(func() {
 		metricmaker.SetMetricConverters(make([]metricmaker.MetricConverter, 0))
 	})
-	Context("NewRawMetricCounter", func() {
-		It("should create raw metric with counter", func() {
+	ginkgo.Context("NewRawMetricCounter", func() {
+		ginkgo.It("should create raw metric with counter", func() {
 			m := metricmaker.NewRawMetricCounter("cpu", map[string]string{
 				"origin": "an-origin",
 			}, 1)
 
-			Expect(m.MetricName()).To(Equal("cpu"))
-			Expect(m.Origin()).To(Equal("an-origin"))
-			Expect(m.Metric().Counter).ToNot(BeNil())
-			Expect(m.Metric().Counter.GetValue()).To(Equal(1.0))
+			gomega.Expect(m.MetricName()).To(gomega.Equal("cpu"))
+			gomega.Expect(m.Origin()).To(gomega.Equal("an-origin"))
+			gomega.Expect(m.Metric().Counter).ToNot(gomega.BeNil())
+			gomega.Expect(m.Metric().Counter.GetValue()).To(gomega.Equal(1.0))
 		})
 	})
 
-	Context("NewRawMetricCounter", func() {
-		It("should create raw metric with counter", func() {
+	ginkgo.Context("NewRawMetricCounter", func() {
+		ginkgo.It("should create raw metric with counter", func() {
 			m := metricmaker.NewRawMetricGauge("cpu", map[string]string{
 				"origin": "an-origin",
 			}, 1)
 
-			Expect(m.MetricName()).To(Equal("cpu"))
-			Expect(m.Origin()).To(Equal("an-origin"))
-			Expect(m.Metric().Gauge).ToNot(BeNil())
-			Expect(m.Metric().Gauge.GetValue()).To(Equal(1.0))
+			gomega.Expect(m.MetricName()).To(gomega.Equal("cpu"))
+			gomega.Expect(m.Origin()).To(gomega.Equal("an-origin"))
+			gomega.Expect(m.Metric().Gauge).ToNot(gomega.BeNil())
+			gomega.Expect(m.Metric().Gauge.GetValue()).To(gomega.Equal(1.0))
 		})
 	})
 
-	Context("NewRawMetricsFromEnvelop", func() {
-		Context("envelop is timer", func() {
-			It("should give an empty list", func() {
+	ginkgo.Context("NewRawMetricsFromEnvelop", func() {
+		ginkgo.Context("envelop is timer", func() {
+			ginkgo.It("should give an empty list", func() {
 				ms := metricmaker.NewRawMetricsFromEnvelop(&loggregator_v2.Envelope{
 					Timestamp:      0,
 					SourceId:       "",
@@ -50,12 +50,12 @@ var _ = Describe("MetricMaker", func() {
 					Message:        &loggregator_v2.Envelope_Timer{},
 				})
 
-				Expect(ms).To(HaveLen(0))
+				gomega.Expect(ms).To(gomega.HaveLen(0))
 			})
 		})
 
-		Context("envelop is counter", func() {
-			It("should give metric associated", func() {
+		ginkgo.Context("envelop is counter", func() {
+			ginkgo.It("should give metric associated", func() {
 				ms := metricmaker.NewRawMetricsFromEnvelop(&loggregator_v2.Envelope{
 					Timestamp:      0,
 					SourceId:       "source-id",
@@ -73,27 +73,27 @@ var _ = Describe("MetricMaker", func() {
 					},
 				})
 
-				Expect(ms).To(HaveLen(1))
+				gomega.Expect(ms).To(gomega.HaveLen(1))
 				m := ms[0]
-				Expect(m.MetricName()).To(Equal("my_metric"))
-				Expect(m.Origin()).To(Equal("my-origin"))
+				gomega.Expect(m.MetricName()).To(gomega.Equal("my_metric"))
+				gomega.Expect(m.Origin()).To(gomega.Equal("my-origin"))
 				metricDto := m.Metric()
-				Expect(metricDto).ToNot(BeNil())
-				Expect(metricDto.Counter).ToNot(BeNil())
-				Expect(metricDto.Counter.GetValue()).To(Equal(1.0))
+				gomega.Expect(metricDto).ToNot(gomega.BeNil())
+				gomega.Expect(metricDto.Counter).ToNot(gomega.BeNil())
+				gomega.Expect(metricDto.Counter.GetValue()).To(gomega.Equal(1.0))
 
-				Expect(metricDto.Label[0].GetName()).To(Equal("instance_id"))
-				Expect(metricDto.Label[0].GetValue()).To(Equal("my-instance"))
-				Expect(metricDto.Label[1].GetName()).To(Equal("origin"))
-				Expect(metricDto.Label[1].GetValue()).To(Equal("my-origin"))
-				Expect(metricDto.Label[2].GetName()).To(Equal("source_id"))
-				Expect(metricDto.Label[2].GetValue()).To(Equal("source-id"))
+				gomega.Expect(metricDto.Label[0].GetName()).To(gomega.Equal("instance_id"))
+				gomega.Expect(metricDto.Label[0].GetValue()).To(gomega.Equal("my-instance"))
+				gomega.Expect(metricDto.Label[1].GetName()).To(gomega.Equal("origin"))
+				gomega.Expect(metricDto.Label[1].GetValue()).To(gomega.Equal("my-origin"))
+				gomega.Expect(metricDto.Label[2].GetName()).To(gomega.Equal("source_id"))
+				gomega.Expect(metricDto.Label[2].GetValue()).To(gomega.Equal("source-id"))
 
 			})
 		})
 
-		Context("envelop is gauge", func() {
-			It("should give metric associated", func() {
+		ginkgo.Context("envelop is gauge", func() {
+			ginkgo.It("should give metric associated", func() {
 				ms := metricmaker.NewRawMetricsFromEnvelop(&loggregator_v2.Envelope{
 					Timestamp:      0,
 					SourceId:       "source-id",
@@ -118,30 +118,30 @@ var _ = Describe("MetricMaker", func() {
 					},
 				})
 
-				Expect(ms).To(HaveLen(2))
+				gomega.Expect(ms).To(gomega.HaveLen(2))
 				// force reorder
 				if ms[0].MetricName() != "my_metric_1" {
 					ms = []*metrics.RawMetric{ms[1], ms[0]}
 				}
-				Expect(ms[0].MetricName()).To(Equal("my_metric_1"))
-				Expect(ms[0].Origin()).To(Equal("my-origin"))
-				Expect(ms[1].MetricName()).To(Equal("my_metric_2"))
-				Expect(ms[1].Origin()).To(Equal("my-origin"))
+				gomega.Expect(ms[0].MetricName()).To(gomega.Equal("my_metric_1"))
+				gomega.Expect(ms[0].Origin()).To(gomega.Equal("my-origin"))
+				gomega.Expect(ms[1].MetricName()).To(gomega.Equal("my_metric_2"))
+				gomega.Expect(ms[1].Origin()).To(gomega.Equal("my-origin"))
 
 				m := ms[0]
 				metricDto := m.Metric()
-				Expect(metricDto).ToNot(BeNil())
-				Expect(metricDto.Gauge).ToNot(BeNil())
-				Expect(metricDto.Gauge.GetValue()).To(Equal(1.0))
+				gomega.Expect(metricDto).ToNot(gomega.BeNil())
+				gomega.Expect(metricDto.Gauge).ToNot(gomega.BeNil())
+				gomega.Expect(metricDto.Gauge.GetValue()).To(gomega.Equal(1.0))
 
-				Expect(metricDto.Label[0].GetName()).To(Equal("instance_id"))
-				Expect(metricDto.Label[0].GetValue()).To(Equal("my-instance"))
-				Expect(metricDto.Label[1].GetName()).To(Equal("origin"))
-				Expect(metricDto.Label[1].GetValue()).To(Equal("my-origin"))
-				Expect(metricDto.Label[2].GetName()).To(Equal("source_id"))
-				Expect(metricDto.Label[2].GetValue()).To(Equal("source-id"))
-				Expect(metricDto.Label[3].GetName()).To(Equal("unit"))
-				Expect(metricDto.Label[3].GetValue()).To(Equal("bytes"))
+				gomega.Expect(metricDto.Label[0].GetName()).To(gomega.Equal("instance_id"))
+				gomega.Expect(metricDto.Label[0].GetValue()).To(gomega.Equal("my-instance"))
+				gomega.Expect(metricDto.Label[1].GetName()).To(gomega.Equal("origin"))
+				gomega.Expect(metricDto.Label[1].GetValue()).To(gomega.Equal("my-origin"))
+				gomega.Expect(metricDto.Label[2].GetName()).To(gomega.Equal("source_id"))
+				gomega.Expect(metricDto.Label[2].GetValue()).To(gomega.Equal("source-id"))
+				gomega.Expect(metricDto.Label[3].GetName()).To(gomega.Equal("unit"))
+				gomega.Expect(metricDto.Label[3].GetValue()).To(gomega.Equal("bytes"))
 
 			})
 		})
