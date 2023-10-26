@@ -4,25 +4,25 @@ import (
 	"time"
 
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 
-	. "github.com/bosh-prometheus/firehose_exporter/nozzle"
+	"github.com/bosh-prometheus/firehose_exporter/nozzle"
 )
 
-var _ = Describe("collect nozzle metrics", func() {
+var _ = ginkgo.Describe("collect nozzle metrics", func() {
 	var pointBuffer chan []*metrics.RawMetric
 	var metricStore *MetricStoreTesting
-	BeforeEach(func() {
+	ginkgo.BeforeEach(func() {
 		pointBuffer = make(chan []*metrics.RawMetric)
 		metricStore = NewMetricStoreTesting(pointBuffer)
 	})
-	It("writes Ingress, Egress and Err metrics", func() {
+	ginkgo.It("writes Ingress, Egress and Err metrics", func() {
 		streamConnector := newSpyStreamConnector()
-		n := NewNozzle(streamConnector, "firehose_exporter", 0,
+		n := nozzle.NewNozzle(streamConnector, "firehose_exporter", 0,
 			pointBuffer,
 			internalMetric,
-			WithNozzleTimerRollup(
+			nozzle.WithNozzleTimerRollup(
 				100*time.Millisecond,
 				[]string{"tag1", "tag2", "status_code"},
 				[]string{"tag1", "tag2"},
@@ -33,16 +33,16 @@ var _ = Describe("collect nozzle metrics", func() {
 		addEnvelope(1, "memory", "some-source-id", streamConnector)
 		addEnvelope(2, "memory", "some-source-id", streamConnector)
 		addEnvelope(3, "memory", "some-source-id", streamConnector)
-		Eventually(metricStore.GetPoints).Should(HaveLen(3))
+		gomega.Eventually(metricStore.GetPoints).Should(gomega.HaveLen(3))
 	})
 
-	It("writes duration seconds histogram metrics", func() {
+	ginkgo.It("writes duration seconds histogram metrics", func() {
 		streamConnector := newSpyStreamConnector()
 
-		n := NewNozzle(streamConnector, "firehose_exporter", 0,
+		n := nozzle.NewNozzle(streamConnector, "firehose_exporter", 0,
 			pointBuffer,
 			internalMetric,
-			WithNozzleTimerRollup(
+			nozzle.WithNozzleTimerRollup(
 				100*time.Millisecond,
 				[]string{"tag1", "tag2", "status_code"},
 				[]string{"tag1", "tag2"},

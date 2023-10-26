@@ -4,13 +4,13 @@ import (
 	"time"
 
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	. "github.com/bosh-prometheus/firehose_exporter/nozzle/rollup"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/bosh-prometheus/firehose_exporter/nozzle/rollup"
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 )
 
-var _ = Describe("Counter Rollup", func() {
-	extract := func(batches []*PointsBatch) []*metrics.RawMetric {
+var _ = ginkgo.Describe("Counter Rollup", func() {
+	extract := func(batches []*rollup.PointsBatch) []*metrics.RawMetric {
 		var points []*metrics.RawMetric
 		for _, b := range batches {
 			points = append(points, b.Points...)
@@ -18,8 +18,8 @@ var _ = Describe("Counter Rollup", func() {
 		return points
 	}
 
-	It("returns counters for rolled up events", func() {
-		counterRollup := NewCounterRollup(
+	ginkgo.It("returns counters for rolled up events", func() {
+		counterRollup := rollup.NewCounterRollup(
 			"0",
 			nil,
 		)
@@ -31,12 +31,12 @@ var _ = Describe("Counter Rollup", func() {
 		)
 
 		points := extract(counterRollup.Rollup(0))
-		Expect(len(points)).To(Equal(1))
-		Expect(*points[0].Metric().Counter.Value).To(BeNumerically("==", 1))
+		gomega.Expect(len(points)).To(gomega.Equal(1))
+		gomega.Expect(*points[0].Metric().Counter.Value).To(gomega.BeNumerically("==", 1))
 	})
 
-	It("returns points that track a running total of rolled up events", func() {
-		counterRollup := NewCounterRollup(
+	ginkgo.It("returns points that track a running total of rolled up events", func() {
+		counterRollup := rollup.NewCounterRollup(
 			"0",
 			[]string{"included-tag"},
 		)
@@ -48,8 +48,8 @@ var _ = Describe("Counter Rollup", func() {
 		)
 
 		points := extract(counterRollup.Rollup(0))
-		Expect(len(points)).To(Equal(1))
-		Expect(*points[0].Metric().Counter.Value).To(BeNumerically("==", 1))
+		gomega.Expect(len(points)).To(gomega.Equal(1))
+		gomega.Expect(*points[0].Metric().Counter.Value).To(gomega.BeNumerically("==", 1))
 
 		counterRollup.Record(
 			"source-id",
@@ -58,12 +58,12 @@ var _ = Describe("Counter Rollup", func() {
 		)
 
 		points = extract(counterRollup.Rollup(1))
-		Expect(len(points)).To(Equal(1))
-		Expect(*points[0].Metric().Counter.Value).To(BeNumerically("==", float64(2)))
+		gomega.Expect(len(points)).To(gomega.Equal(1))
+		gomega.Expect(*points[0].Metric().Counter.Value).To(gomega.BeNumerically("==", float64(2)))
 	})
 
-	It("returns separate counters for distinct source IDs", func() {
-		counterRollup := NewCounterRollup(
+	ginkgo.It("returns separate counters for distinct source IDs", func() {
+		counterRollup := rollup.NewCounterRollup(
 			"0",
 			[]string{"included-tag"},
 		)
@@ -80,11 +80,11 @@ var _ = Describe("Counter Rollup", func() {
 		)
 
 		points := extract(counterRollup.Rollup(0))
-		Expect(len(points)).To(Equal(2))
+		gomega.Expect(len(points)).To(gomega.Equal(2))
 	})
 
-	It("returns separate counters for different included tags", func() {
-		counterRollup := NewCounterRollup(
+	ginkgo.It("returns separate counters for different included tags", func() {
+		counterRollup := rollup.NewCounterRollup(
 			"0",
 			[]string{"included-tag"},
 		)
@@ -101,13 +101,13 @@ var _ = Describe("Counter Rollup", func() {
 		)
 
 		points := extract(counterRollup.Rollup(0))
-		Expect(len(points)).To(Equal(2))
-		Expect(*points[0].Metric().Counter.Value).To(BeNumerically("==", 1))
-		Expect(*points[1].Metric().Counter.Value).To(BeNumerically("==", 1))
+		gomega.Expect(len(points)).To(gomega.Equal(2))
+		gomega.Expect(*points[0].Metric().Counter.Value).To(gomega.BeNumerically("==", 1))
+		gomega.Expect(*points[1].Metric().Counter.Value).To(gomega.BeNumerically("==", 1))
 	})
 
-	It("does not return separate counters for different excluded tags", func() {
-		counterRollup := NewCounterRollup(
+	ginkgo.It("does not return separate counters for different excluded tags", func() {
+		counterRollup := rollup.NewCounterRollup(
 			"0",
 			[]string{"included-tag"},
 		)
@@ -124,16 +124,16 @@ var _ = Describe("Counter Rollup", func() {
 		)
 
 		points := extract(counterRollup.Rollup(0))
-		Expect(len(points)).To(Equal(1))
-		Expect(*points[0].Metric().Counter.Value).To(BeNumerically("==", float64(2)))
+		gomega.Expect(len(points)).To(gomega.Equal(1))
+		gomega.Expect(*points[0].Metric().Counter.Value).To(gomega.BeNumerically("==", float64(2)))
 	})
 
-	Context("CleanPeriodic", func() {
-		It("should clean metrics after amount of time", func() {
-			counterRollup := NewCounterRollup(
+	ginkgo.Context("CleanPeriodic", func() {
+		ginkgo.It("should clean metrics after amount of time", func() {
+			counterRollup := rollup.NewCounterRollup(
 				"0",
 				nil,
-				SetCounterCleaning(10*time.Millisecond, 50*time.Millisecond),
+				rollup.SetCounterCleaning(10*time.Millisecond, 50*time.Millisecond),
 			)
 
 			counterRollup.Record(
@@ -143,7 +143,7 @@ var _ = Describe("Counter Rollup", func() {
 			)
 			time.Sleep(100 * time.Millisecond)
 			points := extract(counterRollup.Rollup(0))
-			Expect(len(points)).To(Equal(0))
+			gomega.Expect(len(points)).To(gomega.Equal(0))
 		})
 	})
 })

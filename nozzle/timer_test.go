@@ -5,52 +5,52 @@ import (
 
 	"github.com/bosh-prometheus/firehose_exporter/metricmaker"
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	. "github.com/bosh-prometheus/firehose_exporter/nozzle"
+	"github.com/bosh-prometheus/firehose_exporter/nozzle"
 	"github.com/bosh-prometheus/firehose_exporter/transform"
 	"github.com/gogo/protobuf/proto"
 	dto "github.com/prometheus/client_model/go"
 
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 
-	. "github.com/bosh-prometheus/firehose_exporter/testing"
+	"github.com/bosh-prometheus/firehose_exporter/testing"
 )
 
-var _ = Describe("when the envelope is a Timer", func() {
+var _ = ginkgo.Describe("when the envelope is a Timer", func() {
 	var (
 		streamConnector  *spyStreamConnector
-		nozzle           *Nozzle
+		noz              *nozzle.Nozzle
 		pointBuffer      chan []*metrics.RawMetric
 		metricStore      *MetricStoreTesting
-		filterSelector   *FilterSelector
-		filterDeployment *FilterDeployment
+		filterSelector   *nozzle.FilterSelector
+		filterDeployment *nozzle.FilterDeployment
 	)
 
-	BeforeEach(func() {
+	ginkgo.BeforeEach(func() {
 		pointBuffer = make(chan []*metrics.RawMetric)
 		metricStore = NewMetricStoreTesting(pointBuffer)
-		filterSelector = NewFilterSelector()
-		filterDeployment = NewFilterDeployment()
+		filterSelector = nozzle.NewFilterSelector()
+		filterDeployment = nozzle.NewFilterDeployment()
 		streamConnector = newSpyStreamConnector()
-		nozzle = NewNozzle(streamConnector, "firehose_exporter", 0,
+		noz = nozzle.NewNozzle(streamConnector, "firehose_exporter", 0,
 			pointBuffer,
 			internalMetric,
-			WithNozzleTimerRollup(
+			nozzle.WithNozzleTimerRollup(
 				100*time.Millisecond,
 				[]string{"tag1", "tag2", "status_code", "app_id"},
 				[]string{"tag1", "tag2", "app_id"},
 			),
-			WithFilterSelector(filterSelector),
-			WithFilterDeployment(filterDeployment),
+			nozzle.WithFilterSelector(filterSelector),
+			nozzle.WithFilterDeployment(filterDeployment),
 		)
 	})
 
-	JustBeforeEach(func() {
-		go nozzle.Start()
+	ginkgo.JustBeforeEach(func() {
+		go noz.Start()
 	})
 
-	It("rolls up configured metrics", func() {
+	ginkgo.It("rolls up configured metrics", func() {
 
 		intervalStart := time.Now().Truncate(100 * time.Millisecond).UnixNano()
 
@@ -137,12 +137,12 @@ var _ = Describe("when the envelope is a Timer", func() {
 		numberOfExpectedSeriesIncludingStatusCode := 4
 		numberOfExpectedSeriesExcludingStatusCode := 2
 		numberOfExpectedPoints := numberOfExpectedSeriesIncludingStatusCode + numberOfExpectedSeriesExcludingStatusCode
-		Eventually(metricStore.GetPoints).Should(HaveLen(numberOfExpectedPoints))
+		gomega.Eventually(metricStore.GetPoints).Should(gomega.HaveLen(numberOfExpectedPoints))
 
 		points := metricStore.GetPoints()
 
 		// _count points, per series including status_code
-		Expect(points).To(ContainPoints([]*metrics.RawMetric{
+		gomega.Expect(points).To(testing.ContainPoints([]*metrics.RawMetric{
 			metricmaker.NewRawMetricCounter("http_total", map[string]string{
 				"node_index":  "0",
 				"source_id":   "source-id",
@@ -172,7 +172,7 @@ var _ = Describe("when the envelope is a Timer", func() {
 		// _duration_seconds histogram points, per series excluding status_code
 		// only testing one series
 
-		Expect(points).To(ContainPoints([]*metrics.RawMetric{
+		gomega.Expect(points).To(testing.ContainPoints([]*metrics.RawMetric{
 			metricmaker.NewRawMetricFromMetric("http_duration_seconds",
 				createHistogramMetric(
 					map[string]string{
@@ -200,11 +200,11 @@ var _ = Describe("when the envelope is a Timer", func() {
 		firstPointTimestamp := points[0].Metric().GetTimestampMs()
 		firstPointTime := time.Unix(firstPointTimestamp/1000, 0)
 
-		Expect(firstPointTime).To(BeTemporally("~", time.Unix(0, intervalStart), time.Second))
-		Expect(firstPointTime).To(Equal(firstPointTime.Truncate(100 * time.Millisecond)))
+		gomega.Expect(firstPointTime).To(gomega.BeTemporally("~", time.Unix(0, intervalStart), time.Second))
+		gomega.Expect(firstPointTime).To(gomega.Equal(firstPointTime.Truncate(100 * time.Millisecond)))
 	})
 
-	It("only rolls up gorouter metrics with a peer_type of Server", func() {
+	ginkgo.It("only rolls up gorouter metrics with a peer_type of Server", func() {
 		intervalStart := time.Now().Truncate(100 * time.Millisecond).UnixNano()
 
 		streamConnector.envelopes <- []*loggregator_v2.Envelope{
@@ -303,11 +303,11 @@ var _ = Describe("when the envelope is a Timer", func() {
 		numberOfExpectedSeriesIncludingStatusCode := 2
 		numberOfExpectedSeriesExcludingStatusCode := 1
 		numberOfExpectedPoints := numberOfExpectedSeriesIncludingStatusCode + numberOfExpectedSeriesExcludingStatusCode
-		Eventually(metricStore.GetPoints).Should(HaveLen(numberOfExpectedPoints))
+		gomega.Eventually(metricStore.GetPoints).Should(gomega.HaveLen(numberOfExpectedPoints))
 
 		points := metricStore.GetPoints()
 		// _count points, per series including status_code
-		Expect(points).To(ContainPoints([]*metrics.RawMetric{
+		gomega.Expect(points).To(testing.ContainPoints([]*metrics.RawMetric{
 			metricmaker.NewRawMetricCounter("http_total", map[string]string{
 				"node_index":  "0",
 				"source_id":   "gorouter",
@@ -323,7 +323,7 @@ var _ = Describe("when the envelope is a Timer", func() {
 		// _duration_seconds histogram points, per series excluding status_code
 		// only testing one series
 
-		Expect(points).To(ContainPoints([]*metrics.RawMetric{
+		gomega.Expect(points).To(testing.ContainPoints([]*metrics.RawMetric{
 			metricmaker.NewRawMetricFromMetric("http_duration_seconds",
 				createHistogramMetric(
 					map[string]string{
@@ -349,12 +349,12 @@ var _ = Describe("when the envelope is a Timer", func() {
 		firstPointTimestamp := points[0].Metric().GetTimestampMs()
 		firstPointTime := time.Unix(firstPointTimestamp/1000, 0)
 
-		Expect(firstPointTime).To(BeTemporally("~", time.Unix(0, intervalStart), time.Second))
-		Expect(firstPointTime).To(Equal(firstPointTime.Truncate(100 * time.Millisecond)))
+		gomega.Expect(firstPointTime).To(gomega.BeTemporally("~", time.Unix(0, intervalStart), time.Second))
+		gomega.Expect(firstPointTime).To(gomega.Equal(firstPointTime.Truncate(100 * time.Millisecond)))
 
 	})
 
-	It("ignores other metrics", func() {
+	ginkgo.It("ignores other metrics", func() {
 
 		streamConnector.envelopes <- []*loggregator_v2.Envelope{
 			{
@@ -381,16 +381,16 @@ var _ = Describe("when the envelope is a Timer", func() {
 			},
 		}
 
-		Eventually(metricStore.GetPoints).Should(HaveLen(1))
-		Consistently(metricStore.GetPoints, .5).Should(HaveLen(1))
+		gomega.Eventually(metricStore.GetPoints).Should(gomega.HaveLen(1))
+		gomega.Consistently(metricStore.GetPoints, .5).Should(gomega.HaveLen(1))
 		m := metricmaker.NewRawMetricCounter("http", map[string]string{
 			"source_id": "source-id",
 		}, 4.0)
 		m.Metric().TimestampMs = proto.Int64(66606660666066601)
-		Expect(metricStore.GetPoints()).To(ContainPoint(m))
+		gomega.Expect(metricStore.GetPoints()).To(testing.ContainPoint(m))
 	})
 
-	It("keeps a total across rollupIntervals", func() {
+	ginkgo.It("keeps a total across rollupIntervals", func() {
 
 		baseTimer := loggregator_v2.Envelope{
 			SourceId: "source-id",
@@ -418,11 +418,11 @@ var _ = Describe("when the envelope is a Timer", func() {
 
 		streamConnector.envelopes <- []*loggregator_v2.Envelope{&firstTimer}
 
-		Eventually(metricStore.GetPoints).Should(HaveLen(2))
+		gomega.Eventually(metricStore.GetPoints).Should(gomega.HaveLen(2))
 
 		streamConnector.envelopes <- []*loggregator_v2.Envelope{&secondTimer, &thirdTimer}
 
-		Eventually(metricStore.GetPoints).Should(HaveLen(4))
+		gomega.Eventually(metricStore.GetPoints).Should(gomega.HaveLen(4))
 
 		secondIntervalHistogram := metricmaker.NewRawMetricFromMetric("http_duration_seconds",
 			createHistogramMetric(
@@ -454,13 +454,13 @@ var _ = Describe("when the envelope is a Timer", func() {
 			"tag2":       "t2",
 		}, 3.0)
 
-		Expect(metricStore.GetPoints()).To(ContainPoints([]*metrics.RawMetric{
+		gomega.Expect(metricStore.GetPoints()).To(testing.ContainPoints([]*metrics.RawMetric{
 			secondIntervalHistogram,
 			secondIntervalTotal,
 		}))
 	})
 
-	It("skip metric with a source id in form of app guid", func() {
+	ginkgo.It("skip metric with a source id in form of app guid", func() {
 		intervalStart := time.Now().Truncate(100 * time.Millisecond).UnixNano()
 
 		streamConnector.envelopes <- []*loggregator_v2.Envelope{
@@ -498,11 +498,11 @@ var _ = Describe("when the envelope is a Timer", func() {
 				},
 			},
 		}
-		Eventually(metricStore.GetPoints).Should(HaveLen(2))
+		gomega.Eventually(metricStore.GetPoints).Should(gomega.HaveLen(2))
 		labelsFirst := transform.LabelPairsToLabelsMap(metricStore.GetPoints()[0].Metric().GetLabel())
-		Expect(labelsFirst).Should(HaveKeyWithValue("app_id", "6f0b4a14-0703-442c-bc80-bea78d31d5ab"))
+		gomega.Expect(labelsFirst).Should(gomega.HaveKeyWithValue("app_id", "6f0b4a14-0703-442c-bc80-bea78d31d5ab"))
 		labelsSecond := transform.LabelPairsToLabelsMap(metricStore.GetPoints()[1].Metric().GetLabel())
-		Expect(labelsSecond).Should(HaveKeyWithValue("app_id", "6f0b4a14-0703-442c-bc80-bea78d31d5ab"))
+		gomega.Expect(labelsSecond).Should(gomega.HaveKeyWithValue("app_id", "6f0b4a14-0703-442c-bc80-bea78d31d5ab"))
 	})
 })
 

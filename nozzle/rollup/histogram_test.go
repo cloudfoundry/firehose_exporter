@@ -5,12 +5,12 @@ import (
 	"time"
 
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	. "github.com/bosh-prometheus/firehose_exporter/nozzle/rollup"
+	"github.com/bosh-prometheus/firehose_exporter/nozzle/rollup"
 	"github.com/bosh-prometheus/firehose_exporter/transform"
 	dto "github.com/prometheus/client_model/go"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 )
 
 const (
@@ -27,7 +27,7 @@ func (h *histogram) Count() int {
 			return int(*p.Metric().Histogram.SampleCount)
 		}
 	}
-	Fail("No count point found in histogram")
+	ginkgo.Fail("No count point found in histogram")
 	return 0
 }
 
@@ -37,7 +37,7 @@ func (h *histogram) Sum() int {
 			return int(*p.Metric().Histogram.SampleSum)
 		}
 	}
-	Fail("No sum point found in histogram")
+	ginkgo.Fail("No sum point found in histogram")
 	return 0
 }
 
@@ -56,12 +56,12 @@ func (h *histogram) Bucket(le string) *dto.Histogram {
 			}
 		}
 	}
-	Fail(fmt.Sprintf("No bucket point found in histogram for le = '%s'", le))
+	ginkgo.Fail(fmt.Sprintf("No bucket point found in histogram for le = '%s'", le))
 	return nil
 }
 
-var _ = Describe("Histogram Rollup", func() {
-	extract := func(batches []*PointsBatch) []*histogram {
+var _ = ginkgo.Describe("Histogram Rollup", func() {
+	extract := func(batches []*rollup.PointsBatch) []*histogram {
 		var histograms []*histogram
 
 		for _, b := range batches {
@@ -73,8 +73,8 @@ var _ = Describe("Histogram Rollup", func() {
 		return histograms
 	}
 
-	It("returns aggregate information for rolled up events", func() {
-		rollup := NewHistogramRollup(
+	ginkgo.It("returns aggregate information for rolled up events", func() {
+		rollup := rollup.NewHistogramRollup(
 			"0",
 			nil,
 		)
@@ -91,13 +91,13 @@ var _ = Describe("Histogram Rollup", func() {
 		)
 
 		histograms := extract(rollup.Rollup(0))
-		Expect(len(histograms)).To(Equal(1))
-		Expect(histograms[0].Count()).To(Equal(2))
-		Expect(histograms[0].Sum()).To(Equal(15))
+		gomega.Expect(len(histograms)).To(gomega.Equal(1))
+		gomega.Expect(histograms[0].Count()).To(gomega.Equal(2))
+		gomega.Expect(histograms[0].Sum()).To(gomega.Equal(15))
 	})
 
-	It("returns batches which each includes a size estimate", func() {
-		rollup := NewHistogramRollup(
+	ginkgo.It("returns batches which each includes a size estimate", func() {
+		rollup := rollup.NewHistogramRollup(
 			"0",
 			nil,
 		)
@@ -109,12 +109,12 @@ var _ = Describe("Histogram Rollup", func() {
 		)
 
 		pointsBatches := rollup.Rollup(0)
-		Expect(len(pointsBatches)).To(Equal(1))
-		Expect(pointsBatches[0].Size).To(BeNumerically(">", 0))
+		gomega.Expect(len(pointsBatches)).To(gomega.Equal(1))
+		gomega.Expect(pointsBatches[0].Size).To(gomega.BeNumerically(">", 0))
 	})
 
-	It("returns points for each bucket in the histogram", func() {
-		rollup := NewHistogramRollup(
+	ginkgo.It("returns points for each bucket in the histogram", func() {
+		rollup := rollup.NewHistogramRollup(
 			"0",
 			nil,
 		)
@@ -136,11 +136,11 @@ var _ = Describe("Histogram Rollup", func() {
 		)
 
 		histograms := extract(rollup.Rollup(0))
-		Expect(len(histograms)).To(Equal(1))
+		gomega.Expect(len(histograms)).To(gomega.Equal(1))
 	})
 
-	It("returns points with the timestamp given to Rollup", func() {
-		rollup := NewHistogramRollup(
+	ginkgo.It("returns points with the timestamp given to Rollup", func() {
+		rollup := rollup.NewHistogramRollup(
 			"node-index",
 			nil,
 		)
@@ -152,11 +152,11 @@ var _ = Describe("Histogram Rollup", func() {
 		)
 
 		histograms := extract(rollup.Rollup(88))
-		Expect(len(histograms)).To(Equal(1))
+		gomega.Expect(len(histograms)).To(gomega.Equal(1))
 	})
 
-	It("returns histograms with labels based on tags", func() {
-		rollup := NewHistogramRollup(
+	ginkgo.It("returns histograms with labels based on tags", func() {
+		rollup := rollup.NewHistogramRollup(
 			"node-index",
 			[]string{"included-tag"},
 		)
@@ -168,18 +168,18 @@ var _ = Describe("Histogram Rollup", func() {
 		)
 
 		histograms := extract(rollup.Rollup(0))
-		Expect(len(histograms)).To(Equal(1))
+		gomega.Expect(len(histograms)).To(gomega.Equal(1))
 		for _, p := range histograms[0].Points() {
-			Expect(transform.LabelPairsToLabelsMap(p.Metric().Label)).To(And(
-				HaveKeyWithValue("included_tag", "foo"),
-				HaveKeyWithValue("source_id", "source-id"),
-				HaveKeyWithValue("node_index", "node-index"),
+			gomega.Expect(transform.LabelPairsToLabelsMap(p.Metric().Label)).To(gomega.And(
+				gomega.HaveKeyWithValue("included_tag", "foo"),
+				gomega.HaveKeyWithValue("source_id", "source-id"),
+				gomega.HaveKeyWithValue("node_index", "node-index"),
 			))
 		}
 	})
 
-	It("returns points that track a running total of rolled up events", func() {
-		rollup := NewHistogramRollup(
+	ginkgo.It("returns points that track a running total of rolled up events", func() {
+		rollup := rollup.NewHistogramRollup(
 			"0",
 			[]string{"included-tag"},
 		)
@@ -191,8 +191,8 @@ var _ = Describe("Histogram Rollup", func() {
 		)
 
 		histograms := extract(rollup.Rollup(0))
-		Expect(len(histograms)).To(Equal(1))
-		Expect(histograms[0].Count()).To(Equal(1))
+		gomega.Expect(len(histograms)).To(gomega.Equal(1))
+		gomega.Expect(histograms[0].Count()).To(gomega.Equal(1))
 
 		rollup.Record(
 			"source-id",
@@ -201,12 +201,12 @@ var _ = Describe("Histogram Rollup", func() {
 		)
 
 		histograms = extract(rollup.Rollup(1))
-		Expect(len(histograms)).To(Equal(1))
-		Expect(histograms[0].Count()).To(Equal(2))
+		gomega.Expect(len(histograms)).To(gomega.Equal(1))
+		gomega.Expect(histograms[0].Count()).To(gomega.Equal(2))
 	})
 
-	It("returns separate histograms for distinct source IDs", func() {
-		rollup := NewHistogramRollup(
+	ginkgo.It("returns separate histograms for distinct source IDs", func() {
+		rollup := rollup.NewHistogramRollup(
 			"0",
 			[]string{"included-tag"},
 		)
@@ -223,13 +223,13 @@ var _ = Describe("Histogram Rollup", func() {
 		)
 
 		histograms := extract(rollup.Rollup(0))
-		Expect(len(histograms)).To(Equal(2))
-		Expect(histograms[0].Count()).To(Equal(1))
-		Expect(histograms[1].Count()).To(Equal(1))
+		gomega.Expect(len(histograms)).To(gomega.Equal(2))
+		gomega.Expect(histograms[0].Count()).To(gomega.Equal(1))
+		gomega.Expect(histograms[1].Count()).To(gomega.Equal(1))
 	})
 
-	It("returns separate histograms for different included tags", func() {
-		rollup := NewHistogramRollup(
+	ginkgo.It("returns separate histograms for different included tags", func() {
+		rollup := rollup.NewHistogramRollup(
 			"0",
 			[]string{"included-tag"},
 		)
@@ -246,13 +246,13 @@ var _ = Describe("Histogram Rollup", func() {
 		)
 
 		histograms := extract(rollup.Rollup(0))
-		Expect(len(histograms)).To(Equal(2))
-		Expect(histograms[0].Count()).To(Equal(1))
-		Expect(histograms[1].Count()).To(Equal(1))
+		gomega.Expect(len(histograms)).To(gomega.Equal(2))
+		gomega.Expect(histograms[0].Count()).To(gomega.Equal(1))
+		gomega.Expect(histograms[1].Count()).To(gomega.Equal(1))
 	})
 
-	It("does not return separate histograms for different excluded tags", func() {
-		rollup := NewHistogramRollup(
+	ginkgo.It("does not return separate histograms for different excluded tags", func() {
+		rollup := rollup.NewHistogramRollup(
 			"0",
 			[]string{"included-tag"},
 		)
@@ -269,18 +269,18 @@ var _ = Describe("Histogram Rollup", func() {
 		)
 
 		histograms := extract(rollup.Rollup(0))
-		Expect(len(histograms)).To(Equal(1))
-		Expect(histograms[0].Count()).To(Equal(2))
-		Expect(transform.LabelPairsToLabelsMap(histograms[0].Points()[0].Metric().Label)).ToNot(HaveKey("excluded-tag"))
+		gomega.Expect(len(histograms)).To(gomega.Equal(1))
+		gomega.Expect(histograms[0].Count()).To(gomega.Equal(2))
+		gomega.Expect(transform.LabelPairsToLabelsMap(histograms[0].Points()[0].Metric().Label)).ToNot(gomega.HaveKey("excluded-tag"))
 	})
 
-	Context("CleanPeriodic", func() {
+	ginkgo.Context("CleanPeriodic", func() {
 
-		It("should clean metrics after amount of time", func() {
-			rollup := NewHistogramRollup(
+		ginkgo.It("should clean metrics after amount of time", func() {
+			rollup := rollup.NewHistogramRollup(
 				"0",
 				nil,
-				SetHistogramCleaning(10*time.Millisecond, 50*time.Millisecond),
+				rollup.SetHistogramCleaning(10*time.Millisecond, 50*time.Millisecond),
 			)
 			rollup.Record(
 				"source-id",
@@ -289,7 +289,7 @@ var _ = Describe("Histogram Rollup", func() {
 			)
 			time.Sleep(100 * time.Millisecond)
 			histograms := extract(rollup.Rollup(0))
-			Expect(len(histograms)).To(Equal(0))
+			gomega.Expect(len(histograms)).To(gomega.Equal(0))
 		})
 	})
 })

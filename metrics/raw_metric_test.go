@@ -5,16 +5,16 @@ import (
 
 	"github.com/bosh-prometheus/firehose_exporter/transform"
 	"github.com/gogo/protobuf/proto"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/ginkgo"
+	"github.com/onsi/gomega"
 	dto "github.com/prometheus/client_model/go"
 
 	"github.com/bosh-prometheus/firehose_exporter/metrics"
 )
 
-var _ = Describe("RawMetric", func() {
-	Context("EstimateMetricSize", func() {
-		It("should give an estimate metric size based on timestamp, value and label", func() {
+var _ = ginkgo.Describe("RawMetric", func() {
+	ginkgo.Context("EstimateMetricSize", func() {
+		ginkgo.It("should give an estimate metric size based on timestamp, value and label", func() {
 			m := metrics.NewRawMetric("my_metric", "my-origin", &dto.Metric{
 				Label: transform.LabelsMapToLabelPairs(map[string]string{
 					"origin": "my-origin",
@@ -22,7 +22,7 @@ var _ = Describe("RawMetric", func() {
 				TimestampMs: nil,
 			})
 
-			Expect(m.EstimateMetricSize()).To(Equal(23))
+			gomega.Expect(m.EstimateMetricSize()).To(gomega.Equal(23))
 
 			m = metrics.NewRawMetric("my_metric", "my-origin", &dto.Metric{
 				Label: transform.LabelsMapToLabelPairs(map[string]string{
@@ -30,26 +30,26 @@ var _ = Describe("RawMetric", func() {
 				}),
 				TimestampMs: proto.Int64(0),
 			})
-			Expect(m.EstimateMetricSize()).To(Equal(23 + 8))
+			gomega.Expect(m.EstimateMetricSize()).To(gomega.Equal(23 + 8))
 		})
 	})
 
-	Context("Set ExpireIn", func() {
-		It("should mark as swept when expire time is passed", func() {
+	ginkgo.Context("Set ExpireIn", func() {
+		ginkgo.It("should mark as swept when expire time is passed", func() {
 			m := metrics.NewRawMetric("my_metric", "my-origin", &dto.Metric{
 				Label: transform.LabelsMapToLabelPairs(map[string]string{
 					"origin": "my-origin",
 				}),
 			})
 			m.ExpireIn(100 * time.Millisecond)
-			Expect(m.IsSwept()).To(BeFalse())
+			gomega.Expect(m.IsSwept()).To(gomega.BeFalse())
 			time.Sleep(101 * time.Millisecond)
-			Expect(m.IsSwept()).To(BeTrue())
+			gomega.Expect(m.IsSwept()).To(gomega.BeTrue())
 		})
 	})
 
-	Context("Id", func() {
-		It("should generate an id based on metric labels", func() {
+	ginkgo.Context("Id", func() {
+		ginkgo.It("should generate an id based on metric labels", func() {
 			m1 := metrics.NewRawMetric("my_metric", "my-origin", &dto.Metric{
 				Label: transform.LabelsMapToLabelPairs(map[string]string{
 					"origin":   "my-origin",
@@ -69,8 +69,8 @@ var _ = Describe("RawMetric", func() {
 				}),
 			})
 
-			Expect(m1.ID()).To(Equal(m2.ID()))
-			Expect(m1.ID()).ToNot(Equal(m3.ID()))
+			gomega.Expect(m1.ID()).To(gomega.Equal(m2.ID()))
+			gomega.Expect(m1.ID()).ToNot(gomega.Equal(m3.ID()))
 		})
 	})
 })
