@@ -5,7 +5,7 @@ go 1.20
 require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20230406180255-f141159491b0
 	code.cloudfoundry.org/go-loggregator/v8 v8.0.5
-	github.com/alecthomas/kingpin/v2 v2.3.2
+	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/cespare/xxhash/v2 v2.2.0
 	github.com/gogo/protobuf v1.3.2
 	github.com/iancoleman/strcase v0.3.0
