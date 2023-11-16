@@ -9,7 +9,7 @@ code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2
 # code.cloudfoundry.org/tlsconfig v0.0.0-20230320190829-8f91c367795b
 ## explicit; go 1.19
 code.cloudfoundry.org/tlsconfig
-# github.com/alecthomas/kingpin/v2 v2.3.2
+# github.com/alecthomas/kingpin/v2 v2.4.0
 ## explicit; go 1.17
 github.com/alecthomas/kingpin/v2
 # github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137
