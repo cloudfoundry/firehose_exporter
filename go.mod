@@ -13,7 +13,7 @@ require (
 	github.com/onsi/gomega v1.31.1
 	github.com/prometheus/client_golang v1.18.0
 	github.com/prometheus/client_model v0.6.0
-	github.com/prometheus/common v0.45.0
+	github.com/prometheus/common v0.48.0
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/net v0.21.0
 )
@@ -27,7 +27,6 @@ require (
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/pprof v0.0.0-20230406165453-00490a63f317 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
