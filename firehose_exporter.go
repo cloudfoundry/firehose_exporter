@@ -241,7 +241,7 @@ func main() {
 		router.HandleFunc("/debug/pprof/trace", pprof.Trace)
 		router.Handle("/debug/vars", expvar.Handler())
 	}
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte(`<html>
 				             <head><title>Cloud Foundry Firehose Exporter</title></head>
 				             <body>
