@@ -4,9 +4,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bosh-prometheus/firehose_exporter/metricmaker"
-	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	"github.com/bosh-prometheus/firehose_exporter/transform"
+	"github.com/cloudfoundry/firehose_exporter/metricmaker"
+	"github.com/cloudfoundry/firehose_exporter/metrics"
+	"github.com/cloudfoundry/firehose_exporter/transform"
 	"github.com/gogo/protobuf/proto"
 )
 

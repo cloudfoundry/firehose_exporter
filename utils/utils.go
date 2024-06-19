@@ -3,7 +3,7 @@ package utils
 import (
 	"strings"
 
-	"github.com/bosh-prometheus/firehose_exporter/metrics"
+	"github.com/cloudfoundry/firehose_exporter/metrics"
 )
 
 func MetricIsContainerMetric(metric *metrics.RawMetric) bool {

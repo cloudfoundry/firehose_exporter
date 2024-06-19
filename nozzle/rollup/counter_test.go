@@ -3,8 +3,8 @@ package rollup_test
 import (
 	"time"
 
-	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	"github.com/bosh-prometheus/firehose_exporter/nozzle/rollup"
+	"github.com/cloudfoundry/firehose_exporter/metrics"
+	"github.com/cloudfoundry/firehose_exporter/nozzle/rollup"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 )

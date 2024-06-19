@@ -4,16 +4,16 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
-	"github.com/bosh-prometheus/firehose_exporter/metricmaker"
-	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	"github.com/bosh-prometheus/firehose_exporter/testing"
-	"github.com/bosh-prometheus/firehose_exporter/transform"
+	"github.com/cloudfoundry/firehose_exporter/metricmaker"
+	"github.com/cloudfoundry/firehose_exporter/metrics"
+	"github.com/cloudfoundry/firehose_exporter/testing"
+	"github.com/cloudfoundry/firehose_exporter/transform"
 	"github.com/gogo/protobuf/proto"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	dto "github.com/prometheus/client_model/go"
 
-	"github.com/bosh-prometheus/firehose_exporter/nozzle"
+	"github.com/cloudfoundry/firehose_exporter/nozzle"
 )
 
 var _ = ginkgo.Describe("Nozzle", func() {

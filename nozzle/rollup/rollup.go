@@ -3,7 +3,7 @@ package rollup
 import (
 	"strings"
 
-	"github.com/bosh-prometheus/firehose_exporter/metrics"
+	"github.com/cloudfoundry/firehose_exporter/metrics"
 	log "github.com/sirupsen/logrus"
 )
 

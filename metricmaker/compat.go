@@ -3,8 +3,8 @@ package metricmaker
 import (
 	"strings"
 
-	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	"github.com/bosh-prometheus/firehose_exporter/utils"
+	"github.com/cloudfoundry/firehose_exporter/metrics"
+	"github.com/cloudfoundry/firehose_exporter/utils"
 	dto "github.com/prometheus/client_model/go"
 )
 
