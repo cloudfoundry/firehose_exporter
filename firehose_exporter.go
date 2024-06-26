@@ -9,10 +9,10 @@ import (
 
 	"code.cloudfoundry.org/go-loggregator/v8"
 	"github.com/alecthomas/kingpin/v2"
-	"github.com/bosh-prometheus/firehose_exporter/collectors"
-	"github.com/bosh-prometheus/firehose_exporter/metricmaker"
-	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	"github.com/bosh-prometheus/firehose_exporter/nozzle"
+	"github.com/cloudfoundry/firehose_exporter/collectors"
+	"github.com/cloudfoundry/firehose_exporter/metricmaker"
+	"github.com/cloudfoundry/firehose_exporter/metrics"
+	"github.com/cloudfoundry/firehose_exporter/nozzle"
 	"github.com/prometheus/common/version"
 	log "github.com/sirupsen/logrus"
 )

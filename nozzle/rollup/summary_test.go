@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	"github.com/bosh-prometheus/firehose_exporter/nozzle/rollup"
-	"github.com/bosh-prometheus/firehose_exporter/transform"
+	"github.com/cloudfoundry/firehose_exporter/metrics"
+	"github.com/cloudfoundry/firehose_exporter/nozzle/rollup"
+	"github.com/cloudfoundry/firehose_exporter/transform"
 	dto "github.com/prometheus/client_model/go"
 
 	"github.com/onsi/ginkgo"

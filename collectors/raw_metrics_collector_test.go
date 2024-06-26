@@ -7,13 +7,13 @@ import (
 	"net/http/httptest"
 	"time"
 
-	"github.com/bosh-prometheus/firehose_exporter/metricmaker"
-	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	"github.com/bosh-prometheus/firehose_exporter/testing"
+	"github.com/cloudfoundry/firehose_exporter/metricmaker"
+	"github.com/cloudfoundry/firehose_exporter/metrics"
+	"github.com/cloudfoundry/firehose_exporter/testing"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 
-	"github.com/bosh-prometheus/firehose_exporter/collectors"
+	"github.com/cloudfoundry/firehose_exporter/collectors"
 )
 
 var _ = ginkgo.Describe("RawMetricsCollector", func() {

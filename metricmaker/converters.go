@@ -4,9 +4,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/bosh-prometheus/firehose_exporter/metrics"
-	"github.com/bosh-prometheus/firehose_exporter/transform"
-	"github.com/bosh-prometheus/firehose_exporter/utils"
+	"github.com/cloudfoundry/firehose_exporter/metrics"
+	"github.com/cloudfoundry/firehose_exporter/transform"
+	"github.com/cloudfoundry/firehose_exporter/utils"
 	"github.com/gogo/protobuf/proto"
 	dto "github.com/prometheus/client_model/go"
 )

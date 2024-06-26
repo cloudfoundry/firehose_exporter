@@ -9,7 +9,7 @@ import (
 
 	"code.cloudfoundry.org/go-loggregator/v8"
 	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
-	"github.com/bosh-prometheus/firehose_exporter/metrics"
+	"github.com/cloudfoundry/firehose_exporter/metrics"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 )

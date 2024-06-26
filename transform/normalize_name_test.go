@@ -4,7 +4,7 @@ import (
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 
-	"github.com/bosh-prometheus/firehose_exporter/transform"
+	"github.com/cloudfoundry/firehose_exporter/transform"
 )
 
 var _ = ginkgo.Describe("NormalizeName", func() {

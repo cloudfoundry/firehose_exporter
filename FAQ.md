@@ -149,7 +149,7 @@ We will be glad to address any questions not answered here. Please, just open a 
 
 [firehose]: https://docs.cloudfoundry.org/loggregator/architecture.html#firehose
 
-[issues]: https://github.com/bosh-prometheus/firehose_exporter/issues
+[issues]: https://github.com/cloudfoundry/firehose_exporter/issues
 
 [quantile]: https://en.wikipedia.org/wiki/Quantile
 
