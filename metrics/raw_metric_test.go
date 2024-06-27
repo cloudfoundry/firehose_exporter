@@ -3,13 +3,13 @@ package metrics_test
 import (
 	"time"
 
-	"github.com/bosh-prometheus/firehose_exporter/transform"
+	"github.com/cloudfoundry/firehose_exporter/transform"
 	"github.com/gogo/protobuf/proto"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	dto "github.com/prometheus/client_model/go"
 
-	"github.com/bosh-prometheus/firehose_exporter/metrics"
+	"github.com/cloudfoundry/firehose_exporter/metrics"
 )
 
 var _ = ginkgo.Describe("RawMetric", func() {

@@ -1,4 +1,4 @@
-# Cloud Foundry Firehose Exporter [![Build Status](https://travis-ci.org/bosh-prometheus/firehose_exporter.png)](https://travis-ci.org/bosh-prometheus/firehose_exporter)
+# Cloud Foundry Firehose Exporter [![Build Status](https://travis-ci.org/cloudfoundry/firehose_exporter.png)](https://travis-ci.org/cloudfoundry/firehose_exporter)
 
 A [Prometheus][prometheus] exporter proxy for [Cloud Foundry Firehose][firehose] metrics. Please refer to the [FAQ][faq]
 for general questions about this exporter.
@@ -22,7 +22,7 @@ $ ./firehose_exporter <flags>
 Using the standard `go install` (you must have [Go][golang] already installed in your local machine):
 
 ```bash
-$ go install github.com/bosh-prometheus/firehose_exporter
+$ go install github.com/cloudfoundry/firehose_exporter
 $ firehose_exporter <flags>
 ```
 
@@ -39,7 +39,7 @@ $ docker run -p 9186:9186 boshprometheus/firehose-exporter <flags>
 The exporter can be deployed to an already existing [Cloud Foundry][cloudfoundry] environment:
 
 ```bash
-$ git clone https://github.com/bosh-prometheus/firehose_exporter.git
+$ git clone https://github.com/cloudfoundry/firehose_exporter.git
 $ cd firehose_exporter
 ```
 
@@ -110,23 +110,23 @@ The exporter returns additionally the following internal metrics:
 
 ## Contributing
 
-Refer to [CONTRIBUTING.md](https://github.com/bosh-prometheus/firehose_exporter/blob/master/CONTRIBUTING.md).
+Refer to [CONTRIBUTING.md](https://github.com/cloudfoundry/firehose_exporter/blob/master/CONTRIBUTING.md).
 
 ## License
 
-Apache License 2.0, see [LICENSE](https://github.com/bosh-prometheus/firehose_exporter/blob/master/LICENSE).
+Apache License 2.0, see [LICENSE](https://github.com/cloudfoundry/firehose_exporter/blob/master/LICENSE).
 
 [cloudfoundry]: https://www.cloudfoundry.org/
 
 [cfmetrics]: https://docs.cloudfoundry.org/loggregator/all_metrics.html
 
-[faq]: https://github.com/bosh-prometheus/firehose_exporter/blob/master/FAQ.md
+[faq]: https://github.com/cloudfoundry/firehose_exporter/blob/master/FAQ.md
 
 [firehose]: https://docs.cloudfoundry.org/loggregator/architecture.html#firehose
 
 [golang]: https://golang.org/
 
-[manifest]: https://github.com/bosh-prometheus/firehose_exporter/blob/master/manifest.yml
+[manifest]: https://github.com/cloudfoundry/firehose_exporter/blob/master/manifest.yml
 
 [prometheus]: https://prometheus.io/
 

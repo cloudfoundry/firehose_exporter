@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bosh-prometheus/firehose_exporter/metrics"
+	"github.com/cloudfoundry/firehose_exporter/metrics"
 	"github.com/gogo/protobuf/proto"
 	"github.com/prometheus/client_golang/prometheus"
 	dto "github.com/prometheus/client_model/go"

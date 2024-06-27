@@ -1,4 +1,4 @@
-module github.com/bosh-prometheus/firehose_exporter
+module github.com/cloudfoundry/firehose_exporter
 
 go 1.20
 

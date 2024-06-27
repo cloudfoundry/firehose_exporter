@@ -3,11 +3,11 @@ package nozzle_test
 import (
 	"time"
 
-	"github.com/bosh-prometheus/firehose_exporter/metrics"
+	"github.com/cloudfoundry/firehose_exporter/metrics"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 
-	"github.com/bosh-prometheus/firehose_exporter/nozzle"
+	"github.com/cloudfoundry/firehose_exporter/nozzle"
 )
 
 var _ = ginkgo.Describe("collect nozzle metrics", func() {

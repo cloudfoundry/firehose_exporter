@@ -1,7 +1,7 @@
 package metricmaker_test
 
 import (
-	"github.com/bosh-prometheus/firehose_exporter/metricmaker"
+	"github.com/cloudfoundry/firehose_exporter/metricmaker"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 )
