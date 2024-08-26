@@ -11,7 +11,7 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.34.1
-	github.com/prometheus/client_golang v1.19.1
+	github.com/prometheus/client_golang v1.20.2
 	github.com/prometheus/client_model v0.6.1
 	github.com/prometheus/common v0.55.0
 	github.com/sirupsen/logrus v1.9.3
