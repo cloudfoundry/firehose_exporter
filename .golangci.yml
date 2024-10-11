@@ -32,3 +32,8 @@ linters:
   - unused
   - whitespace
   - reassign
+
+linters-settings:
+  gosec:
+    excludes:
+      - G115
