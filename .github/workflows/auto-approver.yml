@@ -1,0 +1,21 @@
+name: Auto Approve
+
+on:
+  pull_request_target:
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  dependabot-pr:
+    name: Dependabot PR
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    env:
+      GH_TOKEN: ${{ secrets.CF_PROM_CI_BOT_TOKEN }}
+    steps:
+    - name: Approve PRs from Dependabot
+      run: gh pr review "${{ github.event.pull_request.html_url }}" --approve
+    - name: Enable Auto-Merge for Dependabot PRs
+      run: gh pr merge "${{ github.event.pull_request.html_url }}" --auto --rebase
