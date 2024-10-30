@@ -10,7 +10,7 @@ require (
 	github.com/gogo/protobuf v1.3.2
 	github.com/iancoleman/strcase v0.3.0
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.34.2
+	github.com/onsi/gomega v1.35.0
 	github.com/prometheus/client_golang v1.20.5
 	github.com/prometheus/client_model v0.6.1
 	github.com/prometheus/common v0.60.1
@@ -34,7 +34,7 @@ require (
 	golang.org/x/text v0.19.0 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/grpc v1.56.3 // indirect
-	google.golang.org/protobuf v1.34.2 // indirect
+	google.golang.org/protobuf v1.35.1 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
