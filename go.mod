@@ -15,7 +15,7 @@ require (
 	github.com/prometheus/client_model v0.6.1
 	github.com/prometheus/common v0.61.0
 	github.com/sirupsen/logrus v1.9.3
-	golang.org/x/net v0.33.0
+	golang.org/x/net v0.34.0
 )
 
 require (
@@ -30,7 +30,7 @@ require (
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/grpc v1.56.3 // indirect
