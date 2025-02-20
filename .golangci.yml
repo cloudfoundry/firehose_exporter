@@ -2,15 +2,16 @@ run:
   timeout: 30m
 
 output:
-  format: line-number
+  formats:
+    - format: line-number
 
 linters:
   disable-all: false
   enable:
   - bodyclose
+  - copyloopvar
   - dogsled
   - errcheck
-  - exportloopref
   - gocognit
   - goconst
   - gocritic
