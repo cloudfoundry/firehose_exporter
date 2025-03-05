@@ -1,6 +1,7 @@
 module github.com/cloudfoundry/firehose_exporter
 
 go 1.22.4
+toolchain go1.23.7
 
 require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20230406180255-f141159491b0
@@ -15,7 +16,7 @@ require (
 	github.com/prometheus/client_model v0.6.1
 	github.com/prometheus/common v0.62.0
 	github.com/sirupsen/logrus v1.9.3
-	golang.org/x/net v0.35.0
+	golang.org/x/net v0.36.0
 )
 
 require (
