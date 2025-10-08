@@ -17,7 +17,7 @@ require (
 	github.com/prometheus/client_model v0.6.2
 	github.com/prometheus/common v0.67.1
 	github.com/sirupsen/logrus v1.9.3
-	golang.org/x/net v0.44.0
+	golang.org/x/net v0.45.0
 )
 
 require (
