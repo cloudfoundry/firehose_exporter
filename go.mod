@@ -1,8 +1,6 @@
 module github.com/cloudfoundry/firehose_exporter
 
-go 1.24.0
-
-toolchain go1.24.1
+go 1.25.0
 
 require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20230406180255-f141159491b0
@@ -17,7 +15,7 @@ require (
 	github.com/prometheus/client_model v0.6.2
 	github.com/prometheus/common v0.67.4
 	github.com/sirupsen/logrus v1.9.4
-	golang.org/x/net v0.46.0
+	golang.org/x/net v0.51.0
 )
 
 require (
@@ -34,8 +32,8 @@ require (
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/sys v0.37.0 // indirect
-	golang.org/x/text v0.30.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/text v0.34.0 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/grpc v1.56.3 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
