@@ -120,7 +120,11 @@ func (c *RawMetricsCollector) RenderExpFmt(rsp http.ResponseWriter, req *http.Re
 		defer gzipPool.Put(gz)
 
 		gz.Reset(w)
-		defer gz.Close()
+		defer func() {
+			if err := gz.Close(); err != nil && !strings.Contains(err.Error(), "broken pipe") {
+				log.Warningf("Error when closing gzip writer: %s", err.Error())
+			}
+		}()
 
 		w = gz
 	}
@@ -169,7 +173,9 @@ func (c *RawMetricsCollector) RenderExpFmt(rsp http.ResponseWriter, req *http.Re
 	}
 	if closer, ok := enc.(expfmt.Closer); ok {
 		// This in particular takes care of the final "# EOF\n" line for OpenMetrics.
-		closer.Close()
+		if err := closer.Close(); err != nil && !strings.Contains(err.Error(), "broken pipe") {
+			log.Warningf("Error when closing expfmt encoder: %s", err.Error())
+		}
 	}
 }
 
