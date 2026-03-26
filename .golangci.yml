@@ -1,40 +1,6 @@
-run:
-  timeout: 30m
-
+version: "2"
 output:
   formats:
-    - format: line-number
-
-linters:
-  disable-all: false
-  enable:
-  - bodyclose
-  - copyloopvar
-  - dogsled
-  - errcheck
-  - gocognit
-  - goconst
-  - gocritic
-  - godox
-  - gofmt
-  - goimports
-  - gosec
-  - gosimple
-  - govet
-  - ineffassign
-  - misspell
-  - nakedret
-  - revive
-  - staticcheck
-  - stylecheck
-  - typecheck
-  - unconvert
-  - unparam
-  - unused
-  - whitespace
-  - reassign
-
-linters-settings:
-  gosec:
-    excludes:
-      - G115
+    text:
+      path: stdout
+      colors: true

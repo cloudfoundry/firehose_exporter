@@ -1,6 +1,7 @@
 package nozzle
 
 import (
+	"context"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -16,7 +17,6 @@ import (
 	"github.com/cloudfoundry/firehose_exporter/utils"
 	dto "github.com/prometheus/client_model/go"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/net/context"
 )
 
 const (

@@ -147,7 +147,9 @@ var _ = ginkgo.Describe("RawMetricsCollector", func() {
 
 					gzipReader, err := gzip.NewReader(respRec.Body)
 					gomega.Expect(err).ToNot(gomega.HaveOccurred())
-					defer gzipReader.Close()
+					defer func() {
+						gomega.Expect(gzipReader.Close()).ToNot(gomega.HaveOccurred())
+					}()
 
 					var resB bytes.Buffer
 					_, err = resB.ReadFrom(gzipReader)
