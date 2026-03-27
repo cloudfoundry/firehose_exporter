@@ -1,0 +1,35 @@
+name: Bump Go Version
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # weekly
+  workflow_dispatch:
+
+jobs:
+  bump-go-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        id: setup-go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Bump go directive in go.mod
+        run: go mod edit -go=${{ steps.setup-go.outputs.go-version }}
+
+      - name: Tidy dependencies
+        run: go mod tidy
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore: bump Go version to ${{ steps.setup-go.outputs.go-version }} + go mod tidy"
+          committer: "cf-prometheus-ci-bot <184612680+cf-prometheus-ci-bot@users.noreply.github.com>"
+          author: "cf-prometheus-ci-bot <184612680+cf-prometheus-ci-bot@users.noreply.github.com>"
+          token: ${{ secrets.CF_PROM_CI_BOT_TOKEN }}
+          title: "chore: bump Go version to ${{ steps.setup-go.outputs.go-version }}"
+          branch: bump-go-version
+          body: "Automated PR to bump Go version to `${{ steps.setup-go.outputs.go-version }}` + go mod tidy"
