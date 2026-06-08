@@ -15,7 +15,7 @@ jobs:
         id: setup-go
         uses: actions/setup-go@v5
         with:
-          go-version-file: 'go.mod'
+          go-version: stable
 
       - name: Bump go directive in go.mod
         run: go mod edit -go=${{ steps.setup-go.outputs.go-version }}
