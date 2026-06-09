@@ -1,6 +1,6 @@
 module github.com/cloudfoundry/firehose_exporter
 
-go 1.25.0
+go 1.26.4
 
 require (
 	code.cloudfoundry.org/go-diodes v0.0.0-20230406180255-f141159491b0
