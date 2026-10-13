@@ -109,7 +109,7 @@ func (c *RawMetricsCollector) cleanWorker(wg *sync.WaitGroup, chanSmap <-chan *s
 }
 
 func (c *RawMetricsCollector) RenderExpFmt(rsp http.ResponseWriter, req *http.Request) {
-	format := expfmt.Negotiate(req.Header)
+	format := expfmt.NegotiateAccept(req.Header, expfmt.DefaultAcceptedFormats()...)
 	header := rsp.Header()
 	header.Set("Content-Type", string(format))
 	w := io.Writer(rsp)
