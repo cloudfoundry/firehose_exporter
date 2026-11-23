@@ -1,0 +1,43 @@
+name: Tag Release
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 20 * *'  # Monthly on the 20th at 00:00 UTC
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tag-patch-release
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout latest default branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          token: ${{ secrets.CF_PROM_CI_BOT_TOKEN }}
+
+      - name: Create and push next release tag
+        id: tag
+        uses: mathieudutour/github-tag-action@v7
+        with:
+          github_token: ${{ secrets.CF_PROM_CI_BOT_TOKEN }}
+          release_branches: ${{ github.event.repository.default_branch }}
+          tag_prefix: v
+          create_annotated_tag: true
+          fetch_all_tags: true
+
+      - name: Summarize release
+        if: steps.tag.outputs.new_tag != ''
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+          NEW_TAG: ${{ steps.tag.outputs.new_tag }}
+        run: |
+          echo "Tagged $COMMIT_SHA as $NEW_TAG." >> "$GITHUB_STEP_SUMMARY"
